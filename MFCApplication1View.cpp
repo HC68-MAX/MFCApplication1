@@ -71,6 +71,7 @@ CMFCApplication1View::CMFCApplication1View() noexcept
     m_dwLastTime = GetTickCount();
     m_nFrameCount = 0;
     m_fDeltaTime = 0.033f; // 默认1/30秒
+    m_fSmoothedFPS = 60.0f; // 默认60帧
 }
 
 CMFCApplication1View::~CMFCApplication1View()
@@ -467,7 +468,7 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
     }
 
     strInfo.Format(_T("角色: %s   帧率: %.1f FPS"),
-        strMarioState, 1.0f / m_fDeltaTime);
+        strMarioState, m_fSmoothedFPS);
     pDC->TextOut(10, 50, strInfo);
 
     // 调试模式特定信息
@@ -578,7 +579,7 @@ void CMFCApplication1View::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 // 计算帧时间差
 void CMFCApplication1View::CalculateDeltaTime()
 {
-    DWORD dwCurrentTime = GetTickCount();
+    DWORD dwCurrentTime = GetTickCount64();
     m_fDeltaTime = (dwCurrentTime - m_dwLastTime) / 1000.0f; // 转换为秒
 
     // 限制最大deltaTime，避免卡顿导致的大跳帧
@@ -586,6 +587,18 @@ void CMFCApplication1View::CalculateDeltaTime()
         m_fDeltaTime = 0.1f;
 
     m_dwLastTime = dwCurrentTime;
+    // 帧率平滑处理（移动平均）
+    static float frameRates[10] = { 0 };
+    static int frameIndex = 0;
+    static float frameSum = 0;
+
+    frameSum -= frameRates[frameIndex];
+    frameRates[frameIndex] = 1.0f / m_fDeltaTime;
+    frameSum += frameRates[frameIndex];
+    frameIndex = (frameIndex + 1) % 10;
+
+    // 使用平滑后的帧率
+    m_fSmoothedFPS = frameSum / 10;
 }
 
 

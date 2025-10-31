@@ -64,7 +64,7 @@ protected:
 	DWORD m_dwLastTime;
 	int m_nFrameCount;
 	float m_fDeltaTime;
-
+	float m_fSmoothedFPS;  // 平滑后的帧率
 	// 输入状态变量
 	BOOL m_bKeyLeft;
 	BOOL m_bKeyRight;
