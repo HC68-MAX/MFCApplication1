@@ -96,7 +96,11 @@ protected:
 	std::vector<CRect> GetAllPlatformRects() const;
 	void HandleBrickCollisions();
 	void DrawDebugCollision(CDC* pDC);
-	//void DrawDebugInfo(CDC* pDC);
+	void DrawDebugInfo(CDC* pDC);
+	// 新增调试绘制方法
+	void DrawCollisionPoints(CDC* pDC, const CRect& marioRect);
+	void DrawCurrentCollisions(CDC* pDC, const std::vector<CRect>& solidObjects, const CRect& marioRect);
+	void DrawCoordinateGrid(CDC* pDC);
 	std::vector<CRect> CMFCApplication1View::GetAllSolidObjects() const;
 };
 

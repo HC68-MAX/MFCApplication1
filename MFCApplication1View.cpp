@@ -201,11 +201,16 @@ void CMFCApplication1View::InitializeMap()
     m_Pipes.push_back(CPipe(600, 380, 120));
 }
 
-// 修改 RenderGame 方法，绘制所有地图元素
 void CMFCApplication1View::RenderGame(CDC* pDC)
 {
     // 清除背景（天空）
     pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(135, 206, 235));
+
+    // 调试模式：绘制坐标网格
+    if (m_bDebugMode)
+    {
+        DrawCoordinateGrid(pDC);
+    }
 
     // 绘制远处的山（装饰）
     pDC->FillSolidRect(50, 350, 100, 50, RGB(100, 100, 100));
@@ -216,6 +221,7 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
     pDC->FillSolidRect(230, 90, 40, 25, RGB(255, 255, 255));
     pDC->FillSolidRect(500, 150, 70, 25, RGB(255, 255, 255));
     pDC->FillSolidRect(530, 140, 50, 30, RGB(255, 255, 255));
+
     // 绘制地面
     pDC->FillSolidRect(0, 500, m_nScreenWidth, 100, RGB(101, 67, 33));
 
@@ -240,63 +246,11 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
     // 绘制马里奥
     m_Mario.Draw(pDC);
 
-    // 可选：绘制碰撞区域（调试用）
-    if (FALSE) // 设置为TRUE可以显示碰撞区域
-    {
-        CBrush redBrush(RGB(255, 0, 0));
-        CBrush greenBrush(RGB(0, 255, 0));
-        CBrush blueBrush(RGB(0, 0, 255));
+    // 调试模式：绘制碰撞信息
+    DrawDebugCollision(pDC);
 
-        // 绘制脚部碰撞区域
-        CRect feet = m_Mario.GetFeetRect();
-        pDC->FrameRect(&feet, &redBrush);
-
-        // 绘制头部碰撞区域
-        CRect head = m_Mario.GetHeadRect();
-        pDC->FrameRect(&head, &greenBrush);
-
-        // 绘制身体碰撞区域
-        CRect body = m_Mario.GetBodyRect();
-        pDC->FrameRect(&body, &blueBrush);
-    }
-
-    // 绘制调试信息
-    CString strInfo;
-    CString stateStr;
-
-    if (m_Mario.IsOnGround())
-        stateStr = _T("地面");
-    else if (m_Mario.IsJumping())
-        stateStr = _T("跳跃");
-    else
-        stateStr = _T("空中");
-
-    strInfo.Format(_T("位置: (%d, %d) - 状态: %s - 按1/2/3切换状态"),
-        m_Mario.GetX(), m_Mario.GetY(), stateStr);
-
-    pDC->SetTextColor(RGB(255, 255, 255));
-    pDC->SetBkMode(TRANSPARENT);
-    pDC->TextOut(10, 10, strInfo);
-
-    // 显示马里奥状态
-    CString strMarioState;
-    switch (m_Mario.GetState())
-    {
-    case MarioState::SMALL:
-        strMarioState = _T("小马里奥");
-        break;
-    case MarioState::BIG:
-        strMarioState = _T("大马里奥");
-        break;
-    case MarioState::FIRE:
-        strMarioState = _T("火焰马里奥");
-        break;
-    }
-
-    pDC->TextOut(10, 30, _T("状态: ") + strMarioState);
-
-    // 显示操作提示
-    pDC->TextOut(10, 50, _T("操作: 方向键移动, 空格键跳跃"));
+    // 绘制调试信息（总是在屏幕上显示，但内容不同）
+    DrawDebugInfo(pDC);
 }
 // 清理游戏资源
 void CMFCApplication1View::CleanupGame()
@@ -374,12 +328,62 @@ std::vector<CRect> CMFCApplication1View::GetAllSolidObjects() const
 
     return solidObjects;
 }
+// 新增：绘制碰撞检测点
+void CMFCApplication1View::DrawCollisionPoints(CDC* pDC, const CRect& marioRect)
+{
+    // 绘制马里奥周围的检测点
+    int points[][2] = {
+        {marioRect.left, marioRect.top},      // 左上角
+        {marioRect.right, marioRect.top},     // 右上角
+        {marioRect.left, marioRect.bottom},   // 左下角
+        {marioRect.right, marioRect.bottom},  // 右下角
+        {marioRect.CenterPoint().x, marioRect.top},     // 上中点
+        {marioRect.CenterPoint().x, marioRect.bottom},  // 下中点
+        {marioRect.left, marioRect.CenterPoint().y},    // 左中点
+        {marioRect.right, marioRect.CenterPoint().y}    // 右中点
+    };
+
+    for (int i = 0; i < 8; i++)
+    {
+        pDC->Ellipse(points[i][0] - 2, points[i][1] - 2,
+            points[i][0] + 2, points[i][1] + 2);
+    }
+}
+// 新增：绘制当前碰撞的实体
+void CMFCApplication1View::DrawCurrentCollisions(CDC* pDC, const std::vector<CRect>& solidObjects, const CRect& marioRect)
+{
+    CPen yellowPen(PS_SOLID, 3, RGB(255, 255, 0));
+    pDC->SelectObject(&yellowPen);
+
+    // 检查当前与马里奥碰撞的实体
+    for (const auto& rect : solidObjects)
+    {
+        CRect intersection;
+        if (intersection.IntersectRect(&marioRect, &rect))
+        {
+            // 高亮显示当前碰撞的实体
+            pDC->MoveTo(rect.left, rect.top);
+            pDC->LineTo(rect.right, rect.top);
+            pDC->LineTo(rect.right, rect.bottom);
+            pDC->LineTo(rect.left, rect.bottom);
+            pDC->LineTo(rect.left, rect.top);
+
+            // 在碰撞实体上显示碰撞深度信息
+            CString depthInfo;
+            depthInfo.Format(_T("%d,%d"), intersection.Width(), intersection.Height());
+            pDC->SetTextColor(RGB(255, 255, 0));
+            pDC->SetBkMode(TRANSPARENT);
+            pDC->TextOut(rect.left + 5, rect.top + 5, depthInfo);
+        }
+    }
+}
 // 简化的调试碰撞区域绘制
 void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
 {
     if (!m_bDebugMode) return;
-
-    // 创建画笔
+    // 获取所有碰撞实体
+    std::vector<CRect> solidObjects = GetAllSolidObjects();
+    // 1. 绘制所有实体的碰撞框（红色）
     CPen redPen(PS_SOLID, 2, RGB(255, 0, 0));
     CPen* pOldPen = pDC->SelectObject(&redPen);
 
@@ -391,11 +395,11 @@ void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
     pDC->LineTo(marioRect.left, marioRect.bottom);
     pDC->LineTo(marioRect.left, marioRect.top);
 
-    // 恢复原来的画笔
-    pDC->SelectObject(pOldPen);
+    
+    // 2. 绘制马里奥的碰撞框（绿色）
+    CPen greenPen(PS_SOLID, 3, RGB(0, 255, 0));
+    pDC->SelectObject(&greenPen);
 
-    // 绘制所有实体的碰撞框
-    std::vector<CRect> solidObjects = GetAllSolidObjects();
     for (const auto& rect : solidObjects)
     {
         pDC->MoveTo(rect.left, rect.top);
@@ -403,6 +407,104 @@ void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
         pDC->LineTo(rect.right, rect.bottom);
         pDC->LineTo(rect.left, rect.bottom);
         pDC->LineTo(rect.left, rect.top);
+    }
+    // 3. 绘制碰撞检测点（青色点）
+        CPen cyanPen(PS_SOLID, 1, RGB(0, 255, 255));
+    pDC->SelectObject(&cyanPen);
+
+    // 绘制马里奥周围的检测点
+    DrawCollisionPoints(pDC, marioRect);
+
+    // 4. 绘制当前碰撞的实体（黄色高亮）
+    DrawCurrentCollisions(pDC, solidObjects, marioRect);
+
+    // 恢复原来的画笔
+    pDC->SelectObject(pOldPen);
+}
+// 增强的调试信息显示
+void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
+{
+    CString strInfo;
+
+    // 基本信息
+    pDC->SetTextColor(RGB(255, 255, 255));
+    pDC->SetBkMode(TRANSPARENT);
+
+    // 第1行：位置和状态
+    CString stateStr;
+    if (m_Mario.IsOnGround())
+        stateStr = _T("地面");
+    else if (m_Mario.IsJumping())
+        stateStr = _T("跳跃");
+    else
+        stateStr = _T("空中");
+
+    strInfo.Format(_T("位置: (%d, %d)  状态: %s"),
+        m_Mario.GetX(), m_Mario.GetY(), stateStr);
+    pDC->TextOut(10, 10, strInfo);
+
+    // 第2行：速度和输入
+    strInfo.Format(_T("速度: (%.1f, %.1f)  输入: %s%s%s"),
+        m_Mario.GetVelocityX(), m_Mario.GetVelocityY(),
+        m_bKeyLeft ? _T("←") : _T(" "),
+        m_bKeyRight ? _T("→") : _T(" "),
+        m_bKeyJump ? _T("↑") : _T(" "));
+    pDC->TextOut(10, 30, strInfo);
+
+    // 第3行：马里奥状态和帧率
+    CString strMarioState;
+    switch (m_Mario.GetState())
+    {
+    case MarioState::SMALL:
+        strMarioState = _T("小马里奥");
+        break;
+    case MarioState::BIG:
+        strMarioState = _T("大马里奥");
+        break;
+    case MarioState::FIRE:
+        strMarioState = _T("火焰马里奥");
+        break;
+    }
+
+    strInfo.Format(_T("角色: %s   帧率: %.1f FPS"),
+        strMarioState, 1.0f / m_fDeltaTime);
+    pDC->TextOut(10, 50, strInfo);
+
+    // 调试模式特定信息
+    if (m_bDebugMode)
+    {
+        // 调试模式标题
+        pDC->SetTextColor(RGB(255, 255, 0)); // 黄色
+        pDC->TextOut(10, 80, _T("=== 调试模式 ==="));
+        pDC->TextOut(10, 100, _T("按 D 键关闭调试模式"));
+
+        // 碰撞框说明
+        pDC->SetTextColor(RGB(255, 0, 0));   // 红色
+        pDC->TextOut(10, 120, _T("红色: 实体碰撞框"));
+
+        pDC->SetTextColor(RGB(0, 255, 0));   // 绿色
+        pDC->TextOut(10, 140, _T("绿色: 马里奥碰撞框"));
+
+        pDC->SetTextColor(RGB(0, 255, 255)); // 青色
+        pDC->TextOut(10, 160, _T("青色: 碰撞检测点"));
+
+        // 实体统计
+        strInfo.Format(_T("实体数量: 砖块(%d)  水管(%d)"),
+            m_Bricks.size(), m_Pipes.size());
+        pDC->SetTextColor(RGB(255, 255, 255));
+        pDC->TextOut(10, 180, strInfo);
+
+        // 物理信息
+        strInfo.Format(_T("重力: %.1f  最大速度: %.1f"),
+            m_Mario.GetGravity(), m_Mario.GetMaxSpeed());
+        pDC->TextOut(10, 200, strInfo);
+    }
+    else
+    {
+        // 非调试模式提示
+        pDC->SetTextColor(RGB(200, 200, 200)); // 灰色
+        pDC->TextOut(10, 80, _T("按 D 键开启调试模式"));
+        pDC->TextOut(10, 100, _T("操作: 方向键移动, 空格跳跃, 1/2/3切换状态"));
     }
 }
 // 绘制游戏
@@ -419,7 +521,6 @@ void CMFCApplication1View::OnDraw(CDC* pDC)
     // 将内存DC内容复制到屏幕DC
     pDC->BitBlt(0, 0, m_nScreenWidth, m_nScreenHeight, &m_memDC, 0, 0, SRCCOPY);
 }
-
 // 键盘按下事件
 void CMFCApplication1View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
@@ -445,6 +546,10 @@ void CMFCApplication1View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
     case '3':       // 数字3 - 火焰马里奥
         m_Mario.SetState(MarioState::FIRE);
         break;
+	case 'D':       // 切换调试模式
+    case 'd':
+        m_bDebugMode = !m_bDebugMode;
+		break;
     }
 
     CView::OnKeyDown(nChar, nRepCnt, nFlags);
@@ -542,4 +647,48 @@ void CMFCApplication1View::HandleBrickCollisions()
             }
         }
     }
+}
+// 新增：绘制坐标网格
+void CMFCApplication1View::DrawCoordinateGrid(CDC* pDC)
+{
+    if (!m_bDebugMode) return;
+
+    CPen gridPen(PS_DOT, 1, RGB(100, 100, 100));
+    CPen* pOldPen = pDC->SelectObject(&gridPen);
+
+    // 绘制垂直网格线（每50像素）
+    for (int x = 0; x < m_nScreenWidth; x += 50)
+    {
+        pDC->MoveTo(x, 0);
+        pDC->LineTo(x, m_nScreenHeight);
+
+        // 显示坐标
+        if (x % 100 == 0) // 每100像素显示坐标数字
+        {
+            CString coord;
+            coord.Format(_T("%d"), x);
+            pDC->SetTextColor(RGB(150, 150, 150));
+            pDC->SetBkMode(TRANSPARENT);
+            pDC->TextOut(x + 2, 10, coord);
+        }
+    }
+
+    // 绘制水平网格线（每50像素）
+    for (int y = 0; y < m_nScreenHeight; y += 50)
+    {
+        pDC->MoveTo(0, y);
+        pDC->LineTo(m_nScreenWidth, y);
+
+        // 显示坐标
+        if (y % 100 == 0 && y > 0) // 每100像素显示坐标数字
+        {
+            CString coord;
+            coord.Format(_T("%d"), y);
+            pDC->SetTextColor(RGB(150, 150, 150));
+            pDC->SetBkMode(TRANSPARENT);
+            pDC->TextOut(10, y + 2, coord);
+        }
+    }
+
+    pDC->SelectObject(pOldPen);
 }

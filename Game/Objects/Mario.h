@@ -28,7 +28,12 @@ public:
     // 重写基类的虚函数
     virtual void Update(float deltaTime) override;
     virtual void Draw(CDC* pDC) override;
-
+    // 获取物理参数（用于调试）
+    float GetVelocityX() const { return m_fVelocityX; }
+    float GetVelocityY() const { return m_fVelocityY; }
+    float GetGravity() const { return m_fGravity; }
+    float GetMaxSpeed() const { return m_fMaxSpeed; }
+    float GetJumpForce() const { return m_fJumpForce; }
     void MoveLeft();                // 向左移动
     void MoveRight();               // 向右移动
     void Jump();                    // 跳跃
