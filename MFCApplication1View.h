@@ -6,6 +6,9 @@
 #include "Game/Objects/Mario.h"
 #include "Game/Objects/Pipe.h"
 #include "Game/Objects/Brick.h"
+#include "Game/Core/ResourceManager.h"
+#include "Game/Core/SpriteRenderer.h"
+#include "Game/Map/TileMap.h"
 #include <vector>
 class CMFCApplication1View : public CView
 {
@@ -39,6 +42,10 @@ public:
 
 	// 游戏相关成员变量
 protected:
+	// 新系统
+	CTileMap m_TileMap;
+	int m_nCameraX;
+	int m_nCameraY;
 	// 双缓冲绘图
 	CDC m_memDC;
 	CBitmap m_memBitmap;
@@ -101,6 +108,10 @@ protected:
 	void DrawCollisionPoints(CDC* pDC, const CRect& marioRect);
 	void DrawCurrentCollisions(CDC* pDC, const std::vector<CRect>& solidObjects, const CRect& marioRect);
 	void DrawCoordinateGrid(CDC* pDC);
+	// 新方法
+	void InitializeResources();
+	void InitializeTileMap();
+	void UpdateCamera();
 	std::vector<CRect> CMFCApplication1View::GetAllSolidObjects() const;
 };
 

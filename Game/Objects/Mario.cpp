@@ -57,7 +57,26 @@ CMario::~CMario()
 {
     // 目前没有需要手动释放的资源
 }
+// 新增：在指定屏幕坐标绘制
+void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
+{
+    if (!m_bVisible) return;
 
+    // 保存原始位置
+    int originalX = m_nX;
+    int originalY = m_nY;
+
+    // 设置到屏幕位置
+    m_nX = screenX;
+    m_nY = screenY;
+
+    // 绘制
+    Draw(pDC);
+
+    // 恢复位置
+    m_nX = originalX;
+    m_nY = originalY;
+}
 // 更新马里奥状态
 void CMario::Update(float deltaTime)
 {

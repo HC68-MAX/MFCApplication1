@@ -25,6 +25,9 @@
     <Filter Include="Game\Objects">
       <UniqueIdentifier>{22f01363-7cd2-4df1-a24b-bb272423c76b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\Map">
+      <UniqueIdentifier>{b3aa37ab-2cb5-4c88-9e18-e5e9c1eb87fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MFCApplication1.h">
@@ -63,6 +66,15 @@
     <ClInclude Include="Game\Objects\Pipe.h">
       <Filter>Game\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Core\ResourceManager.h">
+      <Filter>Game\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Core\SpriteRenderer.h">
+      <Filter>Game\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Map\TileMap.h">
+      <Filter>Game\Map</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication1.cpp">
@@ -92,6 +104,15 @@
     <ClCompile Include="Game\Objects\Pipe.cpp">
       <Filter>Game\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Core\ResourceManager.cpp">
+      <Filter>Game\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Core\SpriteRenderer.cpp">
+      <Filter>Game\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Map\TileMap.cpp">
+      <Filter>Game\Map</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFCApplication1.rc">
@@ -101,6 +122,9 @@
   <ItemGroup>
     <None Include="res\MFCApplication1.rc2">
       <Filter>资源文件</Filter>
+    </None>
+    <None Include="README.md">
+      <Filter>Game\Resources</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
