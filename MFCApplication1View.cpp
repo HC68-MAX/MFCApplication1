@@ -169,30 +169,36 @@ void CMFCApplication1View::InitializeMap()
     m_Bricks.clear();
     m_Pipes.clear();
 
-    // 添加砖块
-    // 第一排砖块
-    for (int i = 0; i < 5; i++)
+    // 创建简单但有效的测试场景
+
+    // 平台1：长平台 - 测试正常行走和边缘掉落
+    for (int i = 0; i < 6; i++)
     {
-        m_Bricks.push_back(CBrick(200 + i * 45, 300));
+        m_Bricks.push_back(CBrick(100 + i * 40, 400));
+    }
+
+    // 平台2：短平台 - 专门测试边缘掉落
+    for (int i = 0; i < 2; i++)
+    {
+        m_Bricks.push_back(CBrick(400 + i * 40, 350));
+    }
+
+    // 平台3：高平台 - 测试跳跃
+    for (int i = 0; i < 3; i++)
+    {
+        m_Bricks.push_back(CBrick(200 + i * 40, 300));
     }
 
     // 问号砖块
-    m_Bricks.push_back(CBrick(300, 250));
+    m_Bricks.push_back(CBrick(350, 250));
     m_Bricks.back().SetBrickType(CBrick::QUESTION);
 
     // 硬砖块
-    m_Bricks.push_back(CBrick(350, 250));
+    m_Bricks.push_back(CBrick(450, 250));
     m_Bricks.back().SetBrickType(CBrick::HARD);
 
-    // 第二排砖块
-    for (int i = 0; i < 3; i++)
-    {
-        m_Bricks.push_back(CBrick(400 + i * 45, 200));
-    }
-
     // 添加水管
-    m_Pipes.push_back(CPipe(600, 380, 120));  // 高水管
-    m_Pipes.push_back(CPipe(700, 430, 70));   // 矮水管
+    m_Pipes.push_back(CPipe(600, 380, 120));
 }
 
 // 修改 RenderGame 方法，绘制所有地图元素
@@ -342,11 +348,63 @@ void CMFCApplication1View::UpdateGame()
     {
         brick.Update(m_fDeltaTime);
     }
-
-    // 检测碰撞
-    CheckMarioCollisions();
+    // 简化的碰撞检测
+    std::vector<CRect> solidObjects = GetAllSolidObjects();
+    m_Mario.CheckCollisions(solidObjects);
 }
+// 修改获取碰撞对象的方法
+std::vector<CRect> CMFCApplication1View::GetAllSolidObjects() const
+{
+    std::vector<CRect> solidObjects;
 
+    // 添加地面
+    solidObjects.push_back(CRect(0, 500, m_nScreenWidth, 600));
+
+    // 添加所有砖块
+    for (const auto& brick : m_Bricks)
+    {
+        solidObjects.push_back(brick.GetRect());
+    }
+
+    // 添加所有水管
+    for (const auto& pipe : m_Pipes)
+    {
+        solidObjects.push_back(pipe.GetRect());
+    }
+
+    return solidObjects;
+}
+// 简化的调试碰撞区域绘制
+void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
+{
+    if (!m_bDebugMode) return;
+
+    // 创建画笔
+    CPen redPen(PS_SOLID, 2, RGB(255, 0, 0));
+    CPen* pOldPen = pDC->SelectObject(&redPen);
+
+    // 只绘制主要的碰撞框
+    CRect marioRect = m_Mario.GetRect();
+    pDC->MoveTo(marioRect.left, marioRect.top);
+    pDC->LineTo(marioRect.right, marioRect.top);
+    pDC->LineTo(marioRect.right, marioRect.bottom);
+    pDC->LineTo(marioRect.left, marioRect.bottom);
+    pDC->LineTo(marioRect.left, marioRect.top);
+
+    // 恢复原来的画笔
+    pDC->SelectObject(pOldPen);
+
+    // 绘制所有实体的碰撞框
+    std::vector<CRect> solidObjects = GetAllSolidObjects();
+    for (const auto& rect : solidObjects)
+    {
+        pDC->MoveTo(rect.left, rect.top);
+        pDC->LineTo(rect.right, rect.top);
+        pDC->LineTo(rect.right, rect.bottom);
+        pDC->LineTo(rect.left, rect.bottom);
+        pDC->LineTo(rect.left, rect.top);
+    }
+}
 // 绘制游戏
 void CMFCApplication1View::OnDraw(CDC* pDC)
 {

@@ -41,17 +41,16 @@ public:
     CRect GetFeetRect() const;    // 获取脚部碰撞区域
     CRect GetHeadRect() const;    // 获取头部碰撞区域
     CRect GetBodyRect() const;    // 获取身体碰撞区域
-
+    // 碰撞相关方法
+    BOOL IsOnGround() const { return m_bIsOnGround; }
+    BOOL IsJumping() const { return m_bIsJumping; }
+    BOOL IsMoving() const { return m_bIsMoving; }
     // 碰撞响应
     void OnHeadCollision();
     void OnFeetCollision(int surfaceY);
     void OnLeftCollision(int surfaceX);
     void OnRightCollision(int surfaceX);
 
-    // 状态检查函数
-    BOOL IsOnGround() const { return m_bIsOnGround; }
-    BOOL IsJumping() const { return m_bIsJumping; }
-    BOOL IsMoving() const { return m_bIsMoving; }
     // 设置速度
     void SetVelocity(float vx, float vy) { m_fVelocityX = vx; m_fVelocityY = vy; }
    

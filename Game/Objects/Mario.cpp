@@ -153,68 +153,69 @@ void CMario::ApplyPhysics(float deltaTime)
 }
 
 // 新增：检查碰撞
-void CMario::CheckCollisions(const std::vector<CRect>& platforms)
+// 全新的碰撞检测方法 - 简单可靠
+void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
 {
-    // 重置碰撞状态
-    m_bHeadCollision = FALSE;
-    m_bFeetCollision = FALSE;
-    m_bLeftCollision = FALSE;
-    m_bRightCollision = FALSE;
+    // 先假设不在地面上
+    m_bIsOnGround = FALSE;
 
-    // 获取马里奥的各个碰撞区域
-    CRect feetRect = GetFeetRect();
-    CRect headRect = GetHeadRect();
-    CRect bodyRect = GetBodyRect();
-
-    // 检查与每个平台的碰撞
-    for (const auto& platform : platforms)
+    // 检查与每个实体的碰撞
+    for (const auto& rect : solidRects)
     {
         CRect intersection;
+        CRect marioRect = GetRect();
 
-        // 检查脚部碰撞（站在平台上）
-        if (intersection.IntersectRect(&feetRect, &platform))
+        if (intersection.IntersectRect(&marioRect, &rect))
         {
-            if (m_fVelocityY > 0) // 只有在下落时才响应脚部碰撞
+            // 计算碰撞的深度和方向
+            int overlapLeft = marioRect.right - rect.left;
+            int overlapRight = rect.right - marioRect.left;
+            int overlapTop = marioRect.bottom - rect.top;
+            int overlapBottom = rect.bottom - marioRect.top;
+
+            // 找出最小的重叠方向
+            int minOverlap = min(min(overlapLeft, overlapRight), min(overlapTop, overlapBottom));
+
+            // 根据最小重叠方向解决碰撞
+            if (minOverlap == overlapTop && m_fVelocityY > 0)
             {
-                OnFeetCollision(platform.top);
-                m_bFeetCollision = TRUE;
+                // 从上方碰撞（站在平台上）
+                m_nY = rect.top - m_nHeight;
+                m_fVelocityY = 0;
+                m_bIsOnGround = TRUE;
+                m_bIsJumping = FALSE;
             }
-        }
-
-        // 检查头部碰撞（顶到东西）
-        if (intersection.IntersectRect(&headRect, &platform))
-        {
-            if (m_fVelocityY < 0) // 只有在上升时才响应头部碰撞
+            else if (minOverlap == overlapBottom && m_fVelocityY < 0)
             {
-                OnHeadCollision();
-                m_bHeadCollision = TRUE;
+                // 从下方碰撞（顶到东西）
+                m_nY = rect.bottom;
+                m_fVelocityY = 0;
+                m_bIsJumping = FALSE;
             }
-        }
-
-        // 检查左侧碰撞
-        CRect leftRect(bodyRect.left - 2, bodyRect.top + 5, bodyRect.left + 2, bodyRect.bottom - 5);
-        if (intersection.IntersectRect(&leftRect, &platform))
-        {
-            if (m_fVelocityX < 0) // 只有在向左移动时才响应左侧碰撞
+            else if (minOverlap == overlapLeft && m_fVelocityX > 0)
             {
-                OnLeftCollision(platform.right);
-                m_bLeftCollision = TRUE;
+                // 从左侧碰撞
+                m_nX = rect.left - m_nWidth;
+                m_fVelocityX = 0;
             }
-        }
-
-        // 检查右侧碰撞
-        CRect rightRect(bodyRect.right - 2, bodyRect.top + 5, bodyRect.right + 2, bodyRect.bottom - 5);
-        if (intersection.IntersectRect(&rightRect, &platform))
-        {
-            if (m_fVelocityX > 0) // 只有在向右移动时才响应右侧碰撞
+            else if (minOverlap == overlapRight && m_fVelocityX < 0)
             {
-                OnRightCollision(platform.left);
-                m_bRightCollision = TRUE;
+                // 从右侧碰撞
+                m_nX = rect.right;
+                m_fVelocityX = 0;
             }
         }
     }
-}
 
+    // 检查是否掉出屏幕底部（临时地面）
+    if (m_nY + m_nHeight > 500) // 地面在Y=500
+    {
+        m_nY = 500 - m_nHeight;
+        m_fVelocityY = 0;
+        m_bIsOnGround = TRUE;
+        m_bIsJumping = FALSE;
+    }
+}
 // 修改现有的移动方法，改为设置输入状态
 void CMario::MoveLeft()
 {
@@ -436,3 +437,4 @@ void CMario::OnRightCollision(int surfaceX)
     m_nX = surfaceX - m_nWidth; // 停在障碍物左侧
     m_fVelocityX = 0;
 }
+

@@ -69,7 +69,7 @@ protected:
 	BOOL m_bKeyLeft;
 	BOOL m_bKeyRight;
 	BOOL m_bKeyJump;
-
+	BOOL m_bDebugMode;
 	// 地图元素容器
 	std::vector<CBrick> m_Bricks;
 	std::vector<CPipe> m_Pipes;
@@ -95,6 +95,9 @@ protected:
 	void CheckMarioCollisions();
 	std::vector<CRect> GetAllPlatformRects() const;
 	void HandleBrickCollisions();
+	void DrawDebugCollision(CDC* pDC);
+	//void DrawDebugInfo(CDC* pDC);
+	std::vector<CRect> CMFCApplication1View::GetAllSolidObjects() const;
 };
 
 #ifndef _DEBUG  // MFCApplication1View.cpp 中的调试版本
