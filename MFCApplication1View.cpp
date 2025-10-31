@@ -150,87 +150,64 @@ void CMFCApplication1View::OnDestroy()
 // 新增：初始化瓦片地图
 void CMFCApplication1View::InitializeTileMap()
 {
-    // 创建一个大关卡地图（100x25个瓦片，每个瓦片16x16像素）
-    // 增加地图高度，给马里奥更多空间
-    m_TileMap.LoadMap(100, 25, 16);
+    // 明确设置新的瓦片大小 - 32x32像素
+    TRACE(_T("=== 开始初始化瓦片地图 ===\n"));
 
-    // 创建地面 - 放在地图底部（第20行，从0开始）
-    // 这样地面在Y=320像素（20*16=320）
-    for (int x = 0; x < 100; x++)
+    // 创建一个小一点的测试地图，确保变化明显
+    // 地图尺寸：30x15个瓦片，每个瓦片32x32像素
+    BOOL result = m_TileMap.LoadMap(30, 15, 32);
+    TRACE(_T("地图加载结果: %s\n"), result ? _T("成功") : _T("失败"));
+    TRACE(_T("地图尺寸: %dx%d, 瓦片大小: %d\n"),
+        m_TileMap.GetWidth(), m_TileMap.GetHeight(), m_TileMap.GetTileSize());
+
+    // 创建地面 - 放在第10行（从0开始）
+    // 这样地面在Y=320像素（10*32=320）
+    for (int x = 0; x < 30; x++)
     {
-        m_TileMap.SetTile(x, 20, 1, TRUE, _T("ground"));  // 主地面
-        m_TileMap.SetTile(x, 21, 1, TRUE, _T("ground"));  // 地下层
-        m_TileMap.SetTile(x, 22, 1, TRUE, _T("ground"));
-        m_TileMap.SetTile(x, 23, 1, TRUE, _T("ground"));
-        m_TileMap.SetTile(x, 24, 1, TRUE, _T("ground"));
+        m_TileMap.SetTile(x, 10, 1, TRUE, _T("ground"));  // 主地面
+        m_TileMap.SetTile(x, 11, 1, TRUE, _T("ground"));  // 地下层
+        m_TileMap.SetTile(x, 12, 1, TRUE, _T("ground"));
+        m_TileMap.SetTile(x, 13, 1, TRUE, _T("ground"));
+        m_TileMap.SetTile(x, 14, 1, TRUE, _T("ground"));
     }
 
-    // 设置马里奥初始位置在地面上方足够高的位置
-    // 马里奥高度约45像素，地面在Y=320，所以设置Y=270让马里奥站在地面上
-    m_Mario.SetPosition(100, 270); // X=100, Y=270（在地面上方50像素）
+    // 设置马里奥初始位置在地面上方
+    // 地面在Y=320，马里奥高度约45像素，所以设置Y=275
+    m_Mario.SetPosition(150, 275);
 
-    // 重新设计平台布局，确保所有平台都在地面之上
+    // 创建明显的测试平台 - 使用大瓦片
 
-    // 平台1 - 在Y=15行（240像素）
-    for (int x = 5; x < 10; x++)
+    // 平台1 - 在Y=7行（224像素）
+    for (int x = 3; x < 8; x++)
     {
-        m_TileMap.SetTile(x, 15, 2, TRUE, _T("brick"));
+        m_TileMap.SetTile(x, 7, 2, TRUE, _T("brick"));
     }
 
-    // 平台2 - 在Y=12行（192像素）
-    for (int x = 15; x < 20; x++)
+    // 平台2 - 在Y=5行（160像素）
+    for (int x = 10; x < 15; x++)
     {
-        m_TileMap.SetTile(x, 12, 2, TRUE, _T("brick"));
+        m_TileMap.SetTile(x, 5, 2, TRUE, _T("brick"));
     }
 
-    // 问号砖块 - 在Y=10行（160像素）
-    m_TileMap.SetTile(8, 10, 3, TRUE, _T("question"));
-    m_TileMap.SetTile(9, 10, 3, TRUE, _T("question"));
+    // 问号砖块 - 在Y=3行（96像素）
+    m_TileMap.SetTile(7, 3, 3, TRUE, _T("question"));
+    m_TileMap.SetTile(8, 3, 3, TRUE, _T("question"));
 
-    // 硬砖块 - 在Y=8行（128像素）
+    // 硬砖块 - 在Y=2行（64像素）
     for (int x = 12; x < 14; x++)
     {
-        m_TileMap.SetTile(x, 8, 4, TRUE, _T("hard_brick"));
+        m_TileMap.SetTile(x, 2, 4, TRUE, _T("hard_brick"));
     }
 
-    // 水管 - 从Y=16行开始（256像素）
-    m_TileMap.SetTile(25, 16, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(25, 17, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(25, 18, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(25, 19, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(26, 16, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(26, 17, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(26, 18, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(26, 19, 5, TRUE, _T("pipe"));
+    // 水管 - 2x3个瓦片
+    m_TileMap.SetTile(20, 7, 5, TRUE, _T("pipe"));
+    m_TileMap.SetTile(20, 8, 5, TRUE, _T("pipe"));
+    m_TileMap.SetTile(20, 9, 5, TRUE, _T("pipe"));
+    m_TileMap.SetTile(21, 7, 5, TRUE, _T("pipe"));
+    m_TileMap.SetTile(21, 8, 5, TRUE, _T("pipe"));
+    m_TileMap.SetTile(21, 9, 5, TRUE, _T("pipe"));
 
-    // 更多平台...
-    for (int x = 30; x < 40; x++)
-    {
-        m_TileMap.SetTile(x, 15, 2, TRUE, _T("brick"));
-    }
-
-    // 第二组问号砖块
-    for (int x = 33; x < 36; x++)
-    {
-        m_TileMap.SetTile(x, 10, 3, TRUE, _T("question"));
-    }
-
-    // 添加一些空中平台，让关卡更有趣
-    for (int x = 45; x < 50; x++)
-    {
-        m_TileMap.SetTile(x, 13, 2, TRUE, _T("brick"));
-    }
-
-    for (int x = 55; x < 60; x++)
-    {
-        m_TileMap.SetTile(x, 11, 2, TRUE, _T("brick"));
-    }
-
-    // 添加一个高平台
-    for (int x = 65; x < 70; x++)
-    {
-        m_TileMap.SetTile(x, 8, 2, TRUE, _T("brick"));
-    }
+    TRACE(_T("=== 瓦片地图初始化完成 ===\n"));
 }
 // 新增：更新摄像机
 void CMFCApplication1View::UpdateCamera()
@@ -278,70 +255,7 @@ void CMFCApplication1View::InitializeGame()
     // 初始化瓦片地图
     InitializeTileMap();
 }
-// 新增：初始化地图
-void CMFCApplication1View::InitializeMap()
-{
-    // 创建一个大关卡地图（100x20个瓦片，每个瓦片16x16像素）
-    m_TileMap.LoadMap(100, 20, 16);
 
-    // 创建地面 - 在第15行（从0开始），这样地面在Y=240像素
-    for (int x = 0; x < 100; x++)
-    {
-        m_TileMap.SetTile(x, 15, 1, TRUE, _T("ground"));  // 主地面
-        m_TileMap.SetTile(x, 16, 1, TRUE, _T("ground"));  // 地下层
-        m_TileMap.SetTile(x, 17, 1, TRUE, _T("ground"));
-        m_TileMap.SetTile(x, 18, 1, TRUE, _T("ground"));
-        m_TileMap.SetTile(x, 19, 1, TRUE, _T("ground"));
-    }
-
-    // 设置马里奥初始位置在地面上方
-    m_Mario.SetPosition(50, 200); // X=50, Y=200（在地面上方）
-
-    // 创建平台和障碍物
-    // 平台1 - 在Y=10行（160像素）
-    for (int x = 5; x < 10; x++)
-    {
-        m_TileMap.SetTile(x, 10, 2, TRUE, _T("brick"));
-    }
-
-    // 平台2 - 在Y=8行（128像素）
-    for (int x = 15; x < 20; x++)
-    {
-        m_TileMap.SetTile(x, 8, 2, TRUE, _T("brick"));
-    }
-
-    // 问号砖块 - 在Y=6行（96像素）
-    m_TileMap.SetTile(8, 6, 3, TRUE, _T("question"));
-    m_TileMap.SetTile(9, 6, 3, TRUE, _T("question"));
-
-    // 硬砖块 - 在Y=4行（64像素）
-    for (int x = 12; x < 14; x++)
-    {
-        m_TileMap.SetTile(x, 4, 4, TRUE, _T("hard_brick"));
-    }
-
-    // 水管 - 从Y=11行开始（176像素）
-    m_TileMap.SetTile(25, 11, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(25, 12, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(25, 13, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(25, 14, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(26, 11, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(26, 12, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(26, 13, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(26, 14, 5, TRUE, _T("pipe"));
-
-    // 更多平台...
-    for (int x = 30; x < 40; x++)
-    {
-        m_TileMap.SetTile(x, 10, 2, TRUE, _T("brick"));
-    }
-
-    // 第二组问号砖块
-    for (int x = 33; x < 36; x++)
-    {
-        m_TileMap.SetTile(x, 6, 3, TRUE, _T("question"));
-    }
-}
 // 新增：初始化资源
 void CMFCApplication1View::InitializeResources()
 {
@@ -631,6 +545,7 @@ void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
     pDC->SelectObject(pOldPen);
 }
 // 增强的调试信息显示
+// 在调试信息中添加瓦片大小信息
 void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
 {
     CString strInfo;
@@ -716,17 +631,27 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
             m_Mario.GetGravity(), m_Mario.GetMaxSpeed());
         pDC->TextOut(10, 220, strInfo);
 
-        // 地图信息
-        strInfo.Format(_T("地图: %dx%d 瓦片  摄像机: (%d, %d)"),
+        // 地图信息 - 明确显示瓦片大小
+        strInfo.Format(_T("地图: %dx%d 瓦片  瓦片大小: %dx%d"),
             m_TileMap.GetWidth(), m_TileMap.GetHeight(),
-            m_nCameraX, m_nCameraY);
+            m_TileMap.GetTileSize(), m_TileMap.GetTileSize());
         pDC->TextOut(10, 240, strInfo);
 
+        // 摄像机信息
+        strInfo.Format(_T("摄像机: (%d, %d)"), m_nCameraX, m_nCameraY);
+        pDC->TextOut(10, 260, strInfo);
+
         // 地面信息
-        int groundY = 20 * m_TileMap.GetTileSize(); // 地面Y坐标
+        int groundY = 12 * m_TileMap.GetTileSize(); // 地面Y坐标
         strInfo.Format(_T("地面位置: Y=%d  马里奥脚部: Y=%d"),
             groundY, m_Mario.GetY() + m_Mario.GetHeight());
-        pDC->TextOut(10, 260, strInfo);
+        pDC->TextOut(10, 280, strInfo);
+
+        // 瓦片坐标信息
+        int marioTileX = m_Mario.GetX() / m_TileMap.GetTileSize();
+        int marioTileY = m_Mario.GetY() / m_TileMap.GetTileSize();
+        strInfo.Format(_T("马里奥瓦片坐标: (%d, %d)"), marioTileX, marioTileY);
+        pDC->TextOut(10, 300, strInfo);
     }
     else
     {

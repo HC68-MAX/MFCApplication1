@@ -63,41 +63,100 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
                 int screenX = x * m_nTileSize - offsetX;
                 int screenY = y * m_nTileSize - offsetY;
 
+                // 只绘制在屏幕范围内的瓦片
+                if (screenX + m_nTileSize < 0 || screenX >= 800 ||
+                    screenY + m_nTileSize < 0 || screenY >= 600)
+                {
+                    continue;
+                }
+
                 // 根据瓦片ID选择颜色
                 COLORREF color = RGB(128, 128, 128); // 默认灰色
+                COLORREF darkColor = RGB(100, 100, 100);
+                COLORREF lightColor = RGB(200, 200, 200);
+
                 switch (tileID)
                 {
-                case 1: // 地面
-                    color = RGB(180, 90, 40);
+                case 1: // 地面 - 棕色
+                    color = RGB(146, 73, 0);
+                    darkColor = RGB(100, 50, 0);
+                    lightColor = RGB(180, 120, 60);
                     break;
-                case 2: // 砖块
-                    color = RGB(200, 76, 12);
+                case 2: // 砖块 - 橙色
+                    color = RGB(220, 100, 0);
+                    darkColor = RGB(160, 70, 0);
+                    lightColor = RGB(255, 150, 50);
                     break;
-                case 3: // 问号砖块
+                case 3: // 问号砖块 - 黄色
                     color = RGB(255, 200, 0);
+                    darkColor = RGB(200, 150, 0);
+                    lightColor = RGB(255, 255, 100);
                     break;
-                case 4: // 硬砖块
+                case 4: // 硬砖块 - 灰色
                     color = RGB(128, 128, 128);
+                    darkColor = RGB(80, 80, 80);
+                    lightColor = RGB(180, 180, 180);
                     break;
-                case 5: // 水管
-                    color = RGB(0, 150, 0);
+                case 5: // 水管 - 绿色
+                    color = RGB(0, 180, 0);
+                    darkColor = RGB(0, 120, 0);
+                    lightColor = RGB(0, 220, 0);
                     break;
                 }
 
+                // 绘制瓦片主体 - 确保使用正确的尺寸
                 pDC->FillSolidRect(screenX, screenY, m_nTileSize, m_nTileSize, color);
 
-                // 绘制瓦片边框
-                pDC->Draw3dRect(screenX, screenY, m_nTileSize, m_nTileSize,
-                    RGB(100, 100, 100), RGB(200, 200, 200));
+                // 绘制3D效果边框
+                pDC->Draw3dRect(screenX, screenY, m_nTileSize, m_nTileSize, darkColor, lightColor);
 
-                // 如果是问号砖块，绘制问号
-                if (tileID == 3)
+                // 对于某些瓦片类型，添加额外的细节
+                if (tileID == 3) // 问号砖块
                 {
+                    // 绘制大问号
+                    CString strQuestion = _T("?");
                     pDC->SetTextColor(RGB(0, 0, 0));
                     pDC->SetBkMode(TRANSPARENT);
+
+                    // 使用系统字体，但设置较大尺寸
+                    CFont font;
+                    font.CreatePointFont(240, _T("Arial")); // 24点字体
+                    CFont* pOldFont = pDC->SelectObject(&font);
+
                     pDC->SetTextAlign(TA_CENTER);
-                    pDC->TextOut(screenX + m_nTileSize / 2, screenY + m_nTileSize / 4, _T("?"));
+                    pDC->TextOut(screenX + m_nTileSize / 2, screenY + m_nTileSize / 4, strQuestion);
+
+                    // 恢复原来的字体
+                    pDC->SelectObject(pOldFont);
                     pDC->SetTextAlign(TA_LEFT);
+                    font.DeleteObject();
+                }
+                else if (tileID == 2) // 砖块
+                {
+                    // 添加砖块纹理
+                    for (int i = 0; i < m_nTileSize; i += 8)
+                    {
+                        pDC->FillSolidRect(screenX, screenY + i, m_nTileSize, 2, darkColor);
+                    }
+                }
+                else if (tileID == 5) // 水管
+                {
+                    // 添加水管纹理
+                    for (int i = 0; i < m_nTileSize; i += 8)
+                    {
+                        pDC->FillSolidRect(screenX, screenY + i, 4, 2, darkColor);
+                        pDC->FillSolidRect(screenX + m_nTileSize - 4, screenY + i, 4, 2, lightColor);
+                    }
+                }
+
+                // 调试：绘制瓦片边界和坐标（仅在调试模式下）
+                if (FALSE) // 设置为TRUE可以显示瓦片坐标
+                {
+                    CString coord;
+                    coord.Format(_T("%d,%d"), x, y);
+                    pDC->SetTextColor(RGB(255, 255, 255));
+                    pDC->SetBkMode(TRANSPARENT);
+                    pDC->TextOut(screenX + 2, screenY + 2, coord);
                 }
             }
         }
