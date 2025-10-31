@@ -3,6 +3,8 @@
 #include <afxwin.h>  // 包含MFC基础头文件
 #include "GameObject.h"  // 包含基类
 #include <vector>
+#include "../Core/GameConfig.h"  // 添加这行
+
 // 马里奥状态枚举
 enum class MarioState
 {
@@ -69,7 +71,7 @@ public:
         COLORREF hatColor, COLORREF shoeColor);
     void DrawBigMario(CDC* pDC, COLORREF skinColor, COLORREF overallsColor,
         COLORREF hatColor, COLORREF shoeColor);
-    
+    void DrawWithGeometry(CDC* pDC);
 private:
     // 更新马里奥大小（根据状态）
     void UpdateSize();
@@ -106,9 +108,4 @@ private:
     // 马里奥状态
     MarioState m_State;               // 当前状态
 
-    // 物理参数常量（可以根据需要调整）
-    static const float GRAVITY;
-    static const float MAX_SPEED;
-    static const float ACCELERATION;
-    static const float JUMP_FORCE;
 };

@@ -2,24 +2,22 @@
 // Game/Objects/Mario.cpp
 #include <afxwin.h>  // 直接包含MFC头文件
 #include "Mario.h"
+#include "../Core/ResourceManager.h"
+#include "../Core/SpriteRenderer.h"
 
-// 在静态常量定义后添加
-const float CMario::GRAVITY = 0.8f;           // 增加重力
-const float CMario::MAX_SPEED = 8.0f;         // 增加最大速度
-const float CMario::ACCELERATION = 0.5f;      // 增加加速度
-const float CMario::JUMP_FORCE = -20.0f;      // 增加跳跃力
 // 构造函数
-CMario::CMario() : CGameObject(100, 400, 30, 45)  // 调用基类构造函数
+CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameConfig::MARIO_SMALL_HEIGHT)  // 调用基类构造函数
 {
 
     m_fVelocityX = 0.0f;
     m_fVelocityY = 0.0f;
 
-    // 初始化物理参数
-    m_fAcceleration = ACCELERATION;
-    m_fMaxSpeed = MAX_SPEED;
-    m_fJumpForce = JUMP_FORCE;
-    m_fGravity = GRAVITY;
+    // 使用全局配置的物理参数
+    m_fAcceleration = CGameConfig::MARIO_ACCELERATION;
+    m_fMaxSpeed = CGameConfig::MARIO_MAX_SPEED;
+    m_fJumpForce = CGameConfig::MARIO_JUMP_FORCE;
+    m_fGravity = CGameConfig::GRAVITY;
+
 
     // 初始化状态
     m_bIsJumping = FALSE;
@@ -35,7 +33,7 @@ CMario::CMario() : CGameObject(100, 400, 30, 45)  // 调用基类构造函数
 
     // 初始化跳跃相关
     m_fJumpTime = 0.0f;
-    m_fMaxJumpTime = 0.3f;  // 最大跳跃持续时间0.3秒
+    m_fMaxJumpTime = CGameConfig::MARIO_JUMP_MAX_TIME;  // 使用全局配置
     m_bCanJump = TRUE;
     // 根据状态更新大小
     UpdateSize();
@@ -70,8 +68,33 @@ void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
     m_nX = screenX;
     m_nY = screenY;
 
-    // 绘制
-    Draw(pDC);
+    // 使用贴图绘制
+    CResourceManager& resMgr = CResourceManager::GetInstance();
+    CString textureName;
+
+    switch (m_State)
+    {
+    case MarioState::SMALL:
+        textureName = _T("MarioSmall");
+        break;
+    case MarioState::BIG:
+        textureName = _T("MarioBig");
+        break;
+    case MarioState::FIRE:
+        textureName = _T("MarioFire");
+        break;
+    }
+
+    CBitmap* pBitmap = resMgr.GetBitmap(textureName);
+    if (pBitmap)
+    {
+        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
+            0, 0, m_nWidth, m_nHeight, TRUE);
+    }
+    else
+    {
+        DrawWithGeometry(pDC);
+    }
 
     // 恢复位置
     m_nX = originalX;
@@ -261,30 +284,49 @@ void CMario::Draw(CDC* pDC)
 {
     if (!m_bVisible) return;
 
-    // 根据状态选择颜色
-    COLORREF skinColor = RGB(255, 204, 153);  // 皮肤色
-    COLORREF overallsColor = RGB(0, 0, 255);  // 工装裤蓝色
-    COLORREF hatColor = RGB(255, 0, 0);       // 帽子红色
-    COLORREF shoeColor = RGB(139, 69, 19);    // 鞋子棕色
+    CResourceManager& resMgr = CResourceManager::GetInstance();
+    CString textureName;
 
+    // 根据状态选择贴图
     switch (m_State)
     {
-    case MarioState::BIG:
-    case MarioState::FIRE:
-        // 大马里奥和火焰马里奥使用相同的尺寸，但火焰马里奥有特殊颜色
-        if (m_State == MarioState::FIRE)
-        {
-            overallsColor = RGB(255, 165, 0); // 火焰马里奥的橙色工装裤
-        }
-        DrawBigMario(pDC, skinColor, overallsColor, hatColor, shoeColor);
-        break;
     case MarioState::SMALL:
-    default:
-        DrawSmallMario(pDC, skinColor, overallsColor, hatColor, shoeColor);
+        textureName = _T("MarioSmall");
         break;
+    case MarioState::BIG:
+        textureName = _T("MarioBig");
+        break;
+    case MarioState::FIRE:
+        textureName = _T("MarioFire");
+        break;
+    }
+
+    // 获取贴图
+    CBitmap* pBitmap = resMgr.GetBitmap(textureName);
+    if (pBitmap)
+    {
+        // 使用贴图绘制
+        CSpriteRenderer::DrawSprite(pDC, pBitmap, m_nX, m_nY,
+            0, 0, m_nWidth, m_nHeight, TRUE);
+    }
+    else
+    {
+        // 备用：如果没有贴图，使用几何绘制
+        DrawWithGeometry(pDC);
     }
 }
 
+// 新增：几何绘制备用方法
+void CMario::DrawWithGeometry(CDC* pDC)
+{
+    // 这里保留原来的几何绘制代码作为备用
+    COLORREF skinColor = RGB(255, 204, 153);
+    COLORREF overallsColor = RGB(0, 0, 255);
+    COLORREF hatColor = RGB(255, 0, 0);
+    COLORREF shoeColor = RGB(139, 69, 19);
+
+    // ... 原来的几何绘制代码 ...
+}
 // 新增：绘制小马里奥
 void CMario::DrawSmallMario(CDC* pDC, COLORREF skinColor, COLORREF overallsColor,
     COLORREF hatColor, COLORREF shoeColor)
@@ -386,16 +428,16 @@ void CMario::UpdateSize()
     switch (m_State)
     {
     case MarioState::SMALL:
-        m_nWidth = 30;
-        m_nHeight = 45;
+        m_nWidth = CGameConfig::MARIO_SMALL_WIDTH;
+        m_nHeight = CGameConfig::MARIO_SMALL_HEIGHT;
         break;
     case MarioState::BIG:
-        m_nWidth = 36;
-        m_nHeight = 54;
+        m_nWidth = CGameConfig::MARIO_BIG_WIDTH;
+        m_nHeight = CGameConfig::MARIO_BIG_HEIGHT;
         break;
     case MarioState::FIRE:
-        m_nWidth = 36;
-        m_nHeight = 54;
+        m_nWidth = CGameConfig::MARIO_BIG_WIDTH;
+        m_nHeight = CGameConfig::MARIO_BIG_HEIGHT;
         break;
     }
 }

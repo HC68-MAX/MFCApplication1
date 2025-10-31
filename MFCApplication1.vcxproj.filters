@@ -75,6 +75,9 @@
     <ClInclude Include="Game\Map\TileMap.h">
       <Filter>Game\Map</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Core\GameConfig.h">
+      <Filter>Game\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication1.cpp">
@@ -112,6 +115,9 @@
     </ClCompile>
     <ClCompile Include="Game\Map\TileMap.cpp">
       <Filter>Game\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Core\GameConfig.cpp">
+      <Filter>Game\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -3,12 +3,12 @@
 #pragma once
 
 #include "GameObject.h"
-
+#include "../Core/GameConfig.h"  
 class CPipe : public CGameObject
 {
 public:
     CPipe();
-    CPipe(int x, int y, int height);
+    CPipe(int x, int y, int height = CGameConfig::PIPE_HEIGHT);
     virtual ~CPipe();
 
     // 重写基类虚函数

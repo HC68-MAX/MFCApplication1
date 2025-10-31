@@ -9,6 +9,7 @@
 #include "Game/Core/ResourceManager.h"
 #include "Game/Core/SpriteRenderer.h"
 #include "Game/Map/TileMap.h"
+#include "Game/Core/GameConfig.h" 
 #include <vector>
 class CMFCApplication1View : public CView
 {
@@ -54,9 +55,9 @@ protected:
 	// 游戏循环定时器
 	UINT_PTR m_nTimerID;
 
-	// 屏幕尺寸
-	int m_nScreenWidth;
-	int m_nScreenHeight;
+	// 使用全局配置初始化屏幕尺寸
+	int m_nScreenWidth = CGameConfig::SCREEN_WIDTH;
+	int m_nScreenHeight = CGameConfig::SCREEN_HEIGHT;
 /*
 	// 测试用 - 马里奥位置
 	int m_nMarioX;
@@ -112,6 +113,7 @@ protected:
 	void InitializeResources();
 	void InitializeTileMap();
 	void UpdateCamera();
+	// 新增：创建占位符位图
 	std::vector<CRect> CMFCApplication1View::GetAllSolidObjects() const;
 };
 

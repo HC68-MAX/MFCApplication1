@@ -3,7 +3,7 @@
 #include "Brick.h"
 
 // ¹¹Ôìº¯Êý
-CBrick::CBrick() : CGameObject(0, 0, 40, 40)
+CBrick::CBrick() : CGameObject(0, 0, CGameConfig::BRICK_WIDTH, CGameConfig::BRICK_HEIGHT)
 {
     m_Type = NORMAL;
     m_bIsEmpty = FALSE;

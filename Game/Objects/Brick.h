@@ -2,12 +2,12 @@
 // Game/Objects/Brick.h
 
 #include "GameObject.h"
-
+#include "../Core/GameConfig.h"  
 class CBrick : public CGameObject
 {
 public:
     CBrick();
-    CBrick(int x, int y, int width = 40, int height = 40);
+    CBrick(int x, int y, int width = CGameConfig::BRICK_WIDTH, int height = CGameConfig::BRICK_HEIGHT);
     virtual ~CBrick();
 
     // 重写基类虚函数

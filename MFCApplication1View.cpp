@@ -58,8 +58,7 @@ CMFCApplication1View::CMFCApplication1View() noexcept
 {
 	// TODO: 在此处添加构造代码
 		// 初始化游戏变量
-	m_nScreenWidth = 800;
-	m_nScreenHeight = 600;
+
     m_nCameraX = 0;
     m_nCameraY = 0;
 	m_pOldBitmap = nullptr;
@@ -155,25 +154,33 @@ void CMFCApplication1View::InitializeTileMap()
 
     // 创建一个小一点的测试地图，确保变化明显
     // 地图尺寸：30x15个瓦片，每个瓦片32x32像素
-    BOOL result = m_TileMap.LoadMap(30, 15, 32);
+        // 使用全局配置的地图尺寸
+    BOOL result = m_TileMap.LoadMap(
+        CGameConfig::TILE_MAP_WIDTH,
+        CGameConfig::TILE_MAP_HEIGHT,
+        CGameConfig::TILE_SIZE
+    );
     TRACE(_T("地图加载结果: %s\n"), result ? _T("成功") : _T("失败"));
     TRACE(_T("地图尺寸: %dx%d, 瓦片大小: %d\n"),
         m_TileMap.GetWidth(), m_TileMap.GetHeight(), m_TileMap.GetTileSize());
 
     // 创建地面 - 放在第10行（从0开始）
     // 这样地面在Y=320像素（10*32=320）
-    for (int x = 0; x < 30; x++)
+     // 创建地面 - 使用全局配置计算位置
+    int groundLevel = CGameConfig::TILE_MAP_HEIGHT - 5; // 离底部5行的位置
+
+    for (int x = 0; x < CGameConfig::TILE_MAP_WIDTH; x++)
     {
-        m_TileMap.SetTile(x, 10, 1, TRUE, _T("ground"));  // 主地面
-        m_TileMap.SetTile(x, 11, 1, TRUE, _T("ground"));  // 地下层
-        m_TileMap.SetTile(x, 12, 1, TRUE, _T("ground"));
-        m_TileMap.SetTile(x, 13, 1, TRUE, _T("ground"));
-        m_TileMap.SetTile(x, 14, 1, TRUE, _T("ground"));
+        for (int y = groundLevel; y < CGameConfig::TILE_MAP_HEIGHT; y++)
+        {
+            m_TileMap.SetTile(x, y, 1, TRUE, _T("ground"));
+        }
     }
 
     // 设置马里奥初始位置在地面上方
-    // 地面在Y=320，马里奥高度约45像素，所以设置Y=275
-    m_Mario.SetPosition(150, 275);
+    int marioStartX = 5 * CGameConfig::TILE_SIZE;
+    int marioStartY = (groundLevel - 2) * CGameConfig::TILE_SIZE;
+    m_Mario.SetPosition(marioStartX, marioStartY);
 
     // 创建明显的测试平台 - 使用大瓦片
 
@@ -259,37 +266,74 @@ void CMFCApplication1View::InitializeGame()
 // 新增：初始化资源
 void CMFCApplication1View::InitializeResources()
 {
-    // 这里暂时用颜色块，后面添加实际贴图资源后再替换
-    // 示例：加载位图资源
-    // CResourceManager::GetInstance().LoadBitmap(IDB_MARIO, _T("Mario"));
-    // CResourceManager::GetInstance().LoadBitmap(IDB_BRICK, _T("Brick"));
-}
+    TRACE(_T("开始初始化资源...\n"));
 
+    CResourceManager& resMgr = CResourceManager::GetInstance();
+
+    // 加载马里奥贴图
+    TRACE(_T("加载马里奥贴图...\n"));
+    BOOL marioSmall = resMgr.LoadBitmap(IDB_MARIO_SMALL, _T("MarioSmall"));
+    BOOL marioBig = resMgr.LoadBitmap(IDB_MARIO_BIG, _T("MarioBig"));
+    BOOL marioFire = resMgr.LoadBitmap(IDB_MARIO_FIRE, _T("MarioFire"));
+
+    TRACE(_T("马里奥贴图加载: 小=%d, 大=%d, 火=%d\n"), marioSmall, marioBig, marioFire);
+
+    // 加载地图贴图
+    TRACE(_T("加载地图贴图...\n"));
+    BOOL brick = resMgr.LoadBitmap(IDB_BRICK, _T("Brick"));
+    BOOL question = resMgr.LoadBitmap(IDB_QUESTION_BLOCK, _T("QuestionBlock"));
+    BOOL hardBrick = resMgr.LoadBitmap(IDB_HARD_BRICK, _T("HardBrick"));
+    BOOL pipe = resMgr.LoadBitmap(IDB_PIPE, _T("Pipe"));
+    BOOL ground = resMgr.LoadBitmap(IDB_GROUND, _T("Ground"));
+    BOOL background = resMgr.LoadBitmap(IDB_BACKGROUND, _T("Background"));
+
+    TRACE(_T("地图贴图加载: 砖块=%d, 问号=%d, 硬砖=%d, 水管=%d, 地面=%d, 背景=%d\n"),
+        brick, question, hardBrick, pipe, ground, background);
+
+    // 测试获取贴图
+    TRACE(_T("测试获取贴图...\n"));
+    CBitmap* testBrick = resMgr.GetBitmap(_T("Brick"));
+    TRACE(_T("砖块贴图指针: %p\n"), testBrick);
+
+    TRACE(_T("资源初始化完成\n"));
+}
 // 修改RenderGame方法
 void CMFCApplication1View::RenderGame(CDC* pDC)
 {
-    // 清除背景（天空）
-    pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(135, 206, 235));
+    // 使用贴图绘制背景
+    CResourceManager& resMgr = CResourceManager::GetInstance();
+    CBitmap* pBgBitmap = resMgr.GetBitmap(_T("Background"));
 
-    // 绘制远处的山和云朵（装饰）...
+    if (pBgBitmap)
+    {
+        // 平铺背景贴图
+        CSize bgSize;
+        if (CSpriteRenderer::GetBitmapSize(pBgBitmap, bgSize))
+        {
+            for (int y = 0; y < m_nScreenHeight; y += bgSize.cy)
+            {
+                for (int x = 0; x < m_nScreenWidth; x += bgSize.cx)
+                {
+                    CSpriteRenderer::DrawSprite(pDC, pBgBitmap, x, y,
+                        0, 0, bgSize.cx, bgSize.cy, FALSE);
+                }
+            }
+        }
+    }
+    else
+    {
+        // 备用：单色背景
+        pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(135, 206, 235));
+    }
 
-    // 使用瓦片地图绘制关卡
+    // 使用瓦片地图绘制关卡（现在使用贴图）
     m_TileMap.Draw(pDC, m_nCameraX, m_nCameraY);
 
-    // 绘制马里奥（考虑摄像机偏移）
+    // 绘制马里奥（使用贴图）
     int marioScreenX = m_Mario.GetX() - m_nCameraX;
     int marioScreenY = m_Mario.GetY() - m_nCameraY;
-
-    // 临时：保存原始位置，设置屏幕位置，绘制，恢复位置
-    int originalX = m_Mario.GetX();
-    int originalY = m_Mario.GetY();
-
-    // 这里需要修改马里奥的绘制方法以支持屏幕坐标
-    // 暂时先这样处理
-    CDC* pMemDC = &m_memDC;
-
-    // 创建一个临时副本用于绘制
     m_Mario.DrawAt(pDC, marioScreenX, marioScreenY);
+
     // 调试模式：绘制碰撞信息
     if (m_bDebugMode)
     {
@@ -299,8 +343,13 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
     // 绘制调试信息
     DrawDebugInfo(pDC);
 
-    // 恢复马里奥位置
-    m_Mario.SetPosition(originalX, originalY);
+    // 测试：在屏幕左上角绘制一个砖块贴图，确保贴图系统工作
+    CBitmap* pTestBrick = resMgr.GetBitmap(_T("Brick"));
+    if (pTestBrick)
+    {
+        CSpriteRenderer::DrawSprite(pDC, pTestBrick, 10, 100, 0, 0, 32, 32, TRUE);
+        pDC->TextOut(50, 100, _T("砖块贴图测试"));
+    }
 }
 // 清理游戏资源
 void CMFCApplication1View::CleanupGame()
@@ -631,7 +680,7 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
             m_Mario.GetGravity(), m_Mario.GetMaxSpeed());
         pDC->TextOut(10, 220, strInfo);
 
-        // 地图信息 - 明确显示瓦片大小
+        // 地图信息
         strInfo.Format(_T("地图: %dx%d 瓦片  瓦片大小: %dx%d"),
             m_TileMap.GetWidth(), m_TileMap.GetHeight(),
             m_TileMap.GetTileSize(), m_TileMap.GetTileSize());
@@ -641,17 +690,12 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
         strInfo.Format(_T("摄像机: (%d, %d)"), m_nCameraX, m_nCameraY);
         pDC->TextOut(10, 260, strInfo);
 
-        // 地面信息
-        int groundY = 12 * m_TileMap.GetTileSize(); // 地面Y坐标
-        strInfo.Format(_T("地面位置: Y=%d  马里奥脚部: Y=%d"),
-            groundY, m_Mario.GetY() + m_Mario.GetHeight());
+        // 贴图系统状态
+        CResourceManager& resMgr = CResourceManager::GetInstance();
+        CBitmap* testBrick = resMgr.GetBitmap(_T("Brick"));
+        strInfo.Format(_T("贴图系统: 正常  砖块贴图: %p"), testBrick);
+        pDC->SetTextColor(RGB(0, 255, 0)); // 绿色表示正常
         pDC->TextOut(10, 280, strInfo);
-
-        // 瓦片坐标信息
-        int marioTileX = m_Mario.GetX() / m_TileMap.GetTileSize();
-        int marioTileY = m_Mario.GetY() / m_TileMap.GetTileSize();
-        strInfo.Format(_T("马里奥瓦片坐标: (%d, %d)"), marioTileX, marioTileY);
-        pDC->TextOut(10, 300, strInfo);
     }
     else
     {
