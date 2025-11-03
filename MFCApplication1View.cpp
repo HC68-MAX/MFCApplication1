@@ -68,7 +68,7 @@ CMFCApplication1View::CMFCApplication1View() noexcept
     m_bKeyRight = FALSE;
     m_bKeyJump = FALSE;
     // 初始化帧率相关变量
-    m_dwLastTime = GetTickCount();
+    m_dwLastTime = GetTickCount64();
     m_nFrameCount = 0;
     m_fDeltaTime = 0.033f; // 默认1/30秒
     m_fSmoothedFPS = 60.0f; // 默认60帧
@@ -326,13 +326,28 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
         pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(135, 206, 235));
     }
 
-    // 使用瓦片地图绘制关卡（现在使用贴图）
+    // 使用瓦片地图绘制关卡
     m_TileMap.Draw(pDC, m_nCameraX, m_nCameraY);
 
-    // 绘制马里奥（使用贴图）
+    // 绘制独立的游戏对象（如果有的话）
+    for (auto& brick : m_Bricks)
+    {
+        int screenX = brick.GetX() - m_nCameraX;
+        int screenY = brick.GetY() - m_nCameraY;
+        brick.DrawWithSprite(pDC, screenX, screenY);
+    }
+
+    for (auto& pipe : m_Pipes)
+    {
+        int screenX = pipe.GetX() - m_nCameraX;
+        int screenY = pipe.GetY() - m_nCameraY;
+        pipe.DrawWithSprite(pDC, screenX, screenY);
+    }
+
+    // 绘制马里奥（使用精灵渲染器）
     int marioScreenX = m_Mario.GetX() - m_nCameraX;
     int marioScreenY = m_Mario.GetY() - m_nCameraY;
-    m_Mario.DrawAt(pDC, marioScreenX, marioScreenY);
+    m_Mario.DrawWithSprite(pDC, marioScreenX, marioScreenY);
 
     // 调试模式：绘制碰撞信息
     if (m_bDebugMode)
@@ -342,14 +357,6 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
 
     // 绘制调试信息
     DrawDebugInfo(pDC);
-
-    // 测试：在屏幕左上角绘制一个砖块贴图，确保贴图系统工作
-    CBitmap* pTestBrick = resMgr.GetBitmap(_T("Brick"));
-    if (pTestBrick)
-    {
-        CSpriteRenderer::DrawSprite(pDC, pTestBrick, 10, 100, 0, 0, 32, 32, TRUE);
-        pDC->TextOut(50, 100, _T("砖块贴图测试"));
-    }
 }
 // 清理游戏资源
 void CMFCApplication1View::CleanupGame()
@@ -403,77 +410,7 @@ void CMFCApplication1View::UpdateGame()
     std::vector<CRect> solidObjects = m_TileMap.GetSolidTileRects();
     m_Mario.CheckCollisions(solidObjects);
 }
-// 修改获取碰撞对象的方法
-std::vector<CRect> CMFCApplication1View::GetAllSolidObjects() const
-{
-    std::vector<CRect> solidObjects;
 
-    // 添加地面
-    solidObjects.push_back(CRect(0, 500, m_nScreenWidth, 600));
-
-    // 添加所有砖块
-    for (const auto& brick : m_Bricks)
-    {
-        solidObjects.push_back(brick.GetRect());
-    }
-
-    // 添加所有水管
-    for (const auto& pipe : m_Pipes)
-    {
-        solidObjects.push_back(pipe.GetRect());
-    }
-
-    return solidObjects;
-}
-// 新增：绘制碰撞检测点
-void CMFCApplication1View::DrawCollisionPoints(CDC* pDC, const CRect& marioRect)
-{
-    // 绘制马里奥周围的检测点
-    int points[][2] = {
-        {marioRect.left, marioRect.top},      // 左上角
-        {marioRect.right, marioRect.top},     // 右上角
-        {marioRect.left, marioRect.bottom},   // 左下角
-        {marioRect.right, marioRect.bottom},  // 右下角
-        {marioRect.CenterPoint().x, marioRect.top},     // 上中点
-        {marioRect.CenterPoint().x, marioRect.bottom},  // 下中点
-        {marioRect.left, marioRect.CenterPoint().y},    // 左中点
-        {marioRect.right, marioRect.CenterPoint().y}    // 右中点
-    };
-
-    for (int i = 0; i < 8; i++)
-    {
-        pDC->Ellipse(points[i][0] - 2, points[i][1] - 2,
-            points[i][0] + 2, points[i][1] + 2);
-    }
-}
-// 新增：绘制当前碰撞的实体
-void CMFCApplication1View::DrawCurrentCollisions(CDC* pDC, const std::vector<CRect>& solidObjects, const CRect& marioRect)
-{
-    CPen yellowPen(PS_SOLID, 3, RGB(255, 255, 0));
-    pDC->SelectObject(&yellowPen);
-
-    // 检查当前与马里奥碰撞的实体
-    for (const auto& rect : solidObjects)
-    {
-        CRect intersection;
-        if (intersection.IntersectRect(&marioRect, &rect))
-        {
-            // 高亮显示当前碰撞的实体
-            pDC->MoveTo(rect.left, rect.top);
-            pDC->LineTo(rect.right, rect.top);
-            pDC->LineTo(rect.right, rect.bottom);
-            pDC->LineTo(rect.left, rect.bottom);
-            pDC->LineTo(rect.left, rect.top);
-
-            // 在碰撞实体上显示碰撞深度信息
-            CString depthInfo;
-            depthInfo.Format(_T("%d,%d"), intersection.Width(), intersection.Height());
-            pDC->SetTextColor(RGB(255, 255, 0));
-            pDC->SetBkMode(TRANSPARENT);
-            pDC->TextOut(rect.left + 5, rect.top + 5, depthInfo);
-        }
-    }
-}
 // 新增：绘制调试碰撞信息
 void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
 {
@@ -771,135 +708,4 @@ void CMFCApplication1View::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
     }
 
     CView::OnKeyUp(nChar, nRepCnt, nFlags);
-}
-
-// 计算帧时间差
-void CMFCApplication1View::CalculateDeltaTime()
-{
-    DWORD dwCurrentTime = GetTickCount64();
-    m_fDeltaTime = (dwCurrentTime - m_dwLastTime) / 1000.0f; // 转换为秒
-
-    // 限制最大deltaTime，避免卡顿导致的大跳帧
-    if (m_fDeltaTime > 0.1f)
-        m_fDeltaTime = 0.1f;
-
-    m_dwLastTime = dwCurrentTime;
-    // 帧率平滑处理（移动平均）
-    static float frameRates[10] = { 0 };
-    static int frameIndex = 0;
-    static float frameSum = 0;
-
-    frameSum -= frameRates[frameIndex];
-    frameRates[frameIndex] = 1.0f / m_fDeltaTime;
-    frameSum += frameRates[frameIndex];
-    frameIndex = (frameIndex + 1) % 10;
-
-    // 使用平滑后的帧率
-    m_fSmoothedFPS = frameSum / 10;
-}
-
-// 新增：获取所有平台的矩形区域
-std::vector<CRect> CMFCApplication1View::GetAllPlatformRects() const
-{
-    std::vector<CRect> platforms;
-
-    // 添加地面
-    platforms.push_back(CRect(0, 500, m_nScreenWidth, 600));
-
-    // 添加所有砖块
-    for (const auto& brick : m_Bricks)
-    {
-        platforms.push_back(brick.GetRect());
-    }
-
-    // 添加所有水管
-    for (const auto& pipe : m_Pipes)
-    {
-        platforms.push_back(pipe.GetRect());
-    }
-
-    return platforms;
-}
-
-// 新增：检查马里奥碰撞
-void CMFCApplication1View::CheckMarioCollisions()
-{
-    // 获取所有碰撞平台
-    std::vector<CRect> platforms = GetAllPlatformRects();
-
-    // 让马里奥检查碰撞
-    m_Mario.CheckCollisions(platforms);
-
-    // 处理砖块的特殊碰撞（顶砖块）
-    HandleBrickCollisions();
-}
-
-// 新增：处理砖块碰撞
-void CMFCApplication1View::HandleBrickCollisions()
-{
-    // 获取马里奥的头部区域
-    CRect marioHead = m_Mario.GetHeadRect();
-
-    // 检查马里奥头部与砖块的碰撞
-    for (auto& brick : m_Bricks)
-    {
-        CRect brickRect = brick.GetRect();
-        CRect intersection;
-
-        if (intersection.IntersectRect(&marioHead, &brickRect))
-        {
-            // 如果马里奥正在上升并且顶到了砖块
-            if (m_Mario.IsJumping() && brick.CanBeHitFromBelow())
-            {
-                brick.OnHitFromBelow();
-                // 这里可以添加得分效果等
-            }
-        }
-    }
-}
-// 新增：绘制坐标网格
-void CMFCApplication1View::DrawCoordinateGrid(CDC* pDC)
-{
-    if (!m_bDebugMode) return;
-
-    CPen gridPen(PS_DOT, 1, RGB(100, 100, 100));
-    CPen* pOldPen = pDC->SelectObject(&gridPen);
-
-    // 绘制垂直网格线（每50像素）- 考虑摄像机偏移
-    for (int worldX = (m_nCameraX / 50) * 50; worldX < m_nCameraX + m_nScreenWidth; worldX += 50)
-    {
-        int screenX = worldX - m_nCameraX;
-        pDC->MoveTo(screenX, 0);
-        pDC->LineTo(screenX, m_nScreenHeight);
-
-        // 显示坐标（世界坐标）
-        if (worldX % 100 == 0) // 每100像素显示坐标数字
-        {
-            CString coord;
-            coord.Format(_T("%d"), worldX);
-            pDC->SetTextColor(RGB(150, 150, 150));
-            pDC->SetBkMode(TRANSPARENT);
-            pDC->TextOut(screenX + 2, 10, coord);
-        }
-    }
-
-    // 绘制水平网格线（每50像素）- 考虑摄像机偏移
-    for (int worldY = (m_nCameraY / 50) * 50; worldY < m_nCameraY + m_nScreenHeight; worldY += 50)
-    {
-        int screenY = worldY - m_nCameraY;
-        pDC->MoveTo(0, screenY);
-        pDC->LineTo(m_nScreenWidth, screenY);
-
-        // 显示坐标（世界坐标）
-        if (worldY % 100 == 0 && worldY > 0) // 每100像素显示坐标数字
-        {
-            CString coord;
-            coord.Format(_T("%d"), worldY);
-            pDC->SetTextColor(RGB(150, 150, 150));
-            pDC->SetBkMode(TRANSPARENT);
-            pDC->TextOut(10, screenY + 2, coord);
-        }
-    }
-
-    pDC->SelectObject(pOldPen);
 }

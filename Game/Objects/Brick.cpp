@@ -1,7 +1,8 @@
 // Game/Objects/Brick.cpp
 #include <afxwin.h>  // 直接包含MFC头文件
 #include "Brick.h"
-
+#include "GameObject.h"
+#include "..\Core\SpriteConfig.h"
 // 构造函数
 CBrick::CBrick() : CGameObject(0, 0, CGameConfig::BRICK_WIDTH, CGameConfig::BRICK_HEIGHT)
 {
@@ -64,49 +65,75 @@ void CBrick::UpdateHitAnimation(float deltaTime)
     }
 }
 
-// 绘制
+// 绘制 - 使用精灵渲染器
 void CBrick::Draw(CDC* pDC)
+{
+    DrawWithSprite(pDC, m_nX, m_nY);
+}
+
+// 新增：使用精灵渲染器绘制
+void CBrick::DrawWithSprite(CDC* pDC, int screenX, int screenY)
 {
     if (!m_bVisible) return;
 
+    CResourceManager& resMgr = CResourceManager::GetInstance();
+    CBitmap* pBitmap = nullptr;
+    SSpriteCoord spriteCoord;
+
+    // 根据砖块类型选择贴图和精灵坐标
     switch (m_Type)
     {
     case NORMAL:
-        // 绘制普通砖块
-        pDC->FillSolidRect(m_nX, m_nY, m_nWidth, m_nHeight, RGB(180, 90, 40));
-        pDC->Draw3dRect(m_nX, m_nY, m_nWidth, m_nHeight, RGB(120, 60, 20), RGB(220, 150, 100));
+        pBitmap = resMgr.GetBitmap(_T("Brick"));
+        spriteCoord = CSpriteConfig::BRICK_NORMAL;
         break;
 
     case QUESTION:
-        // 绘制问号砖块
         if (!m_bIsEmpty)
         {
-            pDC->FillSolidRect(m_nX, m_nY, m_nWidth, m_nHeight, RGB(255, 200, 0));
-            pDC->Draw3dRect(m_nX, m_nY, m_nWidth, m_nHeight, RGB(180, 140, 0), RGB(255, 255, 100));
-
-            // 绘制问号
-            CString strQuestion = _T("?");
-            pDC->SetTextColor(RGB(0, 0, 0));
-            pDC->SetBkMode(TRANSPARENT);
-            pDC->SetTextAlign(TA_CENTER);
-            pDC->TextOut(m_nX + m_nWidth / 2, m_nY + m_nHeight / 4, strQuestion);
-            pDC->SetTextAlign(TA_LEFT);
+            pBitmap = resMgr.GetBitmap(_T("QuestionBlock"));
+            // 根据是否被击中显示不同的问号砖块状态
+            if (m_bIsHit && m_nHitTimer < 0.1f)
+                spriteCoord = CSpriteConfig::BRICK_QUESTION_HIT;
+            else
+                spriteCoord = CSpriteConfig::BRICK_QUESTION;
         }
         else
         {
-            // 被顶过的问号砖块
-            pDC->FillSolidRect(m_nX, m_nY, m_nWidth, m_nHeight, RGB(120, 120, 120));
+            // 被顶过的问号砖块显示为硬砖块
+            pBitmap = resMgr.GetBitmap(_T("HardBrick"));
+            spriteCoord = CSpriteConfig::BRICK_HARD;
         }
         break;
 
     case HARD:
-        // 绘制硬砖块
-        pDC->FillSolidRect(m_nX, m_nY, m_nWidth, m_nHeight, RGB(120, 120, 120));
-        pDC->Draw3dRect(m_nX, m_nY, m_nWidth, m_nHeight, RGB(80, 80, 80), RGB(180, 180, 180));
+        pBitmap = resMgr.GetBitmap(_T("HardBrick"));
+        spriteCoord = CSpriteConfig::BRICK_HARD;
         break;
     }
-}
 
+    if (pBitmap)
+    {
+        // 使用精灵渲染器绘制
+        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
+            spriteCoord.x, spriteCoord.y,
+            spriteCoord.width, spriteCoord.height, TRUE);
+    }
+    else
+    {
+        // 备用：如果没有贴图，使用颜色绘制
+        COLORREF color = RGB(128, 128, 128);
+        switch (m_Type)
+        {
+        case NORMAL: color = RGB(180, 90, 40); break;
+        case QUESTION: color = m_bIsEmpty ? RGB(120, 120, 120) : RGB(255, 200, 0); break;
+        case HARD: color = RGB(120, 120, 120); break;
+        }
+        pDC->FillSolidRect(screenX, screenY, m_nWidth, m_nHeight, color);
+        pDC->Draw3dRect(screenX, screenY, m_nWidth, m_nHeight,
+            RGB(80, 80, 80), RGB(200, 200, 200));
+    }
+}
 // 被从下方撞击
 void CBrick::OnHitFromBelow()
 {

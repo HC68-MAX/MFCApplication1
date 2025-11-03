@@ -94,22 +94,12 @@ protected:
 //游戏相关函数
 protected:
 	void InitializeGame();
-	void InitializeMap();
 	void UpdateGame();
 	void RenderGame(CDC* pDC);
 	void CleanupGame();
-	void CalculateDeltaTime();  // 新增：计算帧时间差
-	// 新增碰撞检测方法
-	void CheckMarioCollisions();
-	std::vector<CRect> GetAllPlatformRects() const;
-	void HandleBrickCollisions();
 	void DrawDebugCollision(CDC* pDC);
 	void DrawDebugInfo(CDC* pDC);
 	// 新增调试绘制方法
-	void DrawCollisionPoints(CDC* pDC, const CRect& marioRect);
-	void DrawCurrentCollisions(CDC* pDC, const std::vector<CRect>& solidObjects, const CRect& marioRect);
-	void DrawCoordinateGrid(CDC* pDC);
-	// 新方法
 	void InitializeResources();
 	void InitializeTileMap();
 	void UpdateCamera();

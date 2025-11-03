@@ -4,6 +4,7 @@
 #include "Mario.h"
 #include "../Core/ResourceManager.h"
 #include "../Core/SpriteRenderer.h"
+#include "../Core/SpriteConfig.h"
 
 // 构造函数
 CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameConfig::MARIO_SMALL_HEIGHT)  // 调用基类构造函数
@@ -55,7 +56,73 @@ CMario::~CMario()
 {
     // 目前没有需要手动释放的资源
 }
-// 新增：在指定屏幕坐标绘制
+// 新增：使用精灵渲染器绘制马里奥
+void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
+{
+    if (!m_bVisible) return;
+
+    CResourceManager& resMgr = CResourceManager::GetInstance();
+    CString textureName;
+    SSpriteCoord spriteCoord;
+
+    // 根据状态选择贴图
+    switch (m_State)
+    {
+    case MarioState::SMALL:
+        textureName = _T("MarioSmall");
+        // 根据动作选择精灵坐标
+        if (m_bIsJumping)
+            spriteCoord = CSpriteConfig::MARIO_SMALL_JUMP_RIGHT;
+        else if (m_bIsMoving)
+            spriteCoord = (GetTickCount() % 500 < 250) ?
+            CSpriteConfig::MARIO_SMALL_WALK1_RIGHT :
+            CSpriteConfig::MARIO_SMALL_WALK2_RIGHT;
+        else
+            spriteCoord = CSpriteConfig::MARIO_SMALL_STAND_RIGHT;
+        break;
+
+    case MarioState::BIG:
+        textureName = _T("MarioBig");
+        if (m_bIsJumping)
+            spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
+        else if (m_bIsMoving)
+            spriteCoord = (GetTickCount() % 500 < 250) ?
+            CSpriteConfig::MARIO_BIG_WALK1_RIGHT :
+            CSpriteConfig::MARIO_BIG_WALK2_RIGHT;
+        else
+            spriteCoord = CSpriteConfig::MARIO_BIG_STAND_RIGHT;
+        break;
+
+    case MarioState::FIRE:
+        textureName = _T("MarioFire");
+        if (m_bIsJumping)
+            spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
+        else if (m_bIsMoving)
+            spriteCoord = (GetTickCount() % 500 < 250) ?
+            CSpriteConfig::MARIO_FIRE_WALK1_RIGHT :
+            CSpriteConfig::MARIO_FIRE_WALK2_RIGHT;
+        else
+            spriteCoord = CSpriteConfig::MARIO_FIRE_STAND_RIGHT;
+        break;
+    }
+
+    // 获取贴图
+    CBitmap* pBitmap = resMgr.GetBitmap(textureName);
+    if (pBitmap)
+    {
+        // 使用精灵渲染器绘制
+        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
+            spriteCoord.x, spriteCoord.y,
+            spriteCoord.width, spriteCoord.height, TRUE);
+    }
+    else
+    {
+        // 备用：如果没有贴图，使用几何绘制
+        DrawWithGeometry(pDC);
+    }
+}
+
+// 修改现有的DrawAt方法，使用新的精灵绘制方法
 void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
 {
     if (!m_bVisible) return;
@@ -68,37 +135,18 @@ void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
     m_nX = screenX;
     m_nY = screenY;
 
-    // 使用贴图绘制
-    CResourceManager& resMgr = CResourceManager::GetInstance();
-    CString textureName;
-
-    switch (m_State)
-    {
-    case MarioState::SMALL:
-        textureName = _T("MarioSmall");
-        break;
-    case MarioState::BIG:
-        textureName = _T("MarioBig");
-        break;
-    case MarioState::FIRE:
-        textureName = _T("MarioFire");
-        break;
-    }
-
-    CBitmap* pBitmap = resMgr.GetBitmap(textureName);
-    if (pBitmap)
-    {
-        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-            0, 0, m_nWidth, m_nHeight, TRUE);
-    }
-    else
-    {
-        DrawWithGeometry(pDC);
-    }
+    // 使用精灵渲染器绘制
+    DrawWithSprite(pDC, screenX, screenY);
 
     // 恢复位置
     m_nX = originalX;
     m_nY = originalY;
+}
+
+// 修改现有的Draw方法
+void CMario::Draw(CDC* pDC)
+{
+    DrawWithSprite(pDC, m_nX, m_nY);
 }
 // 更新马里奥状态
 void CMario::Update(float deltaTime)
@@ -279,42 +327,6 @@ void CMario::StopMoving()
     m_bInputLeft = FALSE;
     m_bInputRight = FALSE;
 }
-// 绘制马里奥
-void CMario::Draw(CDC* pDC)
-{
-    if (!m_bVisible) return;
-
-    CResourceManager& resMgr = CResourceManager::GetInstance();
-    CString textureName;
-
-    // 根据状态选择贴图
-    switch (m_State)
-    {
-    case MarioState::SMALL:
-        textureName = _T("MarioSmall");
-        break;
-    case MarioState::BIG:
-        textureName = _T("MarioBig");
-        break;
-    case MarioState::FIRE:
-        textureName = _T("MarioFire");
-        break;
-    }
-
-    // 获取贴图
-    CBitmap* pBitmap = resMgr.GetBitmap(textureName);
-    if (pBitmap)
-    {
-        // 使用贴图绘制
-        CSpriteRenderer::DrawSprite(pDC, pBitmap, m_nX, m_nY,
-            0, 0, m_nWidth, m_nHeight, TRUE);
-    }
-    else
-    {
-        // 备用：如果没有贴图，使用几何绘制
-        DrawWithGeometry(pDC);
-    }
-}
 
 // 新增：几何绘制备用方法
 void CMario::DrawWithGeometry(CDC* pDC)
@@ -326,94 +338,6 @@ void CMario::DrawWithGeometry(CDC* pDC)
     COLORREF shoeColor = RGB(139, 69, 19);
 
     // ... 原来的几何绘制代码 ...
-}
-// 新增：绘制小马里奥
-void CMario::DrawSmallMario(CDC* pDC, COLORREF skinColor, COLORREF overallsColor,
-    COLORREF hatColor, COLORREF shoeColor)
-{
-    // 小马里奥的简化绘制 - 更精细的像素风格
-
-    // 绘制帽子
-    pDC->FillSolidRect(m_nX, m_nY, m_nWidth, m_nHeight / 4, hatColor);
-
-    // 绘制脸部（皮肤色）
-    pDC->FillSolidRect(m_nX, m_nY + m_nHeight / 4, m_nWidth, m_nHeight / 3, skinColor);
-
-    // 绘制胡子（在脸部下方）
-    int mustacheY = m_nY + m_nHeight / 4 + m_nHeight / 6;
-    pDC->FillSolidRect(m_nX, mustacheY, m_nWidth, 2, RGB(0, 0, 0));
-
-    // 绘制眼睛
-    int eyeSize = m_nWidth / 8;
-    int eyeX = (m_Direction == Direction::RIGHT) ?
-        m_nX + m_nWidth - eyeSize * 2 :
-        m_nX + eyeSize;
-    pDC->FillSolidRect(eyeX, m_nY + m_nHeight / 4 + 2, eyeSize, eyeSize, RGB(0, 0, 0));
-
-    // 绘制工装裤
-    pDC->FillSolidRect(m_nX, m_nY + m_nHeight / 2, m_nWidth, m_nHeight / 3, overallsColor);
-
-    // 绘制工装裤背带
-    pDC->FillSolidRect(m_nX, m_nY + m_nHeight / 2, 3, m_nHeight / 6, RGB(0, 0, 0));
-    pDC->FillSolidRect(m_nX + m_nWidth - 3, m_nY + m_nHeight / 2, 3, m_nHeight / 6, RGB(0, 0, 0));
-
-    // 绘制鞋子
-    pDC->FillSolidRect(m_nX, m_nY + m_nHeight - m_nHeight / 6, m_nWidth, m_nHeight / 6, shoeColor);
-}
-
-// 新增：绘制大马里奥
-void CMario::DrawBigMario(CDC* pDC, COLORREF skinColor, COLORREF overallsColor,
-    COLORREF hatColor, COLORREF shoeColor)
-{
-    // 大马里奥的绘制 - 更详细的像素风格
-
-    // 绘制帽子
-    pDC->FillSolidRect(m_nX, m_nY, m_nWidth, m_nHeight / 5, hatColor);
-
-    // 绘制帽檐
-    pDC->FillSolidRect(m_nX - 2, m_nY + m_nHeight / 5, m_nWidth + 4, 3, hatColor);
-
-    // 绘制脸部（皮肤色）
-    pDC->FillSolidRect(m_nX, m_nY + m_nHeight / 5 + 3, m_nWidth, m_nHeight / 4, skinColor);
-
-    // 绘制胡子
-    int mustacheY = m_nY + m_nHeight / 5 + m_nHeight / 8 + 3;
-    pDC->FillSolidRect(m_nX, mustacheY, m_nWidth, 3, RGB(0, 0, 0));
-
-    // 绘制眼睛
-    int eyeSize = m_nWidth / 8;
-    int eyeX = (m_Direction == Direction::RIGHT) ?
-        m_nX + m_nWidth - eyeSize * 2 :
-        m_nX + eyeSize;
-    pDC->FillSolidRect(eyeX, m_nY + m_nHeight / 5 + 5, eyeSize, eyeSize, RGB(0, 0, 0));
-
-    // 绘制工装裤上半部分
-    pDC->FillSolidRect(m_nX, m_nY + m_nHeight / 5 + m_nHeight / 4 + 3, m_nWidth, m_nHeight / 4, overallsColor);
-
-    // 绘制工装裤背带
-    pDC->FillSolidRect(m_nX + 5, m_nY + m_nHeight / 5 + m_nHeight / 4 + 3, 4, m_nHeight / 6, RGB(0, 0, 0));
-    pDC->FillSolidRect(m_nX + m_nWidth - 9, m_nY + m_nHeight / 5 + m_nHeight / 4 + 3, 4, m_nHeight / 6, RGB(0, 0, 0));
-
-    // 绘制工装裤下半部分
-    pDC->FillSolidRect(m_nX, m_nY + m_nHeight / 2 + m_nHeight / 4, m_nWidth, m_nHeight / 4, overallsColor);
-
-    // 绘制袖子（皮肤色）
-    pDC->FillSolidRect(m_nX - 3, m_nY + m_nHeight / 5 + m_nHeight / 4 + 3, 3, m_nHeight / 6, skinColor);
-    pDC->FillSolidRect(m_nX + m_nWidth, m_nY + m_nHeight / 5 + m_nHeight / 4 + 3, 3, m_nHeight / 6, skinColor);
-
-    // 绘制鞋子
-    pDC->FillSolidRect(m_nX, m_nY + m_nHeight - m_nHeight / 6, m_nWidth, m_nHeight / 6, shoeColor);
-
-    // 如果是火焰马里奥，绘制火焰效果
-    if (m_State == MarioState::FIRE)
-    {
-        // 在帽子周围绘制简单的火焰效果
-        for (int i = 0; i < 3; i++)
-        {
-            int flameX = m_nX + (m_nWidth / 4) * i;
-            pDC->FillSolidRect(flameX, m_nY - 5, m_nWidth / 4, 3, RGB(255, 255, 0)); // 黄色火焰
-        }
-    }
 }
 
 // 设置状态并更新大小

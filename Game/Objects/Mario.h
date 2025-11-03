@@ -45,6 +45,8 @@ public:
     void HandleInput(BOOL left, BOOL right, BOOL jump);
     // 新增：使用屏幕坐标绘制
     void DrawAt(CDC* pDC, int screenX, int screenY);
+    // 在CMario类中添加这个方法声明
+    void DrawWithSprite(CDC* pDC, int screenX, int screenY);
     // 新增碰撞相关方法
     void  CheckCollisions(const std::vector<CRect>& platforms);
     CRect GetFeetRect() const;    // 获取脚部碰撞区域

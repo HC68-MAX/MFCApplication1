@@ -52,13 +52,6 @@ void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap, int x, int y,
     memDC.DeleteDC();
 }
 
-void CSpriteRenderer::DrawSpriteFrame(CDC* pDC, CBitmap* pBitmap, int x, int y,
-    int frameX, int frameY, int frameWidth, int frameHeight,
-    BOOL transparent, COLORREF transparentColor)
-{
-    DrawSprite(pDC, pBitmap, x, y, frameX, frameY, frameWidth, frameHeight, transparent, transparentColor);
-}
-
 BOOL CSpriteRenderer::GetBitmapSize(CBitmap* pBitmap, CSize& size)
 {
     if (!pBitmap) return FALSE;
