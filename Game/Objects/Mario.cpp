@@ -62,15 +62,20 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
     if (!m_bVisible) return;
 
     CResourceManager& resMgr = CResourceManager::GetInstance();
-    CString textureName;
+    CBitmap* pBitmap = resMgr.GetBitmap(_T("TilesetMain"));
+
+    if (!pBitmap) {
+        // 如果没有贴图，使用几何绘制
+        DrawWithGeometry(pDC);
+        return;
+    }
+
     SSpriteCoord spriteCoord;
 
-    // 根据状态选择贴图
+    // 根据状态和动作选择精灵
     switch (m_State)
     {
     case MarioState::SMALL:
-        textureName = _T("MarioSmall");
-        // 根据动作选择精灵坐标
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_SMALL_JUMP_RIGHT;
         else if (m_bIsMoving)
@@ -82,7 +87,6 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
         break;
 
     case MarioState::BIG:
-        textureName = _T("MarioBig");
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
         else if (m_bIsMoving)
@@ -94,7 +98,6 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
         break;
 
     case MarioState::FIRE:
-        textureName = _T("MarioFire");
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
         else if (m_bIsMoving)
@@ -106,22 +109,11 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
         break;
     }
 
-    // 获取贴图
-    CBitmap* pBitmap = resMgr.GetBitmap(textureName);
-    if (pBitmap)
-    {
-        // 使用精灵渲染器绘制
-        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-            spriteCoord.x, spriteCoord.y,
-            spriteCoord.width, spriteCoord.height, TRUE);
-    }
-    else
-    {
-        // 备用：如果没有贴图，使用几何绘制
-        DrawWithGeometry(pDC);
-    }
+    // 直接使用精灵渲染器绘制
+    CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
+        spriteCoord.x, spriteCoord.y,
+        m_nWidth, m_nHeight, TRUE);
 }
-
 // 修改现有的DrawAt方法，使用新的精灵绘制方法
 void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
 {

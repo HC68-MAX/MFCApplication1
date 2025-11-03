@@ -77,22 +77,26 @@ void CBrick::DrawWithSprite(CDC* pDC, int screenX, int screenY)
     if (!m_bVisible) return;
 
     CResourceManager& resMgr = CResourceManager::GetInstance();
-    CBitmap* pBitmap = nullptr;
+    CBitmap* pBitmap = resMgr.GetBitmap(_T("TilesetMain"));
+
+    if (!pBitmap) {
+        // 备用绘制
+        Draw(pDC);
+        return;
+    }
+
     SSpriteCoord spriteCoord;
 
-    // 根据砖块类型选择贴图和精灵坐标
+    // 根据砖块类型选择精灵
     switch (m_Type)
     {
     case NORMAL:
-        pBitmap = resMgr.GetBitmap(_T("Brick"));
         spriteCoord = CSpriteConfig::BRICK_NORMAL;
         break;
 
     case QUESTION:
         if (!m_bIsEmpty)
         {
-            pBitmap = resMgr.GetBitmap(_T("QuestionBlock"));
-            // 根据是否被击中显示不同的问号砖块状态
             if (m_bIsHit && m_nHitTimer < 0.1f)
                 spriteCoord = CSpriteConfig::BRICK_QUESTION_HIT;
             else
@@ -100,39 +104,18 @@ void CBrick::DrawWithSprite(CDC* pDC, int screenX, int screenY)
         }
         else
         {
-            // 被顶过的问号砖块显示为硬砖块
-            pBitmap = resMgr.GetBitmap(_T("HardBrick"));
             spriteCoord = CSpriteConfig::BRICK_HARD;
         }
         break;
 
     case HARD:
-        pBitmap = resMgr.GetBitmap(_T("HardBrick"));
         spriteCoord = CSpriteConfig::BRICK_HARD;
         break;
     }
-
-    if (pBitmap)
-    {
-        // 使用精灵渲染器绘制
-        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-            spriteCoord.x, spriteCoord.y,
-            spriteCoord.width, spriteCoord.height, TRUE);
-    }
-    else
-    {
-        // 备用：如果没有贴图，使用颜色绘制
-        COLORREF color = RGB(128, 128, 128);
-        switch (m_Type)
-        {
-        case NORMAL: color = RGB(180, 90, 40); break;
-        case QUESTION: color = m_bIsEmpty ? RGB(120, 120, 120) : RGB(255, 200, 0); break;
-        case HARD: color = RGB(120, 120, 120); break;
-        }
-        pDC->FillSolidRect(screenX, screenY, m_nWidth, m_nHeight, color);
-        pDC->Draw3dRect(screenX, screenY, m_nWidth, m_nHeight,
-            RGB(80, 80, 80), RGB(200, 200, 200));
-    }
+    // 直接使用精灵渲染器绘制
+    CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
+        spriteCoord.x, spriteCoord.y,
+        m_nWidth, m_nHeight, TRUE);
 }
 // 被从下方撞击
 void CBrick::OnHitFromBelow()

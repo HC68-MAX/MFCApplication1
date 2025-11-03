@@ -81,6 +81,12 @@
     <ClInclude Include="Game\Core\SpriteConfig.h">
       <Filter>Game\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Core\ResourceIDs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Core\TextureManager.h">
+      <Filter>Game\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication1.cpp">
@@ -125,6 +131,9 @@
     <ClCompile Include="Game\Core\SpriteConfig.cpp">
       <Filter>Game\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Core\TextureManager.cpp">
+      <Filter>Game\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MFCApplication1.rc">
@@ -147,6 +156,9 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\Toolbar.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Game\Resources\tile_set.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

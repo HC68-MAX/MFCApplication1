@@ -185,9 +185,11 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="Game\Core\GameConfig.h" />
+    <ClInclude Include="Game\Core\ResourceIDs.h" />
     <ClInclude Include="Game\Core\ResourceManager.h" />
     <ClInclude Include="Game\Core\SpriteConfig.h" />
     <ClInclude Include="Game\Core\SpriteRenderer.h" />
+    <ClInclude Include="Game\Core\TextureManager.h" />
     <ClInclude Include="Game\Map\TileMap.h" />
     <ClInclude Include="Game\Objects\Brick.h" />
     <ClInclude Include="Game\Objects\GameObject.h" />
@@ -212,6 +214,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Game\Core\SpriteRenderer.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Game\Core\TextureManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Game\Map\TileMap.cpp">
@@ -248,6 +253,7 @@
     <None Include="res\MFCApplication1.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Game\Resources\tile_set.bmp" />
     <Image Include="res\MFCApplication1.ico" />
     <Image Include="res\MFCApplication1Doc.ico" />
     <Image Include="res\Toolbar.bmp" />

@@ -7,7 +7,7 @@ class CGameConfig
 {
 public:
     // 贴图尺寸
-    static const int TILE_SIZE = 32;           // 瓦片基本尺寸
+    static const int TILE_SIZE = 16;           // 瓦片基本尺寸
     static const int MARIO_SMALL_WIDTH = 32;   // 小马里奥宽度
     static const int MARIO_SMALL_HEIGHT = 48;  // 小马里奥高度
     static const int MARIO_BIG_WIDTH = 48;     // 大马里奥宽度  
@@ -27,7 +27,7 @@ public:
     static const int WORLD_HEIGHT = 600;       // 世界高度
     static const int FPS = 60;                 // 目标帧率
     static const int TILE_MAP_WIDTH = 75;      // 瓦片地图宽度 (2400/32=75)
-    static const int TILE_MAP_HEIGHT = 20;     // 瓦片地图高度 (600/32=18.75，向上取整)
+    static const int TILE_MAP_HEIGHT = 15;     // 瓦片地图高度 (600/32=18.75，向上取整)
 
     // 物理参数
     static const float GRAVITY;                // 重力

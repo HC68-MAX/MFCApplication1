@@ -3,6 +3,7 @@
 #include "TileMap.h"
 #include "../Core/ResourceManager.h"
 #include "../Core/SpriteRenderer.h"
+#include "../Core/SpriteConfig.h"
 CTileMap::CTileMap()
     : m_nWidth(0), m_nHeight(0), m_nTileSize(0)
 {
@@ -53,8 +54,9 @@ int CTileMap::GetTile(int x, int y) const
 
 void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
 {
-    // 这里先绘制简单的颜色块，后面会替换为贴图
     CResourceManager& resMgr = CResourceManager::GetInstance();
+    CBitmap* pBitmap = resMgr.GetBitmap(_T("TilesetMain"));
+
     for (int y = 0; y < m_nHeight; y++)
     {
         for (int x = 0; x < m_nWidth; x++)
@@ -72,37 +74,37 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
                     continue;
                 }
 
-                // 根据瓦片ID选择贴图
-                CString textureName;
+                SSpriteCoord spriteCoord;
+
+                // 根据瓦片ID选择贴图坐标
                 switch (tileID)
                 {
                 case 1: // 地面
-                    textureName = _T("Ground");
+                    spriteCoord = CSpriteConfig::GROUND;
                     break;
                 case 2: // 砖块
-                    textureName = _T("Brick");
+                    spriteCoord = CSpriteConfig::BRICK_NORMAL;
                     break;
                 case 3: // 问号砖块
-                    textureName = _T("QuestionBlock");
+                    spriteCoord = CSpriteConfig::BRICK_QUESTION;
                     break;
                 case 4: // 硬砖块
-                    textureName = _T("HardBrick");
+                    spriteCoord = CSpriteConfig::BRICK_HARD;
                     break;
                 case 5: // 水管
-                    textureName = _T("Pipe");
+                    spriteCoord = CSpriteConfig::PIPE_BODY_LEFT; // 临时使用
                     break;
                 default:
-                    textureName = _T("Brick"); // 默认
+                    spriteCoord = CSpriteConfig::BRICK_NORMAL; // 默认
                     break;
                 }
 
-                // 获取贴图并绘制
-                CBitmap* pBitmap = resMgr.GetBitmap(textureName);
                 if (pBitmap)
                 {
-                    // 使用精灵渲染器绘制贴图
+                    // 使用精灵渲染器绘制
                     CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-                        0, 0, m_nTileSize, m_nTileSize, TRUE);
+                        spriteCoord.x, spriteCoord.y,
+                        m_nTileSize, m_nTileSize, TRUE);
                 }
                 else
                 {

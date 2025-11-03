@@ -12,7 +12,7 @@
 
 #include "MFCApplication1Doc.h"
 #include "MFCApplication1View.h"
-
+#include "Game/Core/ResourceIDs.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -270,66 +270,39 @@ void CMFCApplication1View::InitializeResources()
 
     CResourceManager& resMgr = CResourceManager::GetInstance();
 
-    // 加载马里奥贴图
-    TRACE(_T("加载马里奥贴图...\n"));
-    BOOL marioSmall = resMgr.LoadBitmap(IDB_MARIO_SMALL, _T("MarioSmall"));
-    BOOL marioBig = resMgr.LoadBitmap(IDB_MARIO_BIG, _T("MarioBig"));
-    BOOL marioFire = resMgr.LoadBitmap(IDB_MARIO_FIRE, _T("MarioFire"));
+    // 使用新的资源加载方法
+    BOOL success = resMgr.LoadGameResources();
 
-    TRACE(_T("马里奥贴图加载: 小=%d, 大=%d, 火=%d\n"), marioSmall, marioBig, marioFire);
+    TRACE(_T("资源初始化: %s\n"), success ? _T("成功") : _T("失败"));
 
-    // 加载地图贴图
-    TRACE(_T("加载地图贴图...\n"));
-    BOOL brick = resMgr.LoadBitmap(IDB_BRICK, _T("Brick"));
-    BOOL question = resMgr.LoadBitmap(IDB_QUESTION_BLOCK, _T("QuestionBlock"));
-    BOOL hardBrick = resMgr.LoadBitmap(IDB_HARD_BRICK, _T("HardBrick"));
-    BOOL pipe = resMgr.LoadBitmap(IDB_PIPE, _T("Pipe"));
-    BOOL ground = resMgr.LoadBitmap(IDB_GROUND, _T("Ground"));
-    BOOL background = resMgr.LoadBitmap(IDB_BACKGROUND, _T("Background"));
-
-    TRACE(_T("地图贴图加载: 砖块=%d, 问号=%d, 硬砖=%d, 水管=%d, 地面=%d, 背景=%d\n"),
-        brick, question, hardBrick, pipe, ground, background);
-
-    // 测试获取贴图
+    // 测试获取贴图 - 使用新的名称
     TRACE(_T("测试获取贴图...\n"));
-    CBitmap* testBrick = resMgr.GetBitmap(_T("Brick"));
-    TRACE(_T("砖块贴图指针: %p\n"), testBrick);
+    CBitmap* testMain = resMgr.GetBitmap(_T("TilesetMain"));
+    TRACE(_T("主贴图集: %p\n"), testMain);
 
-    TRACE(_T("资源初始化完成\n"));
+    if (testMain)
+    {
+        BITMAP bm;
+        testMain->GetBitmap(&bm);
+        TRACE(_T("贴图尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
+       
+    }
+    else
+    {
+        TRACE(_T("错误: 无法获取主贴图集\n"));
+       
+    }
 }
 // 修改RenderGame方法
 void CMFCApplication1View::RenderGame(CDC* pDC)
 {
-    // 使用贴图绘制背景
-    CResourceManager& resMgr = CResourceManager::GetInstance();
-    CBitmap* pBgBitmap = resMgr.GetBitmap(_T("Background"));
-
-    if (pBgBitmap)
-    {
-        // 平铺背景贴图
-        CSize bgSize;
-        if (CSpriteRenderer::GetBitmapSize(pBgBitmap, bgSize))
-        {
-            for (int y = 0; y < m_nScreenHeight; y += bgSize.cy)
-            {
-                for (int x = 0; x < m_nScreenWidth; x += bgSize.cx)
-                {
-                    CSpriteRenderer::DrawSprite(pDC, pBgBitmap, x, y,
-                        0, 0, bgSize.cx, bgSize.cy, FALSE);
-                }
-            }
-        }
-    }
-    else
-    {
-        // 备用：单色背景
-        pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(135, 206, 235));
-    }
+    // 绘制背景 - 简单的天空色
+    pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(135, 206, 235));
 
     // 使用瓦片地图绘制关卡
     m_TileMap.Draw(pDC, m_nCameraX, m_nCameraY);
 
-    // 绘制独立的游戏对象（如果有的话）
+    // 绘制独立的游戏对象
     for (auto& brick : m_Bricks)
     {
         int screenX = brick.GetX() - m_nCameraX;
@@ -344,7 +317,7 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
         pipe.DrawWithSprite(pDC, screenX, screenY);
     }
 
-    // 绘制马里奥（使用精灵渲染器）
+    // 绘制马里奥
     int marioScreenX = m_Mario.GetX() - m_nCameraX;
     int marioScreenY = m_Mario.GetY() - m_nCameraY;
     m_Mario.DrawWithSprite(pDC, marioScreenX, marioScreenY);

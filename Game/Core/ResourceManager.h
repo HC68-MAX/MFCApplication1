@@ -5,20 +5,15 @@
 #include <afxwin.h>
 #include <map>
 #include <string>
-#define IDB_MARIO_SMALL                130
-#define IDB_MARIO_BIG                  131
-#define IDB_MARIO_FIRE                 132
-#define IDB_BRICK                      133
-#define IDB_QUESTION_BLOCK             134
-#define IDB_HARD_BRICK                 135
-#define IDB_PIPE                       136
-#define IDB_GROUND                     137
-#define IDB_BACKGROUND                 138
+#include "ResourceIDs.h"
 class CResourceManager
 {
 public:
     // 单例模式访问
     static CResourceManager& GetInstance();
+
+    // 新增：加载游戏所需的所有资源
+    BOOL LoadGameResources();
 
     // 资源加载
     BOOL LoadBitmap(UINT resourceID, const CString& resourceName);
