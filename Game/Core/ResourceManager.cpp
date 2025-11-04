@@ -21,8 +21,14 @@ BOOL CResourceManager::LoadGameResources()
     BOOL success = TRUE;
 
     // 加载主贴图集
-    success &= LoadBitmap(IDB_TILESET_MAIN, _T("TilesetMain"));
+    success = LoadBitmap(IDB_TILESET_MAIN, _T("TilesetMain"));
     TRACE(_T("主贴图集加载: %s\n"), success ? _T("成功") : _T("失败"));
+
+    if (!success) {
+        TRACE(_T("错误: 无法加载主贴图集!\n"));
+        // 创建占位符
+        CreatePlaceholderBitmap(_T("TilesetMain"), RGB(255, 0, 0)); // 红色占位符
+    }
 
     // 测试获取贴图
     CBitmap* pTest = GetBitmap(_T("TilesetMain"));
@@ -31,6 +37,10 @@ BOOL CResourceManager::LoadGameResources()
         BITMAP bm;
         pTest->GetBitmap(&bm);
         TRACE(_T("贴图尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
+    }
+    else
+    {
+        TRACE(_T("错误: 获取贴图失败!\n"));
     }
 
     return success;
@@ -61,6 +71,10 @@ BOOL CResourceManager::LoadBitmap(UINT resourceID, const CString& resourceName)
 
 CBitmap* CResourceManager::GetBitmap(const CString& resourceName)
 {
+    if (resourceName == _T("Brick")) {
+        TRACE(_T("注意: 将Brick请求重定向到TilesetMain\n"));
+        return GetBitmap(_T("TilesetMain"));
+    }
     auto it = m_Bitmaps.find(resourceName);
     if (it != m_Bitmaps.end())
     {

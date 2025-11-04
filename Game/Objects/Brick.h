@@ -46,4 +46,5 @@ private:
     BOOL m_bIsHit;
     float m_nHitTimer;
     int m_nOriginalY;
+
 };

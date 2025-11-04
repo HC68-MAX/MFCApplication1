@@ -2,8 +2,11 @@
 #include <afxwin.h>
 #include "SpriteRenderer.h"
 
-void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap, int x, int y,
-    int srcX, int srcY, int width, int height,
+// 新增方法：支持分别指定源和目标尺寸
+  // 保持原有方法（不修改签名）
+void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap,
+    int destX, int destY, int destWidth, int destHeight,
+    int srcX, int srcY, int srcWidth, int srcHeight,
     BOOL transparent, COLORREF transparentColor)
 {
     if (!pBitmap || !pDC)
@@ -22,36 +25,33 @@ void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap, int x, int y,
 
     CBitmap* pOldBitmap = memDC.SelectObject(pBitmap);
 
-    // 获取位图尺寸
-    BITMAP bmpInfo;
-    if (!pBitmap->GetBitmap(&bmpInfo))
-    {
-        TRACE(_T("DrawSprite: 无法获取位图信息\n"));
-        memDC.SelectObject(pOldBitmap);
-        memDC.DeleteDC();
-        return;
-    }
-
-    if (width == -1) width = bmpInfo.bmWidth;
-    if (height == -1) height = bmpInfo.bmHeight;
-
     if (transparent)
     {
-        // 使用 TransparentBlt 进行透明绘制
-        pDC->TransparentBlt(x, y, width, height,
-            &memDC, srcX, srcY, width, height,
+        // 使用 TransparentBlt 进行透明绘制，支持拉伸
+        pDC->TransparentBlt(destX, destY, destWidth, destHeight,
+            &memDC, srcX, srcY, srcWidth, srcHeight,
             transparentColor);
     }
     else
     {
-        // 普通绘制
-        pDC->BitBlt(x, y, width, height, &memDC, srcX, srcY, SRCCOPY);
+        // 使用 StretchBlt 进行拉伸绘制
+        pDC->StretchBlt(destX, destY, destWidth, destHeight,
+            &memDC, srcX, srcY, srcWidth, srcHeight, SRCCOPY);
     }
 
     memDC.SelectObject(pOldBitmap);
     memDC.DeleteDC();
 }
 
+// 保持原有方法
+void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap, int x, int y,
+    int srcX, int srcY, int width, int height,
+    BOOL transparent, COLORREF transparentColor)
+{
+    // 调用新方法，源和目标尺寸相同
+    DrawSprite(pDC, pBitmap, x, y, width, height,
+        srcX, srcY, width, height, transparent, transparentColor);
+}
 BOOL CSpriteRenderer::GetBitmapSize(CBitmap* pBitmap, CSize& size)
 {
     if (!pBitmap) return FALSE;

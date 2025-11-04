@@ -163,57 +163,34 @@ void CMFCApplication1View::InitializeTileMap()
     TRACE(_T("地图加载结果: %s\n"), result ? _T("成功") : _T("失败"));
     TRACE(_T("地图尺寸: %dx%d, 瓦片大小: %d\n"),
         m_TileMap.GetWidth(), m_TileMap.GetHeight(), m_TileMap.GetTileSize());
-
-    // 创建地面 - 放在第10行（从0开始）
-    // 这样地面在Y=320像素（10*32=320）
-     // 创建地面 - 使用全局配置计算位置
-    int groundLevel = CGameConfig::TILE_MAP_HEIGHT - 5; // 离底部5行的位置
-
-    for (int x = 0; x < CGameConfig::TILE_MAP_WIDTH; x++)
-    {
-        for (int y = groundLevel; y < CGameConfig::TILE_MAP_HEIGHT; y++)
-        {
-            m_TileMap.SetTile(x, y, 1, TRUE, _T("ground"));
-        }
+    // 创建一些测试砖块
+    for (int i = 0; i < 5; i++) {
+        CBrick brick(500 + i * 35, 200);  // 在屏幕可见位置创建
+        brick.SetBrickType(CBrick::NORMAL);
+        m_Bricks.push_back(brick);
+        TRACE(_T("创建砖块 %d: 位置(%d, %d)\n"), i, 500 + i * 35, 200);
     }
 
-    // 设置马里奥初始位置在地面上方
-    int marioStartX = 5 * CGameConfig::TILE_SIZE;
-    int marioStartY = (groundLevel - 2) * CGameConfig::TILE_SIZE;
-    m_Mario.SetPosition(marioStartX, marioStartY);
+    // 创建问号砖块
+    CBrick questionBrick(400, 150);
+    questionBrick.SetBrickType(CBrick::QUESTION);
+    m_Bricks.push_back(questionBrick);
+    TRACE(_T("创建问号砖块: 位置(%d, %d)\n"), 400, 150);
 
-    // 创建明显的测试平台 - 使用大瓦片
+    // 创建硬砖块
+    CBrick hardBrick(450, 150);
+    hardBrick.SetBrickType(CBrick::HARD);
+    m_Bricks.push_back(hardBrick);
+    TRACE(_T("创建硬砖块: 位置(%d, %d)\n"), 450, 150);
 
-    // 平台1 - 在Y=7行（224像素）
-    for (int x = 3; x < 8; x++)
-    {
-        m_TileMap.SetTile(x, 7, 2, TRUE, _T("brick"));
-    }
+    // 创建水管
+    CPipe pipe(600, 300, 96);  // 位置(600,300)，高度96
+    m_Pipes.push_back(pipe);
+    TRACE(_T("创建水管: 位置(%d, %d), 高度%d\n"), 600, 300, 96);
 
-    // 平台2 - 在Y=5行（160像素）
-    for (int x = 10; x < 15; x++)
-    {
-        m_TileMap.SetTile(x, 5, 2, TRUE, _T("brick"));
-    }
+    TRACE(_T("独立游戏对象创建完成: 砖块=%d, 水管=%d\n"), m_Bricks.size(), m_Pipes.size());
 
-    // 问号砖块 - 在Y=3行（96像素）
-    m_TileMap.SetTile(7, 3, 3, TRUE, _T("question"));
-    m_TileMap.SetTile(8, 3, 3, TRUE, _T("question"));
-
-    // 硬砖块 - 在Y=2行（64像素）
-    for (int x = 12; x < 14; x++)
-    {
-        m_TileMap.SetTile(x, 2, 4, TRUE, _T("hard_brick"));
-    }
-
-    // 水管 - 2x3个瓦片
-    m_TileMap.SetTile(20, 7, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(20, 8, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(20, 9, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(21, 7, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(21, 8, 5, TRUE, _T("pipe"));
-    m_TileMap.SetTile(21, 9, 5, TRUE, _T("pipe"));
-
+   
     TRACE(_T("=== 瓦片地图初始化完成 ===\n"));
 }
 // 新增：更新摄像机
@@ -314,6 +291,7 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
     {
         int screenX = pipe.GetX() - m_nCameraX;
         int screenY = pipe.GetY() - m_nCameraY;
+        TRACE(_T("运行Pipe"));
         pipe.DrawWithSprite(pDC, screenX, screenY);
     }
 
@@ -602,7 +580,7 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
 
         // 贴图系统状态
         CResourceManager& resMgr = CResourceManager::GetInstance();
-        CBitmap* testBrick = resMgr.GetBitmap(_T("Brick"));
+        CBitmap* testBrick = resMgr.GetBitmap(_T("TilesetMain"));
         strInfo.Format(_T("贴图系统: 正常  砖块贴图: %p"), testBrick);
         pDC->SetTextColor(RGB(0, 255, 0)); // 绿色表示正常
         pDC->TextOut(10, 280, strInfo);
