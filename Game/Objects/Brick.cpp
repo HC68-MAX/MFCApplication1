@@ -74,46 +74,53 @@ void CBrick::Draw(CDC* pDC)
 // 新增：使用精灵渲染器绘制
 void CBrick::DrawWithSprite(CDC* pDC, int screenX, int screenY)
 {
-   // if (!m_bVisible) return;
+    if (!m_bVisible) return;
+
+    TRACE(_T("绘制砖块 - 屏幕位置: (%d, %d), 世界位置: (%d, %d)\n"),
+        screenX, screenY, m_nX, m_nY);
 
     CResourceManager& resMgr = CResourceManager::GetInstance();
     CBitmap* pBitmap = resMgr.GetBitmap(_T("TilesetMain"));
-    TRACE(_T("Brick构造函数被调用 - 位置: (%d, %d)\n"), screenX + m_nWidth, screenY + m_nHeight);
+
     if (!pBitmap) {
-        // 备用绘制
-        CBrush brush(RGB(255, 0, 0)); // 红色作为备用
+        TRACE(_T("错误: TilesetMain 贴图未找到!\n"));
+        // 使用纯色绘制作为备用
+        CBrush brush(RGB(255, 0, 0));
         pDC->FillRect(CRect(screenX, screenY, screenX + m_nWidth, screenY + m_nHeight), &brush);
         return;
     }
 
-    // 硬编码测试：假设我们想要从(0,0)位置裁剪16x16，然后绘制到32x32
-    int srcX = 0;   // 贴图集中的X坐标
-    int srcY = 0;   // 贴图集中的Y坐标  
-    int srcWidth = 16;  // 要裁剪的宽度
-    int srcHeight = 16; // 要裁剪的高度
+    SSpriteCoord spriteCoord;
 
-    int destX = screenX;     // 屏幕X坐标
-    int destY = screenY;     // 屏幕Y坐标
-    int destWidth = 32;      // 绘制宽度
-    int destHeight = 32;     // 绘制高度
+    // 根据砖块类型选择精灵
+    switch (m_Type)
+    {
+    case NORMAL:
+        spriteCoord = CSpriteConfig::BRICK_NORMAL;
+        break;
+    case QUESTION:
+        if (!m_bIsEmpty) {
+            spriteCoord = CSpriteConfig::BRICK_QUESTION;
+        }
+        else {
+            spriteCoord = CSpriteConfig::BRICK_HARD;
+        }
+        break;
+    case HARD:
+        spriteCoord = CSpriteConfig::BRICK_HARD;
+        break;
+    }
 
-    // 使用StretchBlt直接测试
-    CDC memDC;
-    memDC.CreateCompatibleDC(pDC);
-    CBitmap* pOldBitmap = memDC.SelectObject(pBitmap);
-
-    // 直接拉伸绘制
-    pDC->StretchBlt(destX, destY, destWidth, destHeight,
-        &memDC, srcX, srcY, srcWidth, srcHeight,
-        SRCCOPY);
-    TRACE(_T("Brick Draw - Screen: (%d, %d), Size: (%d, %d)\n"),
-        screenX, screenY, m_nWidth, m_nHeight);
-
-    SSpriteCoord spriteCoord = CSpriteConfig::BRICK_NORMAL;
-    TRACE(_T("Sprite Coord - Source: (%d, %d), Size: (%d, %d)\n"),
+    TRACE(_T("使用精灵坐标: (%d, %d), 尺寸: (%d, %d)\n"),
         spriteCoord.x, spriteCoord.y, spriteCoord.width, spriteCoord.height);
 
-    memDC.SelectObject(pOldBitmap);
+    // 关键：确保使用正确的源尺寸和目标尺寸
+    CSpriteRenderer::DrawSprite(pDC, pBitmap,
+        screenX, screenY,                    // 目标位置
+        CGameConfig::BRICK_WIDTH, CGameConfig::BRICK_HEIGHT, // 目标尺寸
+        spriteCoord.x, spriteCoord.y,        // 源位置
+        spriteCoord.width, spriteCoord.height, // 源尺寸
+        TRUE);
 }
 // 被从下方撞击
 void CBrick::OnHitFromBelow()

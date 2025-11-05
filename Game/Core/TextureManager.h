@@ -5,7 +5,7 @@
 #include "SpriteConfig.h"
 #include "ResourceManager.h"
 #include "SpriteRenderer.h"
-
+#include "GameConfig.h"
 class CTextureManager
 {
 public:

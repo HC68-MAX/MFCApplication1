@@ -43,15 +43,6 @@ void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap,
     memDC.DeleteDC();
 }
 
-// 保持原有方法
-void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap, int x, int y,
-    int srcX, int srcY, int width, int height,
-    BOOL transparent, COLORREF transparentColor)
-{
-    // 调用新方法，源和目标尺寸相同
-    DrawSprite(pDC, pBitmap, x, y, width, height,
-        srcX, srcY, width, height, transparent, transparentColor);
-}
 BOOL CSpriteRenderer::GetBitmapSize(CBitmap* pBitmap, CSize& size)
 {
     if (!pBitmap) return FALSE;

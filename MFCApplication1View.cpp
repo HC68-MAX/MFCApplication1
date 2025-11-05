@@ -147,50 +147,22 @@ void CMFCApplication1View::OnDestroy()
     CView::OnDestroy();
 }
 // 新增：初始化瓦片地图
+// 修改 InitializeTileMap 方法
 void CMFCApplication1View::InitializeTileMap()
 {
-    // 明确设置新的瓦片大小 - 32x32像素
     TRACE(_T("=== 开始初始化瓦片地图 ===\n"));
 
-    // 创建一个小一点的测试地图，确保变化明显
-    // 地图尺寸：30x15个瓦片，每个瓦片32x32像素
-        // 使用全局配置的地图尺寸
-    BOOL result = m_TileMap.LoadMap(
-        CGameConfig::TILE_MAP_WIDTH,
-        CGameConfig::TILE_MAP_HEIGHT,
-        CGameConfig::TILE_SIZE
-    );
+    // 使用新的 LoadLevel 方法加载第一关
+    BOOL result = m_TileMap.LoadLevel(1);
     TRACE(_T("地图加载结果: %s\n"), result ? _T("成功") : _T("失败"));
     TRACE(_T("地图尺寸: %dx%d, 瓦片大小: %d\n"),
         m_TileMap.GetWidth(), m_TileMap.GetHeight(), m_TileMap.GetTileSize());
-    // 创建一些测试砖块
-    for (int i = 0; i < 5; i++) {
-        CBrick brick(500 + i * 35, 200);  // 在屏幕可见位置创建
-        brick.SetBrickType(CBrick::NORMAL);
-        m_Bricks.push_back(brick);
-        TRACE(_T("创建砖块 %d: 位置(%d, %d)\n"), i, 500 + i * 35, 200);
-    }
 
-    // 创建问号砖块
-    CBrick questionBrick(400, 150);
-    questionBrick.SetBrickType(CBrick::QUESTION);
-    m_Bricks.push_back(questionBrick);
-    TRACE(_T("创建问号砖块: 位置(%d, %d)\n"), 400, 150);
+    // 设置马里奥初始位置
+    int marioStartX = 5 * CGameConfig::TILE_SIZE;
+    int marioStartY = 200; // 适当的位置
+    m_Mario.SetPosition(marioStartX, marioStartY);
 
-    // 创建硬砖块
-    CBrick hardBrick(450, 150);
-    hardBrick.SetBrickType(CBrick::HARD);
-    m_Bricks.push_back(hardBrick);
-    TRACE(_T("创建硬砖块: 位置(%d, %d)\n"), 450, 150);
-
-    // 创建水管
-    CPipe pipe(600, 300, 96);  // 位置(600,300)，高度96
-    m_Pipes.push_back(pipe);
-    TRACE(_T("创建水管: 位置(%d, %d), 高度%d\n"), 600, 300, 96);
-
-    TRACE(_T("独立游戏对象创建完成: 砖块=%d, 水管=%d\n"), m_Bricks.size(), m_Pipes.size());
-
-   
     TRACE(_T("=== 瓦片地图初始化完成 ===\n"));
 }
 // 新增：更新摄像机
@@ -254,15 +226,21 @@ void CMFCApplication1View::InitializeResources()
 
     // 测试获取贴图 - 使用新的名称
     TRACE(_T("测试获取贴图...\n"));
-    CBitmap* testMain = resMgr.GetBitmap(_T("TilesetMain"));
+    CBitmap* testMain = resMgr.GetBitmap(CSpriteConfig::TILESET_MAIN);
+    CBitmap* testMario = resMgr.GetBitmap(CSpriteConfig::TILESET_MARIO);
     TRACE(_T("主贴图集: %p\n"), testMain);
-
+    TRACE(_T("马里奥贴图集: %p\n"), testMario);
     if (testMain)
     {
         BITMAP bm;
         testMain->GetBitmap(&bm);
         TRACE(_T("贴图尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
        
+    }
+    if (testMario) {
+        BITMAP bm;
+        testMario->GetBitmap(&bm);
+        TRACE(_T("马里奥贴图集尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
     }
     else
     {
@@ -271,29 +249,14 @@ void CMFCApplication1View::InitializeResources()
     }
 }
 // 修改RenderGame方法
+// 修改 RenderGame 方法
 void CMFCApplication1View::RenderGame(CDC* pDC)
 {
     // 绘制背景 - 简单的天空色
     pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(135, 206, 235));
 
-    // 使用瓦片地图绘制关卡
+    // 使用瓦片地图绘制整个关卡（包括瓦片和独立对象）
     m_TileMap.Draw(pDC, m_nCameraX, m_nCameraY);
-
-    // 绘制独立的游戏对象
-    for (auto& brick : m_Bricks)
-    {
-        int screenX = brick.GetX() - m_nCameraX;
-        int screenY = brick.GetY() - m_nCameraY;
-        brick.DrawWithSprite(pDC, screenX, screenY);
-    }
-
-    for (auto& pipe : m_Pipes)
-    {
-        int screenX = pipe.GetX() - m_nCameraX;
-        int screenY = pipe.GetY() - m_nCameraY;
-        TRACE(_T("运行Pipe"));
-        pipe.DrawWithSprite(pDC, screenX, screenY);
-    }
 
     // 绘制马里奥
     int marioScreenX = m_Mario.GetX() - m_nCameraX;
@@ -346,6 +309,7 @@ void CMFCApplication1View::OnTimer(UINT_PTR nIDEvent)
 }
 
 // 更新游戏逻辑
+// 修改 UpdateGame 方法
 void CMFCApplication1View::UpdateGame()
 {
     // 将输入状态传递给马里奥
@@ -357,8 +321,8 @@ void CMFCApplication1View::UpdateGame()
     // 更新摄像机
     UpdateCamera();
 
-    // 使用瓦片地图进行碰撞检测（使用世界坐标）
-    std::vector<CRect> solidObjects = m_TileMap.GetSolidTileRects();
+    // 使用瓦片地图进行碰撞检测（现在包括独立对象）
+    std::vector<CRect> solidObjects = m_TileMap.GetAllCollisionRects();
     m_Mario.CheckCollisions(solidObjects);
 }
 
@@ -542,6 +506,13 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
     // 调试模式特定信息
     if (m_bDebugMode)
     {
+        // 实体统计 - 从 TileMap 获取对象数量
+        CString strInfo;
+        strInfo.Format(_T("实体数量: 砖块(%d)  水管(%d)"),
+            m_TileMap.GetBricks().size(), m_TileMap.GetPipes().size());
+        pDC->SetTextColor(RGB(255, 255, 255));
+        pDC->TextOut(10, 200, strInfo);
+
         // 调试模式标题
         pDC->SetTextColor(RGB(255, 255, 0)); // 黄色
         pDC->TextOut(10, 100, _T("=== 调试模式 ==="));

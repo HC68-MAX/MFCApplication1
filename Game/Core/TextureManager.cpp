@@ -20,7 +20,7 @@ void CTextureManager::DrawSprite(CDC* pDC, const SSpriteCoord& spriteCoord,
     if (pBitmap)
     {
         CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-            spriteCoord.x, spriteCoord.y,
+            CGameConfig::TILE_SIZE, CGameConfig::TILE_SIZE, spriteCoord.x, spriteCoord.y,
             spriteCoord.width, spriteCoord.height, TRUE);
     }
     else
@@ -42,18 +42,6 @@ void CTextureManager::DrawSpriteScaled(CDC* pDC, const SSpriteCoord& spriteCoord
     CResourceManager& resMgr = CResourceManager::GetInstance();
     CBitmap* pBitmap = resMgr.GetBitmap(spritesheetName);
 
-    if (pBitmap)
-    {
-        // 注意：这里需要扩展SpriteRenderer来支持缩放
-        // 暂时使用普通绘制
-        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-            spriteCoord.x, spriteCoord.y,
-            destWidth, destHeight, TRUE);
-    }
-    else
-    {
-        pDC->FillSolidRect(screenX, screenY, destWidth, destHeight, RGB(255, 0, 255));
-    }
 }
 
 // 自动选择精灵表并绘制

@@ -253,6 +253,7 @@
     <None Include="res\MFCApplication1.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Game\Resources\mario_bros.bmp" />
     <Image Include="Game\Resources\tile_set.bmp" />
     <Image Include="res\MFCApplication1.ico" />
     <Image Include="res\MFCApplication1Doc.ico" />

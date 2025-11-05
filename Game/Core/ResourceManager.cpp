@@ -24,6 +24,10 @@ BOOL CResourceManager::LoadGameResources()
     success = LoadBitmap(IDB_TILESET_MAIN, _T("TilesetMain"));
     TRACE(_T("主贴图集加载: %s\n"), success ? _T("成功") : _T("失败"));
 
+    // 加载马里奥贴图集
+    success &= LoadBitmap(IDB_MARIO_SPRITES, _T("MarioSprites"));
+    TRACE(_T("马里奥贴图集加载: %s\n"), success ? _T("成功") : _T("失败"));
+
     if (!success) {
         TRACE(_T("错误: 无法加载主贴图集!\n"));
         // 创建占位符
@@ -42,7 +46,14 @@ BOOL CResourceManager::LoadGameResources()
     {
         TRACE(_T("错误: 获取贴图失败!\n"));
     }
-
+    // 测试获取马里奥贴图
+    CBitmap* pMarioTest = GetBitmap(_T("MarioSprites"));
+    if (pMarioTest)
+    {
+        BITMAP bm;
+        pMarioTest->GetBitmap(&bm);
+        TRACE(_T("马里奥贴图尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
+    }
     return success;
 }
 

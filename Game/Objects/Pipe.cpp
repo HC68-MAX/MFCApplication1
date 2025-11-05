@@ -52,26 +52,27 @@ void CPipe::DrawWithSprite(CDC* pDC, int screenX, int screenY)
     if (segments < 1) segments = 1;
 
     // 绘制水管顶部
-    CSpriteRenderer::DrawSprite(pDC, pBitmap,
-        screenX, screenY,
-        CSpriteConfig::PIPE_TOP_LEFT.x, CSpriteConfig::PIPE_TOP_LEFT.y,
-        CSpriteConfig::PIPE_TOP_LEFT.width, CSpriteConfig::PIPE_TOP_LEFT.height, TRUE);
 
     CSpriteRenderer::DrawSprite(pDC, pBitmap,
+        screenX, screenY, CGameConfig::PIPE_WIDTH, CGameConfig::PIPE_HEIGHT,
+        CSpriteConfig::PIPE_TOP_LEFT.x, CSpriteConfig::PIPE_TOP_LEFT.y,
+        CSpriteConfig::PIPE_TOP_LEFT.width, CSpriteConfig::PIPE_TOP_LEFT.height, TRUE);
+    CSpriteRenderer::DrawSprite(pDC, pBitmap,
         screenX + CSpriteConfig::PIPE_TOP_LEFT.width, screenY,
-        CSpriteConfig::PIPE_TOP_RIGHT.x, CSpriteConfig::PIPE_TOP_RIGHT.y,
-        CSpriteConfig::PIPE_TOP_RIGHT.width, CSpriteConfig::PIPE_TOP_RIGHT.height, TRUE);
+        CGameConfig::PIPE_WIDTH, CGameConfig::PIPE_HEIGHT,
+        CSpriteConfig::PIPE_TOP_LEFT.x, CSpriteConfig::PIPE_TOP_LEFT.y,
+        CSpriteConfig::PIPE_TOP_LEFT.width, CSpriteConfig::PIPE_TOP_LEFT.height, TRUE);
 
     // 绘制水管身体
     for (int i = 1; i < segments; i++)
     {
         int currentY = screenY + i * segmentHeight;
         CSpriteRenderer::DrawSprite(pDC, pBitmap,
-            screenX, currentY,
+            screenX, currentY, CGameConfig::PIPE_WIDTH, CGameConfig::PIPE_HEIGHT,
             CSpriteConfig::PIPE_BODY_LEFT.x, CSpriteConfig::PIPE_BODY_LEFT.y,
             CSpriteConfig::PIPE_BODY_LEFT.width, CSpriteConfig::PIPE_BODY_LEFT.height, TRUE);
 
-        CSpriteRenderer::DrawSprite(pDC, pBitmap,
+        CSpriteRenderer::DrawSprite(pDC, pBitmap, CGameConfig::PIPE_WIDTH, CGameConfig::PIPE_HEIGHT,
             screenX + CSpriteConfig::PIPE_BODY_LEFT.width, currentY,
             CSpriteConfig::PIPE_BODY_RIGHT.x, CSpriteConfig::PIPE_BODY_RIGHT.y,
             CSpriteConfig::PIPE_BODY_RIGHT.width, CSpriteConfig::PIPE_BODY_RIGHT.height, TRUE);

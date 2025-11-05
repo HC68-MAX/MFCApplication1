@@ -62,7 +62,9 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
     if (!m_bVisible) return;
 
     CResourceManager& resMgr = CResourceManager::GetInstance();
-    CBitmap* pBitmap = resMgr.GetBitmap(_T("TilesetMain"));
+    // 使用马里奥专用的贴图集
+    CBitmap* pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
+
 
     if (!pBitmap) {
         // 如果没有贴图，使用几何绘制
@@ -79,7 +81,7 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_SMALL_JUMP_RIGHT;
         else if (m_bIsMoving)
-            spriteCoord = (GetTickCount() % 500 < 250) ?
+            spriteCoord = (GetTickCount64() % 500 < 250) ?
             CSpriteConfig::MARIO_SMALL_WALK1_RIGHT :
             CSpriteConfig::MARIO_SMALL_WALK2_RIGHT;
         else
@@ -90,7 +92,7 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
         else if (m_bIsMoving)
-            spriteCoord = (GetTickCount() % 500 < 250) ?
+            spriteCoord = (GetTickCount64() % 500 < 250) ?
             CSpriteConfig::MARIO_BIG_WALK1_RIGHT :
             CSpriteConfig::MARIO_BIG_WALK2_RIGHT;
         else
@@ -101,7 +103,7 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
         else if (m_bIsMoving)
-            spriteCoord = (GetTickCount() % 500 < 250) ?
+            spriteCoord = (GetTickCount64() % 500 < 250) ?
             CSpriteConfig::MARIO_FIRE_WALK1_RIGHT :
             CSpriteConfig::MARIO_FIRE_WALK2_RIGHT;
         else
@@ -111,8 +113,9 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
 
     // 直接使用精灵渲染器绘制
     CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
+        32,64,
         spriteCoord.x, spriteCoord.y,
-        m_nWidth, m_nHeight, TRUE);
+        spriteCoord.width, spriteCoord.height, TRUE);
 }
 // 修改现有的DrawAt方法，使用新的精灵绘制方法
 void CMario::DrawAt(CDC* pDC, int screenX, int screenY)

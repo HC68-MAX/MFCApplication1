@@ -9,7 +9,7 @@ public:
     // 贴图尺寸
     static const int TILE_SIZE = 32;           // 瓦片基本尺寸
     static const int MARIO_SMALL_WIDTH = 32;   // 小马里奥宽度
-    static const int MARIO_SMALL_HEIGHT = 48;  // 小马里奥高度
+    static const int MARIO_SMALL_HEIGHT = 64;  // 小马里奥高度
     static const int MARIO_BIG_WIDTH = 48;     // 大马里奥宽度  
     static const int MARIO_BIG_HEIGHT = 72;    // 大马里奥高度
     static const int BRICK_WIDTH = 32;         // 砖块宽度

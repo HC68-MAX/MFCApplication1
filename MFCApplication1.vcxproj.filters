@@ -161,5 +161,8 @@
     <Image Include="Game\Resources\tile_set.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="Game\Resources\mario_bros.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

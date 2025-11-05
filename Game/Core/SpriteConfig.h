@@ -16,6 +16,17 @@ struct SSpriteCoord
 class CSpriteConfig
 {
 public:
+    // 新增：贴图集名称常量
+    static const CString TILESET_MAIN;
+    static const CString TILESET_MARIO;
+    static const CString TILESET_ENEMIES;
+
+    // 新增：根据精灵类型获取对应的贴图集名称
+    static CString GetSpritesheetForMario();
+    static CString GetSpritesheetForBrick();
+    static CString GetSpritesheetForPipe();
+    static CString GetSpritesheetForTile(int tileID);
+
     // === 主精灵表 (SpritesheetMain) ===
 
     // 马里奥 - 小

@@ -3,14 +3,35 @@
 
 // 根据您的实际贴图集调整这些坐标
 // 这里只是示例，您需要根据您的贴图集实际布局来设置
+const CString CSpriteConfig::TILESET_MAIN = _T("TilesetMain");
+const CString CSpriteConfig::TILESET_MARIO = _T("MarioSprites");
+const CString CSpriteConfig::TILESET_ENEMIES = _T("EnemySprites");
+CString CSpriteConfig::GetSpritesheetForMario()
+{
+    return TILESET_MARIO;
+}
 
+CString CSpriteConfig::GetSpritesheetForBrick()
+{
+    return TILESET_MAIN;
+}
+
+CString CSpriteConfig::GetSpritesheetForPipe()
+{
+    return TILESET_MAIN;
+}
+
+CString CSpriteConfig::GetSpritesheetForTile(int tileID)
+{
+    return TILESET_MAIN;
+}
 // === 主精灵表坐标 ===
 
 // 马里奥 - 小
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_STAND_RIGHT = { 0, 0, 8, 8 };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK1_RIGHT = { 16, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK2_RIGHT = { 32, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_JUMP_RIGHT = { 48, 0, 16, 16 };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_STAND_RIGHT = { 11*16, 15*16, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK1_RIGHT = { 11 * 16, 15 * 16, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK2_RIGHT = { 11 * 16, 15 * 16, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_JUMP_RIGHT =  { 11 * 16, 15 * 16, 16, 32 };
 
 // 马里奥 - 大
 const SSpriteCoord CSpriteConfig::MARIO_BIG_STAND_RIGHT = { 0, 16, 16, 32 };
@@ -26,15 +47,15 @@ const SSpriteCoord CSpriteConfig::MARIO_FIRE_JUMP_RIGHT = { 48, 48, 16, 32 };
 
 // 砖块
 const SSpriteCoord CSpriteConfig::BRICK_NORMAL = { 16, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::BRICK_QUESTION = { 0, 0, 16, 16 };
+const SSpriteCoord CSpriteConfig::BRICK_QUESTION = { 24*16, 0, 16, 16 };
 const SSpriteCoord CSpriteConfig::BRICK_QUESTION_HIT = { 0, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::BRICK_HARD = { 48, 0, 16, 16 };
+const SSpriteCoord CSpriteConfig::BRICK_HARD = { 24*16, 6*16, 16, 16 };
 
 // 水管
-const SSpriteCoord CSpriteConfig::PIPE_TOP_LEFT = { 0, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::PIPE_TOP_RIGHT = { 0, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::PIPE_BODY_LEFT = { 0, 160, 16, 16 };
-const SSpriteCoord CSpriteConfig::PIPE_BODY_RIGHT = { 0, 0, 16, 16 };
+const SSpriteCoord CSpriteConfig::PIPE_TOP_LEFT = { 0, 8*16, 16, 16 };
+const SSpriteCoord CSpriteConfig::PIPE_TOP_RIGHT = { 16, 8*16, 16, 16 };
+const SSpriteCoord CSpriteConfig::PIPE_BODY_LEFT = { 0, 9*16, 16, 16 };
+const SSpriteCoord CSpriteConfig::PIPE_BODY_RIGHT = { 16, 9 * 16, 16, 16 };
 
 // === 瓦片精灵表坐标 ===
 
