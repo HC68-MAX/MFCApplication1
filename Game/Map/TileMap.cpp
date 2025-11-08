@@ -205,7 +205,7 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
                     CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
                         CGameConfig::TILE_SIZE, CGameConfig::TILE_SIZE,
                         spriteCoord.x, spriteCoord.y,
-                        spriteCoord.width, spriteCoord.height, TRUE);
+                        spriteCoord.width, spriteCoord.height);
                 }
                 else
                 {
@@ -225,20 +225,6 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
         }
     }
     
-    // 新增：绘制独立对象
-    for (auto& brick : m_Bricks)
-    {
-        int screenX = brick.GetX() - offsetX;
-        int screenY = brick.GetY() - offsetY;
-        brick.DrawWithSprite(pDC, screenX, screenY);
-    }
-
-    for (auto& pipe : m_Pipes)
-    {
-        int screenX = pipe.GetX() - offsetX;
-        int screenY = pipe.GetY() - offsetY;
-        pipe.DrawWithSprite(pDC, screenX, screenY);
-    }
 }
 
 // 新增：获取所有碰撞矩形

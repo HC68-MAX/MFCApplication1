@@ -1,5 +1,4 @@
-﻿
-// MFCApplication1View.cpp: CMFCApplication1View 类的实现
+﻿// MFCApplication1View.cpp: CMFCApplication1View 类的实现
 //
 
 #include "pch.h"
@@ -32,7 +31,6 @@ BEGIN_MESSAGE_MAP(CMFCApplication1View, CView)
 	ON_WM_TIMER()
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
-	ON_WM_CREATE()
 END_MESSAGE_MAP()
 #ifdef _DEBUG
 void CMFCApplication1View::AssertValid() const
@@ -68,9 +66,9 @@ CMFCApplication1View::CMFCApplication1View() noexcept
     m_bKeyRight = FALSE;
     m_bKeyJump = FALSE;
     // 初始化帧率相关变量
-    m_dwLastTime = GetTickCount64();
+    m_dwLastTime = std::chrono::steady_clock::now();
     m_nFrameCount = 0;
-    m_fDeltaTime = 0.033f; // 默认1/30秒
+    m_fDeltaTime = 0.016f; // 默认1/60秒
     m_fSmoothedFPS = 60.0f; // 默认60帧
 }
 
@@ -121,8 +119,8 @@ int CMFCApplication1View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	  // 初始化游戏
 	InitializeGame();
 
-	// 设置定时器 - 33ms ≈ 30fps
-	m_nTimerID = SetTimer(1, 33, nullptr);
+	// 设置定时器 - 16ms ≈ 60fps
+	m_nTimerID = SetTimer(1, 16, nullptr);
 	if (m_nTimerID == 0)
 	{
 		AfxMessageBox(_T("无法创建定时器！"));
@@ -298,6 +296,9 @@ void CMFCApplication1View::OnTimer(UINT_PTR nIDEvent)
 {
     if (nIDEvent == m_nTimerID)
     {
+        // 计算时间差
+        CalculateDeltaTime();
+
         // 更新游戏逻辑
         UpdateGame();
 
@@ -457,12 +458,15 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
 
     // 第1行：位置和状态
     CString stateStr;
-    if (m_Mario.IsOnGround())
-        stateStr = _T("地面");
-    else if (m_Mario.IsJumping())
+    // Use Mario's internal flags to determine a more precise action state: standing, walking, jumping, falling
+    if (m_Mario.IsJumping())
         stateStr = _T("跳跃");
+    else if (!m_Mario.IsOnGround())
+        stateStr = _T("下落");
+    else if (m_Mario.IsMoving())
+        stateStr = _T("行走");
     else
-        stateStr = _T("空中");
+        stateStr = _T("站立");
 
     strInfo.Format(_T("世界位置: (%d, %d)  状态: %s"),
         m_Mario.GetX(), m_Mario.GetY(), stateStr);
@@ -506,13 +510,6 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
     // 调试模式特定信息
     if (m_bDebugMode)
     {
-        // 实体统计 - 从 TileMap 获取对象数量
-        CString strInfo;
-        strInfo.Format(_T("实体数量: 砖块(%d)  水管(%d)"),
-            m_TileMap.GetBricks().size(), m_TileMap.GetPipes().size());
-        pDC->SetTextColor(RGB(255, 255, 255));
-        pDC->TextOut(10, 200, strInfo);
-
         // 调试模式标题
         pDC->SetTextColor(RGB(255, 255, 0)); // 黄色
         pDC->TextOut(10, 100, _T("=== 调试模式 ==="));
@@ -630,4 +627,37 @@ void CMFCApplication1View::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
     }
 
     CView::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+
+// 计算帧时间差
+void CMFCApplication1View::CalculateDeltaTime()
+{
+    using namespace std::chrono;
+    auto currentTime = steady_clock::now();
+    duration<float> elapsed = currentTime - m_dwLastTime;
+    m_fDeltaTime = elapsed.count();
+
+    // 限制最大deltaTime，避免卡顿导致的大跳帧
+    if (m_fDeltaTime > 0.1f)
+        m_fDeltaTime = 0.1f;
+
+    m_dwLastTime = currentTime;
+
+    // 帧率平滑处理（移动平均）
+    static float frameRates[10] = { 0 };
+    static int frameIndex = 0;
+    static float frameSum = 0;
+
+    frameSum -= frameRates[frameIndex];
+    if (m_fDeltaTime > 0) {
+        frameRates[frameIndex] = 1.0f / m_fDeltaTime;
+    }
+    else {
+        frameRates[frameIndex] = 0;
+    }
+    frameSum += frameRates[frameIndex];
+    frameIndex = (frameIndex + 1) % 10;
+
+    // 使用平滑后的帧率
+    m_fSmoothedFPS = frameSum / 10;
 }

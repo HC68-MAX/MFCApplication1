@@ -164,5 +164,8 @@
     <Image Include="Game\Resources\mario_bros.bmp">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="game\resources\bitmap3.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -32,12 +32,7 @@ void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap,
             &memDC, srcX, srcY, srcWidth, srcHeight,
             transparentColor);
     }
-    else
-    {
-        // 使用 StretchBlt 进行拉伸绘制
-        pDC->StretchBlt(destX, destY, destWidth, destHeight,
-            &memDC, srcX, srcY, srcWidth, srcHeight, SRCCOPY);
-    }
+  
 
     memDC.SelectObject(pOldBitmap);
     memDC.DeleteDC();

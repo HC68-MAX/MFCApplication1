@@ -1,4 +1,3 @@
-
 // Game/Objects/Mario.cpp
 #include <afxwin.h>  // 直接包含MFC头文件
 #include "Mario.h"
@@ -241,10 +240,10 @@ void CMario::ApplyPhysics(float deltaTime)
 // 全新的碰撞检测方法 - 简单可靠
 void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
 {
-    // 先假设不在地面上
+    // 步骤 1: 在每帧开始时，先假设马里奥不在地面上。
     m_bIsOnGround = FALSE;
 
-    // 检查与每个实体的碰撞
+    // 步骤 2: 执行主要的碰撞检测和位置修正。
     for (const auto& rect : solidRects)
     {
         CRect intersection;
@@ -252,53 +251,71 @@ void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
 
         if (intersection.IntersectRect(&marioRect, &rect))
         {
-            // 计算碰撞的深度和方向
             int overlapLeft = marioRect.right - rect.left;
             int overlapRight = rect.right - marioRect.left;
             int overlapTop = marioRect.bottom - rect.top;
             int overlapBottom = rect.bottom - marioRect.top;
 
-            // 找出最小的重叠方向
-            int minOverlap = min(min(overlapLeft, overlapRight), min(overlapTop, overlapBottom));
+                int dx = min(overlapLeft, overlapRight);
+            int dy = min(overlapTop, overlapBottom);
 
-            // 根据最小重叠方向解决碰撞
-            if (minOverlap == overlapTop && m_fVelocityY > 0)
+            if (dy <= dx)
             {
-                // 从上方碰撞（站在平台上）
-                m_nY = rect.top - m_nHeight;
-                m_fVelocityY = 0;
-                m_bIsOnGround = TRUE;
-                m_bIsJumping = FALSE;
+                if (dy == overlapTop && m_fVelocityY >= 0) // 只有在下落或静止时才算落地
+                {
+                    m_nY = rect.top - m_nHeight;
+                    m_fVelocityY = 0;
+                    m_bIsOnGround = TRUE;
+                    m_bIsJumping = FALSE;
+                }
+                else if (dy == overlapBottom && m_fVelocityY < 0)
+                {
+                    m_nY = rect.bottom;
+                    m_fVelocityY = 0;
+                    m_bIsJumping = FALSE;
+                }
             }
-            else if (minOverlap == overlapBottom && m_fVelocityY < 0)
+            else
             {
-                // 从下方碰撞（顶到东西）
-                m_nY = rect.bottom;
-                m_fVelocityY = 0;
-                m_bIsJumping = FALSE;
-            }
-            else if (minOverlap == overlapLeft && m_fVelocityX > 0)
-            {
-                // 从左侧碰撞
-                m_nX = rect.left - m_nWidth;
-                m_fVelocityX = 0;
-            }
-            else if (minOverlap == overlapRight && m_fVelocityX < 0)
-            {
-                // 从右侧碰撞
-                m_nX = rect.right;
-                m_fVelocityX = 0;
+                if (dx == overlapLeft && m_fVelocityX > 0)
+                {
+                    m_nX = rect.left - m_nWidth;
+                    m_fVelocityX = 0;
+                }
+                else if (dx == overlapRight && m_fVelocityX < 0)
+                {
+                    m_nX = rect.right;
+                    m_fVelocityX = 0;
+                }
             }
         }
     }
 
-    // 检查是否掉出屏幕底部（临时地面）
-    if (m_nY + m_nHeight > 500) // 地面在Y=500
+    // 步骤 3: 地面状态探测（滞后处理），防止边缘抖动。
+    // 如果经过上面的精确碰撞修正后，马里奥仍被判定为“空中”，我们再做一次宽松的检查。
+    if (!m_bIsOnGround)
     {
-        m_nY = 500 - m_nHeight;
-        m_fVelocityY = 0;
-        m_bIsOnGround = TRUE;
-        m_bIsJumping = FALSE;
+        CRect feetProbe = GetFeetRect();
+        // 将探测框向下延伸2个像素，形成一个“缓冲区”。
+        feetProbe.OffsetRect(0, 2);
+
+        for (const auto& rect : solidRects)
+        {
+            CRect tmp;
+            if (tmp.IntersectRect(&feetProbe, &rect))
+            {
+                // 如果探测框接触到了地面，我们就强制认为马里奥在地面上。
+                // 注意：这里我们不修正位置，只更新状态标志。
+                m_bIsOnGround = TRUE;
+                m_bIsJumping = FALSE;
+                // 如果此时有微小的垂直速度，也将其清零以增加稳定性。
+                if (m_fVelocityY > 0) {
+                    m_fVelocityY = 0;
+                }
+                // 找到一个接触点就足够了，跳出循环。
+                break;
+            }
+        }
     }
 }
 // 修改现有的移动方法，改为设置输入状态

@@ -37,8 +37,7 @@ void CPipe::DrawWithSprite(CDC* pDC, int screenX, int screenY)
     if (!m_bVisible) return;
 
     CResourceManager& resMgr = CResourceManager::GetInstance();
-    CBitmap* pBitmap = resMgr.GetBitmap(_T("TilesetMain"));
-
+    CBitmap* pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForPipe());
     if (!pBitmap) {
         // ±∏”√ªÊ÷∆
         Draw(pDC);

@@ -1,5 +1,4 @@
-﻿
-// MFCApplication1View.h: CMFCApplication1View 类的接口
+﻿// MFCApplication1View.h: CMFCApplication1View 类的接口
 //
 
 #pragma once
@@ -11,6 +10,7 @@
 #include "Game/Map/TileMap.h"
 #include "Game/Core/GameConfig.h" 
 #include <vector>
+#include <chrono>
 class CMFCApplication1View : public CView
 {
 protected: // 仅从序列化创建
@@ -69,7 +69,7 @@ protected:
 	CMario m_Mario;  // 马里奥对象实例
 
 	// 添加帧率计算相关
-	DWORD m_dwLastTime;
+	std::chrono::steady_clock::time_point m_dwLastTime;
 	int m_nFrameCount;
 	float m_fDeltaTime;
 	float m_fSmoothedFPS;  // 平滑后的帧率
@@ -104,7 +104,7 @@ protected:
 	void InitializeTileMap();
 	void UpdateCamera();
 	// 新增：创建占位符位图
-	std::vector<CRect> CMFCApplication1View::GetAllSolidObjects() const;
+	void CalculateDeltaTime();
 };
 
 #ifndef _DEBUG  // MFCApplication1View.cpp 中的调试版本
