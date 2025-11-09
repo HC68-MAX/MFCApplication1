@@ -55,13 +55,13 @@ public:
     // 碰撞相关方法
     BOOL IsOnGround() const { return m_bIsOnGround; }
     BOOL IsJumping() const { return m_bIsJumping; }
-    BOOL IsMoving() const { return m_bIsMoving; }
+    BOOL IsMoving() const;
     // 碰撞响应
     void OnHeadCollision();
     void OnFeetCollision(int surfaceY);
     void OnLeftCollision(int surfaceX);
     void OnRightCollision(int surfaceX);
-
+    Direction GetDirection() const { return m_Direction; }
     // 设置速度
     void SetVelocity(float vx, float vy) { m_fVelocityX = vx; m_fVelocityY = vy; }
    

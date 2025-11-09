@@ -12,12 +12,12 @@ public:
     int destWidth, int destHeight,       贴图要贴的大小
     int srcX, int srcY,                  贴图在图集的坐标
     int srcWidth, int srcHeight          贴图在图集需要裁剪的长宽
-    BOOL transparent = TRUE, COLORREF transparentColor = RGB(255, 0, 255)透明处理
+     BOOL flipHorizontal = FALSE         翻转处理
     */ 
     static void DrawSprite(CDC* pDC, CBitmap* pBitmap,
         int destX, int destY, int destWidth, int destHeight,
         int srcX, int srcY, int srcWidth, int srcHeight,
-        BOOL transparent = TRUE, COLORREF transparentColor = RGB(255, 0, 255));
+        BOOL flipHorizontal = FALSE);
     // 获取位图尺寸
     static BOOL GetBitmapSize(CBitmap* pBitmap, CSize& size);
 };

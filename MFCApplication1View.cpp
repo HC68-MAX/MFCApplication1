@@ -120,7 +120,7 @@ int CMFCApplication1View::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	InitializeGame();
 
 	// 设置定时器 - 16ms ≈ 60fps
-	m_nTimerID = SetTimer(1, 16, nullptr);
+	m_nTimerID = SetTimer(1, 5, nullptr);
 	if (m_nTimerID == 0)
 	{
 		AfxMessageBox(_T("无法创建定时器！"));
@@ -458,17 +458,23 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
 
     // 第1行：位置和状态
     CString stateStr;
+
     // Use Mario's internal flags to determine a more precise action state: standing, walking, jumping, falling
     if (m_Mario.IsJumping())
         stateStr = _T("跳跃");
     else if (!m_Mario.IsOnGround())
         stateStr = _T("下落");
     else if (m_Mario.IsMoving())
-        stateStr = _T("行走");
+    {
+        if (m_Mario.GetDirection() == Direction::RIGHT)
+            stateStr = _T("向右行走");
+        else
+            stateStr = _T("向左行走");
+    }
     else
         stateStr = _T("站立");
-
-    strInfo.Format(_T("世界位置: (%d, %d)  状态: %s"),
+   
+    strInfo.Format(_T("世界位置: (%d, %d)  状态: %s "),
         m_Mario.GetX(), m_Mario.GetY(), stateStr);
     pDC->TextOut(10, 10, strInfo);
 

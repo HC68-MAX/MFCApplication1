@@ -19,7 +19,7 @@ public:
     static const int COIN_SIZE = 24;           // 金币尺寸
     static const int ENEMY_WIDTH = 32;         // 敌人宽度
     static const int ENEMY_HEIGHT = 32;        // 敌人高度
-
+	static const int MARIO_WALK_SPEED = 600;       // 马里奥行走速度(贴图用)
     // 屏幕和游戏设置
     static const int SCREEN_WIDTH = 800;       // 屏幕宽度
     static const int SCREEN_HEIGHT = 600;      // 屏幕高度
@@ -35,6 +35,7 @@ public:
     static const float MARIO_ACCELERATION;     // 马里奥加速度
     static const float MARIO_JUMP_FORCE;       // 马里奥跳跃力
     static const float MARIO_JUMP_MAX_TIME;    // 马里奥最大跳跃时间
+
 
     // 颜色配置（用于占位符）
     static const COLORREF COLOR_MARIO_RED = RGB(220, 0, 0);

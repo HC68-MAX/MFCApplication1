@@ -73,16 +73,23 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
 
     SSpriteCoord spriteCoord;
 
-    // 根据状态和动作选择精灵
+    // 根据状态和动作选择精灵（全部使用向右的贴图）
     switch (m_State)
     {
     case MarioState::SMALL:
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_SMALL_JUMP_RIGHT;
-        else if (m_bIsMoving)
-            spriteCoord = (GetTickCount64() % 500 < 250) ?
-            CSpriteConfig::MARIO_SMALL_WALK1_RIGHT :
-            CSpriteConfig::MARIO_SMALL_WALK2_RIGHT;
+        else if (IsMoving())
+        {
+            // 三个行走动作循环
+            DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+            if (animTime < 250)
+                spriteCoord = CSpriteConfig::MARIO_SMALL_WALK1_RIGHT;
+            else if (animTime < 500)
+                spriteCoord = CSpriteConfig::MARIO_SMALL_WALK2_RIGHT;
+            else
+                spriteCoord = CSpriteConfig::MARIO_SMALL_WALK3_RIGHT;
+        }
         else
             spriteCoord = CSpriteConfig::MARIO_SMALL_STAND_RIGHT;
         break;
@@ -90,10 +97,17 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
     case MarioState::BIG:
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
-        else if (m_bIsMoving)
-            spriteCoord = (GetTickCount64() % 500 < 250) ?
-            CSpriteConfig::MARIO_BIG_WALK1_RIGHT :
-            CSpriteConfig::MARIO_BIG_WALK2_RIGHT;
+        else if (IsMoving())
+        {
+            // 三个行走动作循环
+            DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+        if (animTime < 250)
+            spriteCoord = CSpriteConfig::MARIO_BIG_WALK1_RIGHT;
+        else if (animTime < 500)
+            spriteCoord = CSpriteConfig::MARIO_BIG_WALK2_RIGHT;
+        else
+            spriteCoord = CSpriteConfig::MARIO_BIG_WALK3_RIGHT;
+        }
         else
             spriteCoord = CSpriteConfig::MARIO_BIG_STAND_RIGHT;
         break;
@@ -101,20 +115,29 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
     case MarioState::FIRE:
         if (m_bIsJumping)
             spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
-        else if (m_bIsMoving)
-            spriteCoord = (GetTickCount64() % 500 < 250) ?
-            CSpriteConfig::MARIO_FIRE_WALK1_RIGHT :
-            CSpriteConfig::MARIO_FIRE_WALK2_RIGHT;
+        else if (IsMoving())
+        {
+            // 三个行走动作循环
+            DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+            if (animTime < 250)
+                spriteCoord = CSpriteConfig::MARIO_FIRE_WALK1_RIGHT;
+            else if (animTime < 500)
+                spriteCoord = CSpriteConfig::MARIO_FIRE_WALK2_RIGHT;
+            else
+                spriteCoord = CSpriteConfig::MARIO_FIRE_WALK3_RIGHT;
+        }
         else
             spriteCoord = CSpriteConfig::MARIO_FIRE_STAND_RIGHT;
         break;
     }
+    // 判断是否需要水平翻转
+    BOOL flipHorizontal = (m_Direction == Direction::LEFT);
 
-    // 直接使用精灵渲染器绘制
+    // 使用精灵渲染器绘制，添加翻转参数
     CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-        32,64,
+        CGameConfig::MARIO_SMALL_WIDTH, CGameConfig::MARIO_SMALL_HEIGHT,
         spriteCoord.x, spriteCoord.y,
-        spriteCoord.width, spriteCoord.height, TRUE);
+        spriteCoord.width, spriteCoord.height, flipHorizontal);
 }
 // 修改现有的DrawAt方法，使用新的精灵绘制方法
 void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
@@ -136,6 +159,11 @@ void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
     m_nX = originalX;
     m_nY = originalY;
 }
+BOOL CMario::IsMoving() const
+{
+    // 只有当水平速度足够大时，才认为是在移动
+    return abs(m_fVelocityX) > 0.1f;
+}
 
 // 修改现有的Draw方法
 void CMario::Draw(CDC* pDC)
@@ -151,6 +179,9 @@ void CMario::Update(float deltaTime)
     // 应用物理
     ApplyPhysics(deltaTime);
 
+    // 更新移动状态 - 基于实际速度
+    m_bIsMoving = (abs(m_fVelocityX) > 0.01f);
+
     // 简单的边界检查（临时）
     if (m_nX < 0)
     {
@@ -162,20 +193,20 @@ void CMario::Update(float deltaTime)
 // 新的输入处理方法
 void CMario::HandleInput(BOOL left, BOOL right, BOOL jump)
 {
-    m_bIsMoving = FALSE;
+  //  m_bIsMoving = FALSE;
 
     // 处理左右移动
     if (left && !right)
     {
         m_fVelocityX = -m_fMaxSpeed;
         m_Direction = Direction::LEFT;
-        m_bIsMoving = TRUE;
+      //  m_bIsMoving = TRUE;
     }
     else if (right && !left)
     {
         m_fVelocityX = m_fMaxSpeed;
         m_Direction = Direction::RIGHT;
-        m_bIsMoving = TRUE;
+       // m_bIsMoving = TRUE;
     }
     else
     {

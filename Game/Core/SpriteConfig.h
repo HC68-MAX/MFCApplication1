@@ -30,21 +30,28 @@ public:
     // === 主精灵表 (SpritesheetMain) ===
 
     // 马里奥 - 小
+    static const SSpriteCoord MARIO_SMALL_STAND_LEFT;
+    static const SSpriteCoord MARIO_SMALL_WALK1_LEFT;
+    static const SSpriteCoord MARIO_SMALL_WALK2_LEFT;
+    static const SSpriteCoord MARIO_SMALL_JUMP_LEFT;
+    // 马里奥 - 小
     static const SSpriteCoord MARIO_SMALL_STAND_RIGHT;
     static const SSpriteCoord MARIO_SMALL_WALK1_RIGHT;
     static const SSpriteCoord MARIO_SMALL_WALK2_RIGHT;
+    static const SSpriteCoord MARIO_SMALL_WALK3_RIGHT;
     static const SSpriteCoord MARIO_SMALL_JUMP_RIGHT;
-
     // 马里奥 - 大
     static const SSpriteCoord MARIO_BIG_STAND_RIGHT;
     static const SSpriteCoord MARIO_BIG_WALK1_RIGHT;
     static const SSpriteCoord MARIO_BIG_WALK2_RIGHT;
+    static const SSpriteCoord MARIO_BIG_WALK3_RIGHT;
     static const SSpriteCoord MARIO_BIG_JUMP_RIGHT;
 
     // 马里奥 - 火焰
     static const SSpriteCoord MARIO_FIRE_STAND_RIGHT;
     static const SSpriteCoord MARIO_FIRE_WALK1_RIGHT;
     static const SSpriteCoord MARIO_FIRE_WALK2_RIGHT;
+    static const SSpriteCoord MARIO_FIRE_WALK3_RIGHT;
     static const SSpriteCoord MARIO_FIRE_JUMP_RIGHT;
 
     // 砖块

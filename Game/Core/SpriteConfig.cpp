@@ -28,21 +28,23 @@ CString CSpriteConfig::GetSpritesheetForTile(int tileID)
 // === 主精灵表坐标 ===
 
 // 马里奥 - 小
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_STAND_RIGHT = { 11*16, 15*16, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK1_RIGHT = { 11 * 16, 15 * 16, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK2_RIGHT = { 11 * 16, 15 * 16, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_JUMP_RIGHT =  { 11 * 16, 15 * 16, 16, 32 };
-
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_STAND_RIGHT = { 11 * 16, 15 * 16, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK1_RIGHT = { 6 * 16, 15 * 16, 16, 32  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK2_RIGHT = { 7 * 16, 15 * 16, 16, 32  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK3_RIGHT = { 5 * 16, 15 * 16, 16, 32  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_JUMP_RIGHT =  { 15 * 16, 15 * 16,16, 32  };
 // 马里奥 - 大
 const SSpriteCoord CSpriteConfig::MARIO_BIG_STAND_RIGHT = { 0, 16, 16, 32 };
 const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK1_RIGHT = { 16, 16, 16, 32 };
 const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK2_RIGHT = { 32, 16, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK3_RIGHT = { 32, 16, 16, 32 };
 const SSpriteCoord CSpriteConfig::MARIO_BIG_JUMP_RIGHT = { 48, 16, 16, 32 };
 
 // 马里奥 - 火焰
 const SSpriteCoord CSpriteConfig::MARIO_FIRE_STAND_RIGHT = { 0, 48, 16, 32 };
 const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK1_RIGHT = { 16, 48, 16, 32 };
 const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK2_RIGHT = { 32, 48, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK3_RIGHT = { 32, 48, 16, 32 };
 const SSpriteCoord CSpriteConfig::MARIO_FIRE_JUMP_RIGHT = { 48, 48, 16, 32 };
 
 // 砖块
