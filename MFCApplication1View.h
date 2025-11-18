@@ -102,6 +102,7 @@ protected:
 	// 新增：创建占位符位图
 	void CalculateDeltaTime();
 	void CheckCoinCollisions();
+	void ProcessBrickItems();
 };
 
 #ifndef _DEBUG  // MFCApplication1View.cpp 中的调试版本

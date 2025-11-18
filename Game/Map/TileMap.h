@@ -63,6 +63,12 @@ public:
     void ClearCoins();
     void UpdateCoins(float deltaTime);
     BOOL CheckCoinCollisions(const CRect& rect);
+    // 砖块碰撞检测
+    BOOL CheckBrickCollisions(const CRect& rect);
+    // 检查问号砖块碰撞
+    BOOL CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp);
+    // 获取需要生成道具的砖块
+    std::vector<CBrick*> GetBricksThatShouldSpawnItems();
     void RemoveCoin(int index);
 private:
     int m_nWidth;           // 地图宽度（瓦片数）

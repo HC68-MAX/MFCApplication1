@@ -59,8 +59,8 @@ const SSpriteCoord CSpriteConfig::MARIO_FIRE_JUMP_RIGHT  = { 15 * size, 0 * size
 // ×©¿é
 const SSpriteCoord CSpriteConfig::BRICK_NORMAL         = { 0  * size, 0* size, 16, 16 };
 const SSpriteCoord CSpriteConfig::BRICK_QUESTION       = { 24 * size, 0* size, 16, 16 };
-const SSpriteCoord CSpriteConfig::BRICK_QUESTION_HIT   = { 0  * size, 0* size, 16, 16 };
-const SSpriteCoord CSpriteConfig::BRICK_HARD           = { 24 * size, 6* size, 16, 16 };
+const SSpriteCoord CSpriteConfig::BRICK_QUESTION_HIT   = { 27 * size, 0* size, 16, 16 };
+const SSpriteCoord CSpriteConfig::BRICK_HARD           = { 0  * size, 1* size, 16, 16 };
 
 // Ë®¹Ü
 const SSpriteCoord CSpriteConfig::PIPE_TOP_LEFT = { 0, 8* size, 16, 16 };

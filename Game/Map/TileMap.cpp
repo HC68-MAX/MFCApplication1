@@ -56,7 +56,6 @@ BOOL CTileMap::LoadLevel1()
     // 初始化基础地图
     if (!LoadMap(CGameConfig::TILE_MAP_WIDTH, CGameConfig::TILE_MAP_HEIGHT, CGameConfig::TILE_SIZE))
         return FALSE;
-
     // 创建地面
     int groundLevel = m_nHeight - 5; // 离底部5行的位置
     for (int x = 0; x < m_nWidth; x++)
@@ -78,15 +77,10 @@ BOOL CTileMap::LoadLevel1()
     {
         SetTile(x, 5, 2, TRUE, _T("brick"));
     }
-
-    // 问号砖块
-    SetTile(7, 3, 3, TRUE, _T("question"));
-    SetTile(8, 3, 3, TRUE, _T("question"));
-
     // 硬砖块
     for (int x = 12; x < 14; x++)
     {
-        SetTile(x, 2, 4, TRUE, _T("hard_brick"));
+        SetTile(x, 2, 3, TRUE, _T("question_brick"));
     }
 
     // 水管
@@ -202,6 +196,9 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
                 case 8: // 水管管体右
                     spriteCoord = CSpriteConfig::PIPE_BODY_RIGHT; // 临时使用
                     break;
+                case 9: // 被顶过的问号砖块
+                    spriteCoord = CSpriteConfig::BRICK_QUESTION_HIT;
+                    break;
                 default:
                     spriteCoord = CSpriteConfig::BRICK_NORMAL; // 默认
                     break;
@@ -294,7 +291,51 @@ CRect CTileMap::GetTileRect(int tileX, int tileY) const
     return CRect(tileX * m_nTileSize, tileY * m_nTileSize,
         (tileX + 1) * m_nTileSize, (tileY + 1) * m_nTileSize);
 }
+// 检查问号砖块碰撞 - 简化版
+BOOL CTileMap::CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp)
+{
+    // 只有当马里奥向上移动时才检测问号砖块碰撞
+    if (!isMovingUp)
+        return FALSE;
 
+    // 将马里奥头部矩形转换为瓦片坐标
+    int tileLeft = rect.left / m_nTileSize;
+    int tileRight = rect.right / m_nTileSize;
+    int tileY = rect.top / m_nTileSize;
+
+    TRACE(_T("检查问号砖块碰撞 - 头部区域: (%d,%d,%d,%d), 向上移动: %d\n"),
+        rect.left, rect.top, rect.right, rect.bottom, isMovingUp);
+
+    BOOL hitAny = FALSE;
+
+    // 检查头部区域上方的所有瓦片
+    int checkY = tileY - 1;
+
+    for (int x = tileLeft; x <= tileRight; x++)
+    {
+        if (checkY >= 0 && checkY < m_nHeight &&
+            x >= 0 && x < m_nWidth)
+        {
+            const Tile& tile = m_Tiles[checkY][x];
+
+            // 如果是问号砖块
+            if (tile.tileID == 3 && tile.solid)
+            {
+                TRACE(_T("顶到问号砖块! 瓦片位置: (%d, %d)\n"), x, checkY);
+
+                // 生成金币
+                AddCoin(x * m_nTileSize, (checkY - 1) * m_nTileSize);
+
+                // 将问号砖块变为普通砖块
+                SetTile(x, checkY, 9, TRUE, _T("question_brick"));
+
+                hitAny = TRUE;
+            }
+        }
+    }
+
+    return hitAny;
+}
 std::vector<CRect> CTileMap::GetSolidTileRects() const
 {
     std::vector<CRect> solidRects;
@@ -363,6 +404,24 @@ BOOL CTileMap::CheckCoinCollisions(const CRect& rect)
     return collectedAny;
 }
 // 移除金币（标记为已收集）
+BOOL CTileMap::CheckBrickCollisions(const CRect& rect)
+{
+    BOOL hitAny = FALSE;
+
+    for (auto& brick : m_Bricks)
+    {
+        // 检查砖块是否可以被顶并且与头部矩形相交
+        if (brick.CanBeHitFromBelow() && brick.CheckCollision(rect))
+        {
+            TRACE(_T("检测到砖块碰撞! 砖块位置: (%d, %d)\n"), brick.GetX(), brick.GetY());
+            brick.OnHitFromBelow();
+            hitAny = TRUE;
+        }
+    }
+
+    return hitAny;
+}
+
 void CTileMap::RemoveCoin(int index)
 {
     if (index >= 0 && index < m_Coins.size())
@@ -405,3 +464,21 @@ void CTileMap::ClearCoins()
 }
 
 // 在ClearObjects中调用ClearCoins
+// 砖块碰撞检测
+
+// 获取需要生成道具的砖块
+std::vector<CBrick*> CTileMap::GetBricksThatShouldSpawnItems()
+{
+    std::vector<CBrick*> result;
+
+    for (auto& brick : m_Bricks)
+    {
+        if (brick.ShouldSpawnItem())
+        {
+            result.push_back(&brick);
+            brick.SetSpawnItem(FALSE); // 重置状态
+        }
+    }
+
+    return result;
+}

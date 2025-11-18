@@ -83,7 +83,8 @@ public:
     SSpriteCoord GetMikuSpriteCoord() const;
     // Miku动画状态
     float m_fMikuAnimTimer;
-   
+    // 新增：头部碰撞检测
+    BOOL IsMovingUp() const { return m_fVelocityY < 0; }
 private:
     // 更新马里奥大小（根据状态）
     void UpdateSize();

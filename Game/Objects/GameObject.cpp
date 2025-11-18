@@ -42,14 +42,31 @@ BOOL CGameObject::CheckCollision(const CGameObject* other) const
     return rect1.IntersectRect(&rect1, &rect2);
 }
 
-// 碰撞检测 - 与矩形
+/// 碰撞检测 - 与矩形
 BOOL CGameObject::CheckCollision(const CRect& rect) const
 {
     if (!m_bActive)
         return FALSE;
 
     CRect myRect = GetRect();
-    CRect intersection;
 
-    return intersection.IntersectRect(&myRect, &rect);
+    // 直接检查两个矩形是否相交
+    // 如果 rect 在 myRect 的左边
+    if (rect.right < myRect.left)
+        return FALSE;
+
+    // 如果 rect 在 myRect 的右边  
+    if (rect.left > myRect.right)
+        return FALSE;
+
+    // 如果 rect 在 myRect 的上边
+    if (rect.bottom < myRect.top)
+        return FALSE;
+
+    // 如果 rect 在 myRect 的下边
+    if (rect.top > myRect.bottom)
+        return FALSE;
+
+    // 所有边界检查都通过，说明有碰撞
+    return TRUE;
 }

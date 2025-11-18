@@ -347,7 +347,6 @@ void CMario::ApplyPhysics(float deltaTime)
     m_nX += static_cast<int>(m_fVelocityX);
     m_nY += static_cast<int>(m_fVelocityY);
 }
-
 // 新增：检查碰撞
 // 全新的碰撞检测方法 - 简单可靠
 void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
@@ -494,12 +493,20 @@ CRect CMario::GetFeetRect() const
 // 新增：获取头部碰撞区域
 CRect CMario::GetHeadRect() const
 {
-    // 头部区域：身体顶部的一小部分区域
-    int headHeight = 10;
-    return CRect(m_nX + 5, m_nY,
-        m_nX + m_nWidth - 5, m_nY + headHeight);
-}
+    // 头部区域：只有当马里奥向上移动时才检测
+     // 减少检测区域的高度，使其更精确
+    int headHeight = 4;  // 更小的高度
+    int sideMargin = 8;  // 更大的边距
 
+    if (m_State == MarioState::BIG || m_State == MarioState::FIRE)
+    {
+        headHeight = 6;
+        sideMargin = 10;
+    }
+
+    return CRect(m_nX + sideMargin, m_nY,
+        m_nX + m_nWidth - sideMargin, m_nY + headHeight);
+}
 // 新增：获取身体碰撞区域
 CRect CMario::GetBodyRect() const
 {

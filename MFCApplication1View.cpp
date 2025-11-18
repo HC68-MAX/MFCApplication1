@@ -316,6 +316,19 @@ void CMFCApplication1View::OnTimer(UINT_PTR nIDEvent)
     CView::OnTimer(nIDEvent);
 }
 // 修改 UpdateGame 方法
+void CMFCApplication1View::ProcessBrickItems()
+{
+    auto bricksWithItems = m_TileMap.GetBricksThatShouldSpawnItems();
+
+    for (auto brick : bricksWithItems)
+    {
+        // 生成金币（暂时先简单处理）
+        CGameState::GetInstance().AddCoin();
+        TRACE(_T("问号砖块生成金币! 当前金币: %d\n"), CGameState::GetInstance().GetCoins());
+
+        // 这里以后可以扩展为生成蘑菇、火焰花等道具
+    }
+}
 void CMFCApplication1View::UpdateGame()
 {
     // 将输入状态传递给马里奥
@@ -332,9 +345,16 @@ void CMFCApplication1View::UpdateGame()
     // 使用瓦片地图进行碰撞检测（现在包括独立对象）
     std::vector<CRect> solidObjects = m_TileMap.GetAllCollisionRects();
     m_Mario.CheckCollisions(solidObjects);
+
     // 检查金币碰撞
     m_TileMap.CheckCoinCollisions(m_Mario.GetRect());
+    // 检查问号砖块碰撞，只有当马里奥向上移动时才检测
+    CRect marioHead = m_Mario.GetHeadRect();
+    m_TileMap.CheckQuestionBlockHit(marioHead, m_Mario.IsMovingUp());
+    ProcessBrickItems();
 }
+// 处理砖块生成的道具
+
 // 新增：绘制调试碰撞信息
 void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
 {
@@ -367,7 +387,37 @@ void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
         pDC->LineTo(screenRect.left, screenRect.bottom);
         pDC->LineTo(screenRect.left, screenRect.top);
     }
+    // 绘制砖块碰撞区域（紫色）
+    CPen purplePen(PS_SOLID, 2, RGB(255, 0, 255));
+    pDC->SelectObject(&purplePen);
 
+    for (const auto& brick : m_TileMap.GetBricks())
+    {
+        if (brick.CanBeHitFromBelow())
+        {
+            CRect brickRect = brick.GetRect();
+            CRect screenBrickRect(
+                brickRect.left - m_nCameraX,
+                brickRect.top - m_nCameraY,
+                brickRect.right - m_nCameraX,
+                brickRect.bottom - m_nCameraY
+            );
+
+            pDC->MoveTo(screenBrickRect.left, screenBrickRect.top);
+            pDC->LineTo(screenBrickRect.right, screenBrickRect.top);
+            pDC->LineTo(screenBrickRect.right, screenBrickRect.bottom);
+            pDC->LineTo(screenBrickRect.left, screenBrickRect.bottom);
+            pDC->LineTo(screenBrickRect.left, screenBrickRect.top);
+
+            // 在问号砖块上标记
+            if (brick.GetBrickType() == CBrick::QUESTION)
+            {
+                pDC->SetTextColor(RGB(255, 0, 255));
+                pDC->SetBkMode(TRANSPARENT);
+                pDC->TextOut(screenBrickRect.left + 5, screenBrickRect.top + 5, _T("?"));
+            }
+        }
+    }
     // 2. 绘制马里奥的碰撞框（绿色）- 使用屏幕坐标
     pDC->SelectObject(&greenPen);
 
