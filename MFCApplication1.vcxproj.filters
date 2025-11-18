@@ -84,7 +84,10 @@
     <ClInclude Include="Game\Core\ResourceIDs.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Core\TextureManager.h">
+    <ClInclude Include="Game\Objects\Coin.h">
+      <Filter>Game\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Core\GameState.h">
       <Filter>Game\Core</Filter>
     </ClInclude>
   </ItemGroup>
@@ -131,7 +134,10 @@
     <ClCompile Include="Game\Core\SpriteConfig.cpp">
       <Filter>Game\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Core\TextureManager.cpp">
+    <ClCompile Include="Game\Objects\Coin.cpp">
+      <Filter>Game\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Core\GameState.cpp">
       <Filter>Game\Core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -164,7 +170,22 @@
     <Image Include="Game\Resources\mario_bros.bmp">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="game\resources\bitmap3.bmp">
+    <Image Include="Game\Resources\mario_hatsune_spritesheet.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Game\Resources\viewfile.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Game\Resources\viewfile_resized.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Game\Resources\miku.bmp.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Game\Resources\miku_32_atlas.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Game\Resources\miku_48_atlas.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

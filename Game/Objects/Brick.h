@@ -5,20 +5,20 @@
 #include "../Core/GameConfig.h"  
 #include "../Core/ResourceManager.h"  
 #include "../Core/SpriteRenderer.h"
-
+#include "../Core/SpriteConfig.h"
 class CBrick : public CGameObject
 {
 public:
     CBrick();
     CBrick(int x, int y, int width = CGameConfig::BRICK_WIDTH, int height = CGameConfig::BRICK_HEIGHT);
     virtual ~CBrick();
+ void DrawWithSprite(CDC* pDC, int screenX, int screenY);
 
     // 重写基类虚函数
     void Update(float deltaTime) override;
     void Draw(CDC* pDC) override;
     // 新增：使用精灵渲染器绘制
-    void DrawWithSprite(CDC* pDC, int screenX, int screenY);
-
+   
     // 新增碰撞相关方法
     BOOL CanBeHitFromBelow() const { return m_Type == QUESTION && !m_bIsEmpty; }
     void SetHitAnimation(BOOL hit) { m_bIsHit = hit; m_nHitTimer = 0; }

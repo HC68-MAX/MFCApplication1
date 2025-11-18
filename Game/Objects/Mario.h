@@ -4,7 +4,15 @@
 #include "GameObject.h"  // 包含基类
 #include <vector>
 #include "../Core/GameConfig.h"  // 添加这行
-
+#include "../Core/ResourceManager.h"
+#include "../Core/SpriteRenderer.h"
+#include "../Core/SpriteConfig.h"
+// 在Mario.h中添加
+enum class MarioSkin
+{
+    MARIO,      // 原始马里奥
+    MIKU        // 初音未来
+};
 // 马里奥状态枚举
 enum class MarioState
 {
@@ -12,7 +20,6 @@ enum class MarioState
     BIG,        // 大马里奥  
     FIRE        // 火焰马里奥
 };
-
 // 方向枚举
 enum class Direction
 {
@@ -68,22 +75,29 @@ public:
     // 状态管理
     MarioState GetState() const { return m_State; }
     void SetState(MarioState state);
-
-    void DrawSmallMario(CDC* pDC, COLORREF skinColor, COLORREF overallsColor,
-        COLORREF hatColor, COLORREF shoeColor);
-    void DrawBigMario(CDC* pDC, COLORREF skinColor, COLORREF overallsColor,
-        COLORREF hatColor, COLORREF shoeColor);
-    void DrawWithGeometry(CDC* pDC);
+    // 皮肤管理
+    MarioSkin GetSkin() const { return m_Skin; }
+    void SetSkin(MarioSkin skin);
+    // 动画系统
+    void UpdateMikuAnimation(float deltaTime);
+    SSpriteCoord GetMikuSpriteCoord() const;
+    // Miku动画状态
+    float m_fMikuAnimTimer;
+   
 private:
     // 更新马里奥大小（根据状态）
     void UpdateSize();
-
+    // 根据皮肤更新图集和尺寸
+    void UpdateSkinResources();
 private:
     // 速度相关
     float m_fVelocityX, m_fVelocityY; // X和Y方向速度
     float m_fAcceleration;            // 加速度
     float m_fMaxSpeed;                // 最大速度
-
+    int m_nMikuCurrentFrame=1;
+    static const int MIKU_WALK_FRAMES = 32; // 根据实际帧数调整
+    static const int MIKU_FRAME_WIDTH = 48; // 根据实际帧宽度调整
+    static const int MIKU_FRAME_HEIGHT = 48; // 根据实际帧高度调整
     // 跳跃相关
     float m_fJumpForce;               // 跳跃力
     float m_fGravity;                 // 重力
@@ -109,5 +123,6 @@ private:
     BOOL m_bCanJump;             // 是否可以跳跃
     // 马里奥状态
     MarioState m_State;               // 当前状态
-
+    // 添加皮肤成员变量
+    MarioSkin m_Skin;
 };

@@ -5,6 +5,8 @@
 #include "GameObject.h"
 #include "../Core/GameConfig.h" 
 #include "../Core/SpriteConfig.h"
+#include "../Core/ResourceManager.h"
+#include "../Core/SpriteRenderer.h"
 class CPipe : public CGameObject
 {
 public:

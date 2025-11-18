@@ -5,10 +5,12 @@
 #include "Game/Objects/Mario.h"
 #include "Game/Objects/Pipe.h"
 #include "Game/Objects/Brick.h"
+#include "Game/Objects/Coin.h"
 #include "Game/Core/ResourceManager.h"
 #include "Game/Core/SpriteRenderer.h"
 #include "Game/Map/TileMap.h"
 #include "Game/Core/GameConfig.h" 
+#include "Game/Core/GameState.h" 
 #include <vector>
 #include <chrono>
 class CMFCApplication1View : public CView
@@ -58,13 +60,7 @@ protected:
 	// 使用全局配置初始化屏幕尺寸
 	int m_nScreenWidth = CGameConfig::SCREEN_WIDTH;
 	int m_nScreenHeight = CGameConfig::SCREEN_HEIGHT;
-/*
-	// 测试用 - 马里奥位置
-	int m_nMarioX;
-	int m_nMarioY;
-	int m_nMarioWidth;
-	int m_nMarioHeight;
-*/
+
 // 添加新的马里奥对象
 	CMario m_Mario;  // 马里奥对象实例
 
@@ -105,6 +101,7 @@ protected:
 	void UpdateCamera();
 	// 新增：创建占位符位图
 	void CalculateDeltaTime();
+	void CheckCoinCollisions();
 };
 
 #ifndef _DEBUG  // MFCApplication1View.cpp 中的调试版本

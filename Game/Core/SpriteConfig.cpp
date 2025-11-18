@@ -6,6 +6,7 @@
 const CString CSpriteConfig::TILESET_MAIN = _T("TilesetMain");
 const CString CSpriteConfig::TILESET_MARIO = _T("MarioSprites");
 const CString CSpriteConfig::TILESET_ENEMIES = _T("EnemySprites");
+const CString CSpriteConfig::TILESET_MIKU = _T("Miku");
 CString CSpriteConfig::GetSpritesheetForMario()
 {
     return TILESET_MARIO;
@@ -21,43 +22,51 @@ CString CSpriteConfig::GetSpritesheetForPipe()
     return TILESET_MAIN;
 }
 
+CString CSpriteConfig::GetSpritesheetForMiku()
+{
+    return TILESET_MIKU;
+}
 CString CSpriteConfig::GetSpritesheetForTile(int tileID)
 {
     return TILESET_MAIN;
 }
-// === 主精灵表坐标 ===
+// === 初音未来精灵表坐标 ===
+// 根据您的Miku图集实际布局调整这些坐标
 
+// === 主精灵表坐标 ===
+#define mario_y 9
+#define size 16
 // 马里奥 - 小
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_STAND_RIGHT = { 11 * 16, 15 * 16, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK1_RIGHT = { 6 * 16, 15 * 16, 16, 32  };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK2_RIGHT = { 7 * 16, 15 * 16, 16, 32  };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK3_RIGHT = { 5 * 16, 15 * 16, 16, 32  };
-const SSpriteCoord CSpriteConfig::MARIO_SMALL_JUMP_RIGHT =  { 15 * 16, 15 * 16,16, 32  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_STAND_RIGHT = { 11 * size,(mario_y + 2) * size, 16, 16  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK1_RIGHT = { 6 * size, (mario_y + 2) * size, 16, 16  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK2_RIGHT = { 7 * size, (mario_y + 2) * size, 16, 16  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK3_RIGHT = { 5 * size, (mario_y + 2) * size, 16, 16  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_JUMP_RIGHT  = { 15 * size,(mario_y + 2) * size, 16, 16  };
 // 马里奥 - 大
-const SSpriteCoord CSpriteConfig::MARIO_BIG_STAND_RIGHT = { 0, 16, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK1_RIGHT = { 16, 16, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK2_RIGHT = { 32, 16, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK3_RIGHT = { 32, 16, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_BIG_JUMP_RIGHT = { 48, 16, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_BIG_STAND_RIGHT = { 11 * size, mario_y * size, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK1_RIGHT = { 6  * size, mario_y * size, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK2_RIGHT = { 7  * size, mario_y * size, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK3_RIGHT = { 5  * size, mario_y * size, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_BIG_JUMP_RIGHT  = { 15 * size, mario_y * size, 16, 32 };
 
 // 马里奥 - 火焰
-const SSpriteCoord CSpriteConfig::MARIO_FIRE_STAND_RIGHT = { 0, 48, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK1_RIGHT = { 16, 48, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK2_RIGHT = { 32, 48, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK3_RIGHT = { 32, 48, 16, 32 };
-const SSpriteCoord CSpriteConfig::MARIO_FIRE_JUMP_RIGHT = { 48, 48, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_FIRE_STAND_RIGHT = { 11 * size, 0 * size, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK1_RIGHT = { 6  * size, 0 * size, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK2_RIGHT = { 7  * size, 0 * size, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_FIRE_WALK3_RIGHT = { 5  * size, 0 * size, 16, 32 };
+const SSpriteCoord CSpriteConfig::MARIO_FIRE_JUMP_RIGHT  = { 15 * size, 0 * size, 16, 32 };
 
 // 砖块
-const SSpriteCoord CSpriteConfig::BRICK_NORMAL = { 16, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::BRICK_QUESTION = { 24*16, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::BRICK_QUESTION_HIT = { 0, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::BRICK_HARD = { 24*16, 6*16, 16, 16 };
+const SSpriteCoord CSpriteConfig::BRICK_NORMAL         = { 0  * size, 0* size, 16, 16 };
+const SSpriteCoord CSpriteConfig::BRICK_QUESTION       = { 24 * size, 0* size, 16, 16 };
+const SSpriteCoord CSpriteConfig::BRICK_QUESTION_HIT   = { 0  * size, 0* size, 16, 16 };
+const SSpriteCoord CSpriteConfig::BRICK_HARD           = { 24 * size, 6* size, 16, 16 };
 
 // 水管
-const SSpriteCoord CSpriteConfig::PIPE_TOP_LEFT = { 0, 8*16, 16, 16 };
-const SSpriteCoord CSpriteConfig::PIPE_TOP_RIGHT = { 16, 8*16, 16, 16 };
-const SSpriteCoord CSpriteConfig::PIPE_BODY_LEFT = { 0, 9*16, 16, 16 };
-const SSpriteCoord CSpriteConfig::PIPE_BODY_RIGHT = { 16, 9 * 16, 16, 16 };
+const SSpriteCoord CSpriteConfig::PIPE_TOP_LEFT = { 0, 8* size, 16, 16 };
+const SSpriteCoord CSpriteConfig::PIPE_TOP_RIGHT = { 16, 8* size, 16, 16 };
+const SSpriteCoord CSpriteConfig::PIPE_BODY_LEFT = { 0, 9* size, 16, 16 };
+const SSpriteCoord CSpriteConfig::PIPE_BODY_RIGHT = { 16, 9 * size, 16, 16 };
 
 // === 瓦片精灵表坐标 ===
 
@@ -79,10 +88,10 @@ const SSpriteCoord CSpriteConfig::GOOMBA_WALK2 = { 16, 0, 16, 16 };
 const SSpriteCoord CSpriteConfig::GOOMBA_SQUISHED = { 32, 0, 16, 8 };
 
 // 金币
-const SSpriteCoord CSpriteConfig::COIN_SPIN1 = { 48, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::COIN_SPIN2 = { 64, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::COIN_SPIN3 = { 80, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::COIN_SPIN4 = { 96, 0, 16, 16 };
+const SSpriteCoord CSpriteConfig::COIN_SPIN1 = { 24 * size, 1 * size, 16, 16 };
+const SSpriteCoord CSpriteConfig::COIN_SPIN2 = { 25 * size, 1 * size, 16, 16 };
+const SSpriteCoord CSpriteConfig::COIN_SPIN3 = { 26 * size, 1 * size, 16, 16 };
+const SSpriteCoord CSpriteConfig::COIN_SPIN4 = { 24 * size, 1 * size, 16, 16 };
 
 // 工具函数：根据精灵坐标确定使用哪个精灵表
 CString CSpriteConfig::GetSpritesheetForSprite(const SSpriteCoord& coord)

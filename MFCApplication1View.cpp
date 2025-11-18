@@ -15,7 +15,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-#include "Game/Objects/Mario.h"
+
 
 // CMFCApplication1View
 
@@ -224,21 +224,28 @@ void CMFCApplication1View::InitializeResources()
 
     // 测试获取贴图 - 使用新的名称
     TRACE(_T("测试获取贴图...\n"));
-    CBitmap* testMain = resMgr.GetBitmap(CSpriteConfig::TILESET_MAIN);
+    CBitmap* testMain  = resMgr.GetBitmap(CSpriteConfig::TILESET_MAIN);
     CBitmap* testMario = resMgr.GetBitmap(CSpriteConfig::TILESET_MARIO);
+    CBitmap* testMiku  = resMgr.GetBitmap(CSpriteConfig::TILESET_MIKU);
     TRACE(_T("主贴图集: %p\n"), testMain);
     TRACE(_T("马里奥贴图集: %p\n"), testMario);
+    TRACE(_T("初音未来图集: %p\n"), testMiku);
     if (testMain)
     {
         BITMAP bm;
         testMain->GetBitmap(&bm);
-        TRACE(_T("贴图尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
+        TRACE(_T("主贴图集尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
        
     }
     if (testMario) {
         BITMAP bm;
         testMario->GetBitmap(&bm);
         TRACE(_T("马里奥贴图集尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
+    }
+    if (testMiku) {
+        BITMAP bm;
+        testMiku->GetBitmap(&bm);
+        TRACE(_T("初音未来贴图集尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
     }
     else
     {
@@ -308,8 +315,6 @@ void CMFCApplication1View::OnTimer(UINT_PTR nIDEvent)
 
     CView::OnTimer(nIDEvent);
 }
-
-// 更新游戏逻辑
 // 修改 UpdateGame 方法
 void CMFCApplication1View::UpdateGame()
 {
@@ -319,14 +324,17 @@ void CMFCApplication1View::UpdateGame()
     // 更新马里奥状态（使用世界坐标）
     m_Mario.Update(m_fDeltaTime);
 
+    // 更新金币动画
+    m_TileMap.UpdateCoins(m_fDeltaTime);
     // 更新摄像机
     UpdateCamera();
 
     // 使用瓦片地图进行碰撞检测（现在包括独立对象）
     std::vector<CRect> solidObjects = m_TileMap.GetAllCollisionRects();
     m_Mario.CheckCollisions(solidObjects);
+    // 检查金币碰撞
+    m_TileMap.CheckCoinCollisions(m_Mario.GetRect());
 }
-
 // 新增：绘制调试碰撞信息
 void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
 {
@@ -494,7 +502,14 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
         m_bKeyJump ? _T("↑") : _T(" "));
     pDC->TextOut(10, 50, strInfo);
 
-    // 第4行：马里奥状态和帧率
+    // 第4行：游戏状态信息
+    strInfo.Format(_T("金币: %d   分数: %d   生命: %d"),
+        CGameState::GetInstance().GetCoins(),
+        CGameState::GetInstance().GetScore(),
+        CGameState::GetInstance().GetLives());
+    pDC->TextOut(10, 70, strInfo);
+
+    // 第5行：马里奥状态和皮肤
     CString strMarioState;
     switch (m_Mario.GetState())
     {
@@ -509,10 +524,11 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
         break;
     }
 
-    strInfo.Format(_T("角色: %s   帧率: %.1f FPS"),
-        strMarioState, m_fSmoothedFPS);
-    pDC->TextOut(10, 70, strInfo);
-
+    // 添加皮肤信息显示
+    CString skinStr = (m_Mario.GetSkin() == MarioSkin::MARIO) ? _T("马里奥") : _T("初音未来");
+    strInfo.Format(_T("皮肤: %s   角色: %s   帧率: %.1f FPS"),
+        skinStr, strMarioState, m_fSmoothedFPS);
+    pDC->TextOut(10, 90, strInfo);
     // 调试模式特定信息
     if (m_bDebugMode)
     {
@@ -610,6 +626,16 @@ void CMFCApplication1View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
     case 'd':
         m_bDebugMode = !m_bDebugMode;
 		break;
+    case 'M':   // 按M键切换Miku皮肤
+    case 'm':
+    {
+        MarioSkin currentSkin = m_Mario.GetSkin();
+        if (currentSkin == MarioSkin::MARIO)
+            m_Mario.SetSkin(MarioSkin::MIKU);
+        else
+            m_Mario.SetSkin(MarioSkin::MARIO);
+    }
+    break;
     }
 
     CView::OnKeyDown(nChar, nRepCnt, nFlags);

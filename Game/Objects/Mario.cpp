@@ -1,9 +1,6 @@
 // Game/Objects/Mario.cpp
 #include <afxwin.h>  // 直接包含MFC头文件
 #include "Mario.h"
-#include "../Core/ResourceManager.h"
-#include "../Core/SpriteRenderer.h"
-#include "../Core/SpriteConfig.h"
 
 // 构造函数
 CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameConfig::MARIO_SMALL_HEIGHT)  // 调用基类构造函数
@@ -11,14 +8,16 @@ CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameCo
 
     m_fVelocityX = 0.0f;
     m_fVelocityY = 0.0f;
-
+    m_Skin = MarioSkin::MARIO;
+    m_fMikuAnimTimer = 0.0f;
+    m_nMikuCurrentFrame = 1;
     // 使用全局配置的物理参数
     m_fAcceleration = CGameConfig::MARIO_ACCELERATION;
     m_fMaxSpeed = CGameConfig::MARIO_MAX_SPEED;
     m_fJumpForce = CGameConfig::MARIO_JUMP_FORCE;
     m_fGravity = CGameConfig::GRAVITY;
 
-
+    m_Skin = MarioSkin::MARIO; // 默认使用马里奥皮肤
     // 初始化状态
     m_bIsJumping = FALSE;
     m_bIsOnGround = FALSE;
@@ -61,82 +60,85 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
     if (!m_bVisible) return;
 
     CResourceManager& resMgr = CResourceManager::GetInstance();
-    // 使用马里奥专用的贴图集
-    CBitmap* pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
-
-
-    if (!pBitmap) {
-        // 如果没有贴图，使用几何绘制
-        DrawWithGeometry(pDC);
-        return;
-    }
-
+    CBitmap* pBitmap = nullptr;
     SSpriteCoord spriteCoord;
-
-    // 根据状态和动作选择精灵（全部使用向右的贴图）
-    switch (m_State)
+    // 根据皮肤选择图集和精灵坐标
+    if (m_Skin == MarioSkin::MIKU)
     {
-    case MarioState::SMALL:
-        if (m_bIsJumping)
-            spriteCoord = CSpriteConfig::MARIO_SMALL_JUMP_RIGHT;
-        else if (IsMoving())
-        {
-            // 三个行走动作循环
-            DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
-            if (animTime < 250)
-                spriteCoord = CSpriteConfig::MARIO_SMALL_WALK1_RIGHT;
-            else if (animTime < 500)
-                spriteCoord = CSpriteConfig::MARIO_SMALL_WALK2_RIGHT;
-            else
-                spriteCoord = CSpriteConfig::MARIO_SMALL_WALK3_RIGHT;
-        }
-        else
-            spriteCoord = CSpriteConfig::MARIO_SMALL_STAND_RIGHT;
-        break;
+        // 使用Miku图集
+        pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMiku());
 
-    case MarioState::BIG:
-        if (m_bIsJumping)
-            spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
-        else if (IsMoving())
+        // 使用新的动画系统获取Miku精灵坐标
+        spriteCoord = GetMikuSpriteCoord();
+    }
+    else
+    {
+        // 原始马里奥皮肤（保持原有逻辑）
+        pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
+        // 根据状态和动作选择精灵（全部使用向右的贴图）
+        switch (m_State)
         {
-            // 三个行走动作循环
-            DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
-        if (animTime < 250)
-            spriteCoord = CSpriteConfig::MARIO_BIG_WALK1_RIGHT;
-        else if (animTime < 500)
-            spriteCoord = CSpriteConfig::MARIO_BIG_WALK2_RIGHT;
-        else
-            spriteCoord = CSpriteConfig::MARIO_BIG_WALK3_RIGHT;
-        }
-        else
-            spriteCoord = CSpriteConfig::MARIO_BIG_STAND_RIGHT;
-        break;
-
-    case MarioState::FIRE:
-        if (m_bIsJumping)
-            spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
-        else if (IsMoving())
-        {
-            // 三个行走动作循环
-            DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
-            if (animTime < 250)
-                spriteCoord = CSpriteConfig::MARIO_FIRE_WALK1_RIGHT;
-            else if (animTime < 500)
-                spriteCoord = CSpriteConfig::MARIO_FIRE_WALK2_RIGHT;
+        case MarioState::SMALL:
+            if (m_bIsJumping)
+                spriteCoord = CSpriteConfig::MARIO_SMALL_JUMP_RIGHT;
+            else if (IsMoving())
+            {
+                // 三个行走动作循环
+                DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                if (animTime < 250)
+                    spriteCoord = CSpriteConfig::MARIO_SMALL_WALK1_RIGHT;
+                else if (animTime < 500)
+                    spriteCoord = CSpriteConfig::MARIO_SMALL_WALK2_RIGHT;
+                else
+                    spriteCoord = CSpriteConfig::MARIO_SMALL_WALK3_RIGHT;
+            }
             else
-                spriteCoord = CSpriteConfig::MARIO_FIRE_WALK3_RIGHT;
+                spriteCoord = CSpriteConfig::MARIO_SMALL_STAND_RIGHT;
+            break;
+
+        case MarioState::BIG:
+            if (m_bIsJumping)
+                spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
+            else if (IsMoving())
+            {
+                // 三个行走动作循环
+                DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                if (animTime < 250)
+                    spriteCoord = CSpriteConfig::MARIO_BIG_WALK1_RIGHT;
+                else if (animTime < 500)
+                    spriteCoord = CSpriteConfig::MARIO_BIG_WALK2_RIGHT;
+                else
+                    spriteCoord = CSpriteConfig::MARIO_BIG_WALK3_RIGHT;
+            }
+            else
+                spriteCoord = CSpriteConfig::MARIO_BIG_STAND_RIGHT;
+            break;
+
+        case MarioState::FIRE:
+            if (m_bIsJumping)
+                spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
+            else if (IsMoving())
+            {
+                // 三个行走动作循环
+                DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                if (animTime < 250)
+                    spriteCoord = CSpriteConfig::MARIO_FIRE_WALK1_RIGHT;
+                else if (animTime < 500)
+                    spriteCoord = CSpriteConfig::MARIO_FIRE_WALK2_RIGHT;
+                else
+                    spriteCoord = CSpriteConfig::MARIO_FIRE_WALK3_RIGHT;
+            }
+            else
+                spriteCoord = CSpriteConfig::MARIO_FIRE_STAND_RIGHT;
+            break;
         }
-        else
-            spriteCoord = CSpriteConfig::MARIO_FIRE_STAND_RIGHT;
-        break;
     }
     // 判断是否需要水平翻转
     BOOL flipHorizontal = (m_Direction == Direction::LEFT);
 
     // 使用精灵渲染器绘制，添加翻转参数
     CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-        CGameConfig::MARIO_SMALL_WIDTH, CGameConfig::MARIO_SMALL_HEIGHT,
-        spriteCoord.x, spriteCoord.y,
+        m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,
         spriteCoord.width, spriteCoord.height, flipHorizontal);
 }
 // 修改现有的DrawAt方法，使用新的精灵绘制方法
@@ -164,11 +166,49 @@ BOOL CMario::IsMoving() const
     // 只有当水平速度足够大时，才认为是在移动
     return abs(m_fVelocityX) > 0.1f;
 }
-
+// 设置皮肤方法
+// 根据皮肤更新资源
+void CMario::UpdateSkinResources()
+{
+    // 可以根据需要调整不同皮肤的大小
+    switch (m_Skin)
+    {
+    case MarioSkin::MARIO:
+        // 使用默认的马里奥尺寸
+        UpdateSize(); // 调用原有的尺寸更新方法
+        break;
+    case MarioSkin::MIKU:
+        // 为Miku设置合适的尺寸
+        m_nWidth  = CGameConfig::MIKU_WIDTH;   // 根据Miku图集调整
+        m_nHeight = CGameConfig::MIKU_HEIGHT;  // 根据Miku图集调整
+        break;
+    }
+}
 // 修改现有的Draw方法
 void CMario::Draw(CDC* pDC)
 {
     DrawWithSprite(pDC, m_nX, m_nY);
+}
+// 设置皮肤方法
+void CMario::SetSkin(MarioSkin skin)
+{
+    if (m_Skin != skin)
+    {
+        // 保存当前状态的底部位置（保持脚部位置不变）
+        int currentBottom = m_nY + m_nHeight;
+
+        m_Skin = skin;
+
+        // 更新皮肤相关资源，但不改变碰撞箱尺寸
+        UpdateSkinResources();
+
+        // 调整位置：保持脚部位置不变
+        m_nY = currentBottom - m_nHeight;
+
+        // 重置动画状态
+        m_fMikuAnimTimer = 0.0f;
+        m_nMikuCurrentFrame = 1;
+    }
 }
 // 更新马里奥状态
 void CMario::Update(float deltaTime)
@@ -178,7 +218,11 @@ void CMario::Update(float deltaTime)
 
     // 应用物理
     ApplyPhysics(deltaTime);
-
+    // 更新Miku动画
+    if (m_Skin == MarioSkin::MIKU)
+    {
+        UpdateMikuAnimation(deltaTime);
+    }
     // 更新移动状态 - 基于实际速度
     m_bIsMoving = (abs(m_fVelocityX) > 0.01f);
 
@@ -189,6 +233,43 @@ void CMario::Update(float deltaTime)
         m_fVelocityX = 0;
     }
 
+}
+// Miku动画更新
+void CMario::UpdateMikuAnimation(float deltaTime)
+{
+    if (m_bIsMoving && m_bIsOnGround)
+    {
+        // 行走动画
+        m_fMikuAnimTimer += deltaTime;
+        float frameTime = 0.05f; // 每帧显示时间，可调整来控制动画速度
+
+        if (m_fMikuAnimTimer >= frameTime)
+        {
+            m_fMikuAnimTimer = 0.0f;
+            m_nMikuCurrentFrame = (m_nMikuCurrentFrame + 1) % MIKU_WALK_FRAMES;
+        }
+    }
+    else if (m_bIsJumping || !m_bIsOnGround)
+    {
+        // 跳跃或下落状态，使用特定帧
+        m_nMikuCurrentFrame = 1; // 使用第一帧作为跳跃帧，或者根据需要调整
+        m_fMikuAnimTimer = 0.0f;
+    }
+    else
+    {
+        // 站立状态
+        m_nMikuCurrentFrame = 1; // 使用第一帧作为站立帧
+        m_fMikuAnimTimer = 0.0f;
+    }
+}
+
+// 获取Miku精灵坐标
+SSpriteCoord CMario::GetMikuSpriteCoord() const
+{
+    int frameX = (m_nMikuCurrentFrame+1) * MIKU_FRAME_WIDTH;
+
+    // 假设图集从(0,0)开始横向排列所有帧
+    return SSpriteCoord(frameX, 0, MIKU_FRAME_WIDTH, MIKU_FRAME_HEIGHT);
 }
 // 新的输入处理方法
 void CMario::HandleInput(BOOL left, BOOL right, BOOL jump)
@@ -371,23 +452,15 @@ void CMario::StopMoving()
     m_bInputRight = FALSE;
 }
 
-// 新增：几何绘制备用方法
-void CMario::DrawWithGeometry(CDC* pDC)
-{
-    // 这里保留原来的几何绘制代码作为备用
-    COLORREF skinColor = RGB(255, 204, 153);
-    COLORREF overallsColor = RGB(0, 0, 255);
-    COLORREF hatColor = RGB(255, 0, 0);
-    COLORREF shoeColor = RGB(139, 69, 19);
-
-    // ... 原来的几何绘制代码 ...
-}
-
 // 设置状态并更新大小
 void CMario::SetState(MarioState state)
 {
+    // 保存当前状态的底部位置
+    int currentBottom = m_nY + m_nHeight;
     m_State = state;
     UpdateSize();
+    // 调整位置：保持脚部位置不变
+    m_nY = currentBottom - m_nHeight;
 }
 // 根据状态更新马里奥大小
 void CMario::UpdateSize()

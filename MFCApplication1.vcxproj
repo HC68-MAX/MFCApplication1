@@ -185,13 +185,14 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="Game\Core\GameConfig.h" />
+    <ClInclude Include="Game\Core\GameState.h" />
     <ClInclude Include="Game\Core\ResourceIDs.h" />
     <ClInclude Include="Game\Core\ResourceManager.h" />
     <ClInclude Include="Game\Core\SpriteConfig.h" />
     <ClInclude Include="Game\Core\SpriteRenderer.h" />
-    <ClInclude Include="Game\Core\TextureManager.h" />
     <ClInclude Include="Game\Map\TileMap.h" />
     <ClInclude Include="Game\Objects\Brick.h" />
+    <ClInclude Include="Game\Objects\Coin.h" />
     <ClInclude Include="Game\Objects\GameObject.h" />
     <ClInclude Include="Game\Objects\Mario.h" />
     <ClInclude Include="Game\Objects\Pipe.h" />
@@ -207,6 +208,9 @@
     <ClCompile Include="Game\Core\GameConfig.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Game\Core\GameState.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Game\Core\ResourceManager.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -216,13 +220,13 @@
     <ClCompile Include="Game\Core\SpriteRenderer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Game\Core\TextureManager.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="Game\Map\TileMap.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Game\Objects\Brick.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Game\Objects\Coin.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Game\Objects\GameObject.cpp">
@@ -254,7 +258,13 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Game\Resources\mario_bros.bmp" />
+    <Image Include="Game\Resources\mario_hatsune_spritesheet.bmp" />
+    <Image Include="Game\Resources\miku.bmp.bmp" />
+    <Image Include="Game\Resources\miku_32_atlas.bmp" />
+    <Image Include="Game\Resources\miku_48_atlas.bmp" />
     <Image Include="Game\Resources\tile_set.bmp" />
+    <Image Include="Game\Resources\viewfile.bmp" />
+    <Image Include="Game\Resources\viewfile_resized.bmp" />
     <Image Include="res\MFCApplication1.ico" />
     <Image Include="res\MFCApplication1Doc.ico" />
     <Image Include="res\Toolbar.bmp" />

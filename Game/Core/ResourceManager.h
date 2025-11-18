@@ -6,6 +6,8 @@
 #include <map>
 #include <string>
 #include "ResourceIDs.h"
+#include "GameConfig.h" 
+
 class CResourceManager
 {
 public:

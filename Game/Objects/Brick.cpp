@@ -1,8 +1,7 @@
 // Game/Objects/Brick.cpp
 #include <afxwin.h>  // 直接包含MFC头文件
 #include "Brick.h"
-#include "GameObject.h"
-#include "..\Core\SpriteConfig.h"
+
 // 构造函数
 CBrick::CBrick() : CGameObject(0, 0, CGameConfig::BRICK_WIDTH, CGameConfig::BRICK_HEIGHT)
 {

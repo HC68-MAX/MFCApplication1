@@ -96,12 +96,21 @@ BOOL CTileMap::LoadLevel1()
     SetTile(21, 7, 6, TRUE, _T("pipe"));
     SetTile(21, 8, 8, TRUE, _T("pipe"));
     SetTile(21, 9, 8, TRUE, _T("pipe"));
+    // 添加金币
+    AddCoin(5 * CGameConfig::TILE_SIZE, 6 * CGameConfig::TILE_SIZE);
+    AddCoin(6 * CGameConfig::TILE_SIZE, 6 * CGameConfig::TILE_SIZE);
+    AddCoin(11 * CGameConfig::TILE_SIZE, 4 * CGameConfig::TILE_SIZE);
+    AddCoin(12 * CGameConfig::TILE_SIZE, 4 * CGameConfig::TILE_SIZE);
+    AddCoin(13 * CGameConfig::TILE_SIZE, 4 * CGameConfig::TILE_SIZE);
 
-
+    // 在平台上放金币
+    for (int x = 3; x < 8; x++)
+    {
+        AddCoin(x * CGameConfig::TILE_SIZE, 6 * CGameConfig::TILE_SIZE);
+    }
     TRACE(_T("关卡1加载完成: 砖块=%d, 水管=%d\n"), m_Bricks.size(), m_Pipes.size());
     return TRUE;
 }
-
 // 第二关（示例）
 BOOL CTileMap::LoadLevel2()
 {
@@ -133,7 +142,6 @@ BOOL CTileMap::LoadLevel2()
     TRACE(_T("关卡2加载完成: 砖块=%d, 水管=%d\n"), m_Bricks.size(), m_Pipes.size());
     return TRUE;
 }
-
 // 第三关（示例）
 BOOL CTileMap::LoadLevel3()
 {
@@ -224,7 +232,27 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
             }
         }
     }
-    
+
+    // 绘制金币 - 使用正确的屏幕坐标
+    for (auto& coin : m_Coins)
+    {
+        if (coin.IsVisible() && !coin.IsCollected())
+        {
+            int screenX = coin.GetX() - offsetX;
+            int screenY = coin.GetY() - offsetY;
+
+            // 只绘制在屏幕范围内的金币
+            if (screenX + coin.GetWidth() < 0 || screenX >= 800 ||
+                screenY + coin.GetHeight() < 0 || screenY >= 600)
+            {
+                continue;
+            }
+
+            // 使用新的绘制方法，传入屏幕坐标
+            coin.DrawAt(pDC, screenX, screenY);
+        }
+    }
+
 }
 
 // 新增：获取所有碰撞矩形
@@ -311,16 +339,69 @@ void CTileMap::AddBrick(int x, int y, CBrick::BrickType type)
     m_Bricks.push_back(brick);
 }
 
+// 金币碰撞检测
+BOOL CTileMap::CheckCoinCollisions(const CRect& rect)
+{
+    BOOL collectedAny = FALSE;
+
+    for (auto& coin : m_Coins)
+    {
+        if (!coin.IsCollected() && coin.CheckCollision(rect))
+        {
+            coin.Collect();
+            collectedAny = TRUE;
+
+            // 更新游戏状态
+            CGameState::GetInstance().AddCoin();
+
+            TRACE(_T("金币被收集! 当前金币: %d, 分数: %d\n"),
+                CGameState::GetInstance().GetCoins(),
+                CGameState::GetInstance().GetScore());
+        }
+    }
+
+    return collectedAny;
+}
+// 移除金币（标记为已收集）
+void CTileMap::RemoveCoin(int index)
+{
+    if (index >= 0 && index < m_Coins.size())
+    {
+        m_Coins[index].Collect();
+    }
+}
 // 新增：添加水管
 void CTileMap::AddPipe(int x, int y, int height)
 {
     CPipe pipe(x, y, height);
     m_Pipes.push_back(pipe);
 }
-
-// 新增：清空所有对象
+// 新增：添加金币
 void CTileMap::ClearObjects()
 {
     m_Bricks.clear();
     m_Pipes.clear();
+    m_Coins.clear();  // 清空金币
 }
+// 添加金币方法
+void CTileMap::AddCoin(int x, int y)
+{
+    CCoin coin(x, y);
+
+    m_Coins.push_back(coin);
+}
+void CTileMap::UpdateCoins(float deltaTime)
+{
+    // 现在只需要调用一次静态方法来更新所有金币的动画
+    CCoin::UpdateGlobalAnimation(deltaTime);
+
+    // 不再需要遍历每个金币来更新动画
+    // 所有金币共享同一个动画状态
+}
+// 清空金币
+void CTileMap::ClearCoins()
+{
+    m_Coins.clear();
+}
+
+// 在ClearObjects中调用ClearCoins

@@ -11,6 +11,8 @@
 #include "../Core/ResourceManager.h"
 #include "../Core/SpriteRenderer.h"
 #include "../Core/SpriteConfig.h"
+#include "../Objects/Coin.h"  
+#include "../Core/GameState.h"   
 struct Tile
 {
     int tileID;     // 瓦片ID
@@ -56,7 +58,12 @@ public:
     // 新增：获取独立对象（用于渲染）
     const std::vector<CBrick>& GetBricks() const { return m_Bricks; }
     const std::vector<CPipe>& GetPipes() const { return m_Pipes; }
-
+    void AddCoin(int x, int y);
+    const std::vector<CCoin>& GetCoins() const { return m_Coins; }
+    void ClearCoins();
+    void UpdateCoins(float deltaTime);
+    BOOL CheckCoinCollisions(const CRect& rect);
+    void RemoveCoin(int index);
 private:
     int m_nWidth;           // 地图宽度（瓦片数）
     int m_nHeight;          // 地图高度（瓦片数）
@@ -67,7 +74,7 @@ private:
     // 新增：独立对象容器
     std::vector<CBrick> m_Bricks;
     std::vector<CPipe> m_Pipes;
-
+    std::vector<CCoin> m_Coins;
     // 新增：关卡加载方法
     BOOL LoadLevel1();
     BOOL LoadLevel2();

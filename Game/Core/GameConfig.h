@@ -8,10 +8,12 @@ class CGameConfig
 public:
     // 贴图尺寸
     static const int TILE_SIZE = 32;           // 瓦片基本尺寸
+    static const int MIKU_WIDTH  = 128;        // 初音未来宽度
+    static const int MIKU_HEIGHT = 128;        // 初音未来高度
     static const int MARIO_SMALL_WIDTH = 32;   // 小马里奥宽度
-    static const int MARIO_SMALL_HEIGHT = 64;  // 小马里奥高度
-    static const int MARIO_BIG_WIDTH = 48;     // 大马里奥宽度  
-    static const int MARIO_BIG_HEIGHT = 72;    // 大马里奥高度
+    static const int MARIO_SMALL_HEIGHT = 32;  // 小马里奥高度
+    static const int MARIO_BIG_WIDTH = 32;     // 大马里奥宽度  
+    static const int MARIO_BIG_HEIGHT = 64;    // 大马里奥高度
     static const int BRICK_WIDTH = 32;         // 砖块宽度
     static const int BRICK_HEIGHT = 32;        // 砖块高度
     static const int PIPE_WIDTH = 64;          // 水管宽度
@@ -19,7 +21,7 @@ public:
     static const int COIN_SIZE = 24;           // 金币尺寸
     static const int ENEMY_WIDTH = 32;         // 敌人宽度
     static const int ENEMY_HEIGHT = 32;        // 敌人高度
-	static const int MARIO_WALK_SPEED = 600;       // 马里奥行走速度(贴图用)
+	static const int MARIO_WALK_SPEED = 400;   // 马里奥行走速度(贴图用)
     // 屏幕和游戏设置
     static const int SCREEN_WIDTH = 800;       // 屏幕宽度
     static const int SCREEN_HEIGHT = 600;      // 屏幕高度
@@ -29,14 +31,17 @@ public:
     static const int TILE_MAP_WIDTH = 75;      // 瓦片地图宽度 (2400/32=75)
     static const int TILE_MAP_HEIGHT = 15;     // 瓦片地图高度 (600/32=18.75，向上取整)
 
-    // 物理参数
-    static const float GRAVITY;                // 重力
-    static const float MARIO_MAX_SPEED;        // 马里奥最大速度
-    static const float MARIO_ACCELERATION;     // 马里奥加速度
-    static const float MARIO_JUMP_FORCE;       // 马里奥跳跃力
-    static const float MARIO_JUMP_MAX_TIME;    // 马里奥最大跳跃时间
+    // 物理常量定义(float类型改为constexpr)
+    static constexpr float CGameConfig::GRAVITY = 0.8f;				    // 重力
+    static constexpr float CGameConfig::MARIO_MAX_SPEED = 8.0f;		    // 马里奥最大速度
+    static constexpr float CGameConfig::MARIO_ACCELERATION = 0.5f;		// 马里奥加速度
+    static constexpr float CGameConfig::MARIO_JUMP_FORCE = -20.0f;		// 马里奥跳跃力
+    static constexpr float CGameConfig::MARIO_JUMP_MAX_TIME = 0.2f;	    // 马里奥最大跳跃时间
 
-
+    // 动画参数
+    static const int COIN_SPIN_FRAMES = 3;
+    // 每帧持续时间（秒）(float类型改为constexpr)
+    static constexpr float SPIN_FRAME_TIME = 0.2f;
     // 颜色配置（用于占位符）
     static const COLORREF COLOR_MARIO_RED = RGB(220, 0, 0);
     static const COLORREF COLOR_BRICK = RGB(180, 80, 0);

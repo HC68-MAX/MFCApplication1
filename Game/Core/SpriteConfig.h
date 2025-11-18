@@ -20,14 +20,16 @@ public:
     static const CString TILESET_MAIN;
     static const CString TILESET_MARIO;
     static const CString TILESET_ENEMIES;
-
+    static const CString TILESET_MIKU;
     // 新增：根据精灵类型获取对应的贴图集名称
     static CString GetSpritesheetForMario();
     static CString GetSpritesheetForBrick();
     static CString GetSpritesheetForPipe();
+    static CString GetSpritesheetForMiku();
     static CString GetSpritesheetForTile(int tileID);
 
     // === 主精灵表 (SpritesheetMain) ===
+      // 初音未来精灵坐标
 
     // 马里奥 - 小
     static const SSpriteCoord MARIO_SMALL_STAND_LEFT;
@@ -86,10 +88,10 @@ public:
     static const SSpriteCoord GOOMBA_SQUISHED;
 
     // 金币
-    static const SSpriteCoord COIN_SPIN1;
-    static const SSpriteCoord COIN_SPIN2;
-    static const SSpriteCoord COIN_SPIN3;
-    static const SSpriteCoord COIN_SPIN4;
+    static const SSpriteCoord COIN_SPIN1 ;
+    static const SSpriteCoord COIN_SPIN2 ;
+    static const SSpriteCoord COIN_SPIN3 ;
+    static const SSpriteCoord COIN_SPIN4 ;
 
     // === 工具函数 ===
     static CString GetSpritesheetForSprite(const SSpriteCoord& coord);
