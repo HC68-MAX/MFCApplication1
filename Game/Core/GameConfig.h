@@ -35,8 +35,8 @@ public:
     static constexpr float CGameConfig::GRAVITY = 0.8f;				    // 重力
     static constexpr float CGameConfig::MARIO_MAX_SPEED = 8.0f;		    // 马里奥最大速度
     static constexpr float CGameConfig::MARIO_ACCELERATION = 0.5f;		// 马里奥加速度
-    static constexpr float CGameConfig::MARIO_JUMP_FORCE = -20.0f;		// 马里奥跳跃力
-    static constexpr float CGameConfig::MARIO_JUMP_MAX_TIME = 0.2f;	    // 马里奥最大跳跃时间
+    static constexpr float CGameConfig::MARIO_JUMP_FORCE = -15.0f;		// 马里奥跳跃力
+    static constexpr float CGameConfig::MARIO_JUMP_MAX_TIME = 0.5f;	    // 马里奥最大跳跃时间
 
     // 动画参数
     static const int COIN_SPIN_FRAMES = 3;
