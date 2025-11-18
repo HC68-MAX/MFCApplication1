@@ -17,7 +17,6 @@ public:
     // 重写基类虚函数
     void Update(float deltaTime) override;
     void Draw(CDC* pDC) override;
-
     // 新增：使用精灵渲染器绘制
     void DrawWithSprite(CDC* pDC, int screenX, int screenY);
 

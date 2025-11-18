@@ -1,18 +1,20 @@
 #pragma once
 // Game/Objects/Mario.h
-#include <afxwin.h>  // 包含MFC基础头文件
-#include "GameObject.h"  // 包含基类
+#include <afxwin.h>
+#include "GameObject.h"
 #include <vector>
-#include "../Core/GameConfig.h"  // 添加这行
+#include "../Core/GameConfig.h"
 #include "../Core/ResourceManager.h"
 #include "../Core/SpriteRenderer.h"
 #include "../Core/SpriteConfig.h"
-// 在Mario.h中添加
+
+// 马里奥皮肤枚举
 enum class MarioSkin
 {
     MARIO,      // 原始马里奥
     MIKU        // 初音未来
 };
+
 // 马里奥状态枚举
 enum class MarioState
 {
@@ -20,6 +22,7 @@ enum class MarioState
     BIG,        // 大马里奥  
     FIRE        // 火焰马里奥
 };
+
 // 方向枚举
 enum class Direction
 {
@@ -27,103 +30,125 @@ enum class Direction
     RIGHT
 };
 
+// CMario类，代表游戏中的主角马里奥
 class CMario : public CGameObject
 {
 public:
-    // 构造函数和析构函数
-    CMario();
-    CMario(int x, int y);
-    virtual ~CMario();
-    // 重写基类的虚函数
-    virtual void Update(float deltaTime) override;
-    virtual void Draw(CDC* pDC) override;
-    // 获取物理参数（用于调试）
-    float GetVelocityX() const { return m_fVelocityX; }
-    float GetVelocityY() const { return m_fVelocityY; }
-    float GetGravity() const { return m_fGravity; }
-    float GetMaxSpeed() const { return m_fMaxSpeed; }
-    float GetJumpForce() const { return m_fJumpForce; }
+    // =================================================================
+    // 构造与析构
+    // =================================================================
+    CMario(); // 默认构造函数
+    CMario(int x, int y); // 带初始位置的构造函数
+    virtual ~CMario(); // 析构函数
+
+    // =================================================================
+    // 主要游戏循环接口
+    // =================================================================
+    virtual void Update(float deltaTime) override; // 每帧更新马里奥的状态
+    virtual void Draw(CDC* pDC) override; // 绘制马里奥
+    void DrawAt(CDC* pDC, int screenX, int screenY); // 在指定屏幕坐标绘制
+
+    // =================================================================
+    // 输入与移动控制
+    // =================================================================
+    void HandleInput(BOOL left, BOOL right, BOOL jump); // 处理玩家输入
     void MoveLeft();                // 向左移动
     void MoveRight();               // 向右移动
     void Jump();                    // 跳跃
     void StopMoving();              // 停止移动
-    // 新增方法
-    void ApplyPhysics(float deltaTime);
-    void HandleInput(BOOL left, BOOL right, BOOL jump);
-    // 新增：使用屏幕坐标绘制
-    void DrawAt(CDC* pDC, int screenX, int screenY);
-    // 在CMario类中添加这个方法声明
-    void DrawWithSprite(CDC* pDC, int screenX, int screenY);
-    // 新增碰撞相关方法
-    void  CheckCollisions(const std::vector<CRect>& platforms);
+
+    // =================================================================
+    // 状态管理 (大小, 皮肤)
+    // =================================================================
+    MarioState GetState() const { return m_State; } // 获取当前状态（大小）
+    void SetState(MarioState state); // 设置当前状态
+    MarioSkin GetSkin() const { return m_Skin; } // 获取当前皮肤
+    void SetSkin(MarioSkin skin); // 设置当前皮肤
+    Direction GetDirection() const { return m_Direction; } // 获取当前朝向
+
+    // =================================================================
+    // 物理与碰撞
+    // =================================================================
+    void ApplyPhysics(float deltaTime); // 应用物理效果（如重力）
+    void CheckCollisions(const std::vector<CRect>& platforms); // 检测与平台的碰撞
+    
+    // 碰撞区域获取
     CRect GetFeetRect() const;    // 获取脚部碰撞区域
     CRect GetHeadRect() const;    // 获取头部碰撞区域
     CRect GetBodyRect() const;    // 获取身体碰撞区域
-    // 碰撞相关方法
-    BOOL IsOnGround() const { return m_bIsOnGround; }
-    BOOL IsJumping() const { return m_bIsJumping; }
-    BOOL IsMoving() const;
-    // 碰撞响应
-    void OnHeadCollision();
-    void OnFeetCollision(int surfaceY);
-    void OnLeftCollision(int surfaceX);
-    void OnRightCollision(int surfaceX);
-    Direction GetDirection() const { return m_Direction; }
-    // 设置速度
-    void SetVelocity(float vx, float vy) { m_fVelocityX = vx; m_fVelocityY = vy; }
-   
-    // 状态管理
-    MarioState GetState() const { return m_State; }
-    void SetState(MarioState state);
-    // 皮肤管理
-    MarioSkin GetSkin() const { return m_Skin; }
-    void SetSkin(MarioSkin skin);
-    // 动画系统
-    void UpdateMikuAnimation(float deltaTime);
-    SSpriteCoord GetMikuSpriteCoord() const;
-    // Miku动画状态
-    float m_fMikuAnimTimer;
-    // 新增：头部碰撞检测
-    BOOL IsMovingUp() const { return m_fVelocityY < 0; }
+
+    // 碰撞状态查询
+    BOOL IsOnGround() const { return m_bIsOnGround; } // 是否在地面上
+    BOOL IsJumping() const { return m_bIsJumping; } // 是否在跳跃中
+    BOOL IsMoving() const; // 是否在移动中
+    BOOL IsMovingUp() const { return m_fVelocityY < 0; } // 判断是否正在向上移动（用于头部碰撞）
+
+    // 碰撞响应处理
+    void OnHeadCollision(); // 头部碰撞响应
+    void OnFeetCollision(int surfaceY); // 脚部碰撞响应
+    void OnLeftCollision(int surfaceX); // 左侧碰撞响应
+    void OnRightCollision(int surfaceX); // 右侧碰撞响应
+
+    void DrawWithSprite(CDC* pDC, int screenX, int screenY); // 使用精灵图绘制
+    // =================================================================
+    // 调试与获取参数
+    // =================================================================
+    float GetVelocityX() const { return m_fVelocityX; } // 获取X轴速度
+    float GetVelocityY() const { return m_fVelocityY; } // 获取Y轴速度
+    void SetVelocity(float vx, float vy) { m_fVelocityX = vx; m_fVelocityY = vy; } // 设置X和Y轴速度
+    float GetGravity() const { return m_fGravity; } // 获取重力加速度
+    float GetMaxSpeed() const { return m_fMaxSpeed; } // 获取最大移动速度
+    float GetJumpForce() const { return m_fJumpForce; } // 获取跳跃力
+ 
 private:
-    // 更新马里奥大小（根据状态）
-    void UpdateSize();
-    // 根据皮肤更新图集和尺寸
-    void UpdateSkinResources();
+    // =================================================================
+    // 私有辅助函数
+    // =================================================================
+    void UpdateSize(); // 更新马里奥大小（根据状态）
+    void UpdateSkinResources(); // 根据皮肤更新图集和尺寸
+    void UpdateMikuAnimation(float deltaTime); // 更新Miku皮肤的动画
+    SSpriteCoord GetMikuSpriteCoord() const; // 获取Miku皮肤当前的精灵坐标
+
 private:
-    // 速度相关
+    // =================================================================
+    // 成员变量
+    // =================================================================
+
+    // 物理与速度
     float m_fVelocityX, m_fVelocityY; // X和Y方向速度
     float m_fAcceleration;            // 加速度
     float m_fMaxSpeed;                // 最大速度
-    int m_nMikuCurrentFrame=1;
-    static const int MIKU_WALK_FRAMES = 32; // 根据实际帧数调整
-    static const int MIKU_FRAME_WIDTH = 48; // 根据实际帧宽度调整
-    static const int MIKU_FRAME_HEIGHT = 48; // 根据实际帧高度调整
+    float m_fGravity;                 // 重力
+
     // 跳跃相关
     float m_fJumpForce;               // 跳跃力
-    float m_fGravity;                 // 重力
-    BOOL m_bIsJumping;                // 是否正在跳跃
-    BOOL m_bIsOnGround;               // 是否在地面上
+    float m_fJumpTime;                // 跳跃计时器
+    float m_fMaxJumpTime;             // 最大跳跃持续时间
+    BOOL  m_bIsJumping;               // 是否正在跳跃
+    BOOL  m_bIsOnGround;              // 是否在地面上
+    BOOL  m_bCanJump;                 // 是否可以跳跃
 
-    // 移动状态
-    BOOL m_bIsMoving;                 // 是否正在移动
-    Direction m_Direction;            // 面向方向
+    // 状态与方向
+    MarioState m_State;               // 当前状态（小、大、火焰）
+    MarioSkin  m_Skin;                // 当前皮肤
+    Direction  m_Direction;           // 面向方向
+    BOOL       m_bIsMoving;           // 是否正在移动
 
-    // 新增输入状态变量
-    BOOL m_bInputLeft;
-    BOOL m_bInputRight;
-    BOOL m_bInputJump;
-    // 新增碰撞状态
-    BOOL m_bHeadCollision;
-    BOOL m_bFeetCollision;
-    BOOL m_bLeftCollision;
-    BOOL m_bRightCollision;
-    // 新增物理变量
-    float m_fJumpTime;           // 跳跃计时器
-    float m_fMaxJumpTime;        // 最大跳跃持续时间
-    BOOL m_bCanJump;             // 是否可以跳跃
-    // 马里奥状态
-    MarioState m_State;               // 当前状态
-    // 添加皮肤成员变量
-    MarioSkin m_Skin;
+    // 输入状态
+    BOOL m_bInputLeft;                // 是否接收到向左的输入
+    BOOL m_bInputRight;               // 是否接收到向右的输入
+    BOOL m_bInputJump;                // 是否接收到跳跃的输入
+
+    // 碰撞状态
+    BOOL m_bHeadCollision;            // 头部是否发生碰撞
+    BOOL m_bFeetCollision;            // 脚部是否发生碰撞
+    BOOL m_bLeftCollision;            // 左侧是否发生碰撞
+    BOOL m_bRightCollision;           // 右侧是否发生碰撞
+
+    // Miku动画相关
+    float m_fMikuAnimTimer;           // Miku动画计时器
+    int   m_nMikuCurrentFrame;        // Miku动画当前帧
+    static const int MIKU_WALK_FRAMES = 32; // Miku行走动画的总帧数
+    static const int MIKU_FRAME_WIDTH = 48; // Miku每帧的宽度
+    static const int MIKU_FRAME_HEIGHT = 48; // Miku每帧的高度
 };

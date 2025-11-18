@@ -34,8 +34,8 @@ CString CSpriteConfig::GetSpritesheetForTile(int tileID)
 // 根据您的Miku图集实际布局调整这些坐标
 
 // === 主精灵表坐标 ===
-#define mario_y 9
-#define size 16
+constexpr int mario_y = 9;
+constexpr int size = 16;
 // 马里奥 - 小
 const SSpriteCoord CSpriteConfig::MARIO_SMALL_STAND_RIGHT = { 11 * size,(mario_y + 2) * size, 16, 16  };
 const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK1_RIGHT = { 6 * size, (mario_y + 2) * size, 16, 16  };

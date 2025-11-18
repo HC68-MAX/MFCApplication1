@@ -2,12 +2,14 @@
 #include <afxwin.h>  // 直接包含MFC头文件
 #include "Mario.h"
 
-// 构造函数
-CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameConfig::MARIO_SMALL_HEIGHT)  // 调用基类构造函数
+// 构造函数：初始化马里奥的默认状态
+CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameConfig::MARIO_SMALL_HEIGHT)  // 调用基类构造函数，设置初始位置和大小
 {
 
+    // 初始化速度
     m_fVelocityX = 0.0f;
     m_fVelocityY = 0.0f;
+    // 初始化皮肤和动画
     m_Skin = MarioSkin::MARIO;
     m_fMikuAnimTimer = 0.0f;
     m_nMikuCurrentFrame = 1;
@@ -23,8 +25,8 @@ CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameCo
     m_bIsOnGround = FALSE;
     m_bIsMoving = FALSE;
 
-    m_Direction = Direction::RIGHT;
-    m_State = MarioState::SMALL;
+    m_Direction = Direction::RIGHT; // 默认朝向右
+    m_State = MarioState::SMALL; // 默认是小马里奥
     // 初始化输入状态
     m_bInputLeft = FALSE;
     m_bInputRight = FALSE;
@@ -38,12 +40,9 @@ CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameCo
     UpdateSize();
 }
 
-// 带参数的构造函数 —— 使用委托构造（正确调用默认构造）
+// 带参数的构造函数：使用委托构造，先调用默认构造函数，再设置指定位置
 CMario::CMario(int x, int y) : CMario()
 {
-    // 调用默认构造函数初始化大多数值
-    CMario();
-
     // 设置指定位置
     m_nX = x;
     m_nY = y;
@@ -57,7 +56,7 @@ CMario::~CMario()
 // 新增：使用精灵渲染器绘制马里奥
 void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
 {
-    if (!m_bVisible) return;
+    if (!m_bVisible) return; // 如果不可见，则不绘制
 
     CResourceManager& resMgr = CResourceManager::GetInstance();
     CBitmap* pBitmap = nullptr;
@@ -163,11 +162,10 @@ void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
 }
 BOOL CMario::IsMoving() const
 {
-    // 只有当水平速度足够大时，才认为是在移动
+    // 只有当水平速度的绝对值大于一个很小的阈值时，才认为是在移动
     return abs(m_fVelocityX) > 0.1f;
 }
-// 设置皮肤方法
-// 根据皮肤更新资源
+// 根据皮肤更新资源和尺寸
 void CMario::UpdateSkinResources()
 {
     // 可以根据需要调整不同皮肤的大小
@@ -194,18 +192,18 @@ void CMario::SetSkin(MarioSkin skin)
 {
     if (m_Skin != skin)
     {
-        // 保存当前状态的底部位置（保持脚部位置不变）
+        // 保存当前状态的底部位置（为了切换皮肤后脚部位置不变）
         int currentBottom = m_nY + m_nHeight;
 
         m_Skin = skin;
 
-        // 更新皮肤相关资源，但不改变碰撞箱尺寸
+        // 更新皮肤相关资源，这可能会改变马里奥的高度
         UpdateSkinResources();
 
-        // 调整位置：保持脚部位置不变
+        // 调整Y坐标，保持脚部位置不变
         m_nY = currentBottom - m_nHeight;
 
-        // 重置动画状态
+        // 重置动画状态，防止切换皮肤后动画错乱
         m_fMikuAnimTimer = 0.0f;
         m_nMikuCurrentFrame = 1;
     }
@@ -274,24 +272,20 @@ SSpriteCoord CMario::GetMikuSpriteCoord() const
 // 新的输入处理方法
 void CMario::HandleInput(BOOL left, BOOL right, BOOL jump)
 {
-  //  m_bIsMoving = FALSE;
-
     // 处理左右移动
     if (left && !right)
     {
         m_fVelocityX = -m_fMaxSpeed;
         m_Direction = Direction::LEFT;
-      //  m_bIsMoving = TRUE;
     }
     else if (right && !left)
     {
         m_fVelocityX = m_fMaxSpeed;
         m_Direction = Direction::RIGHT;
-       // m_bIsMoving = TRUE;
     }
     else
     {
-        // 没有移动输入时应用摩擦力
+        // 没有移动输入时应用摩擦力，使马里奥减速停止
         if (m_fVelocityX > 0)
         {
             m_fVelocityX -= m_fAcceleration * 2; // 增加摩擦力
@@ -310,7 +304,7 @@ void CMario::HandleInput(BOOL left, BOOL right, BOOL jump)
         m_fVelocityY = m_fJumpForce;
         m_bIsJumping = TRUE;
         m_bIsOnGround = FALSE;
-        m_bCanJump = FALSE; // 防止连续跳跃
+        m_bCanJump = FALSE; // 防止在空中连续跳跃
         m_fJumpTime = 0.0f;
     }
 
@@ -320,7 +314,7 @@ void CMario::HandleInput(BOOL left, BOOL right, BOOL jump)
         m_bCanJump = TRUE;
     }
 
-    // 跳跃持续时间控制（实现可变高度跳跃）
+    // 跳跃持续时间控制（实现长按跳得更高）
     if (m_bIsJumping && jump && m_fJumpTime < m_fMaxJumpTime)
     {
         m_fVelocityY = m_fJumpForce * (1.0f - m_fJumpTime / m_fMaxJumpTime);
@@ -328,7 +322,7 @@ void CMario::HandleInput(BOOL left, BOOL right, BOOL jump)
     }
 }
 
-// 新的物理应用方法
+// 应用物理效果
 void CMario::ApplyPhysics(float deltaTime)
 {
     // 应用重力（如果不在地面上）
@@ -347,14 +341,13 @@ void CMario::ApplyPhysics(float deltaTime)
     m_nX += static_cast<int>(m_fVelocityX);
     m_nY += static_cast<int>(m_fVelocityY);
 }
-// 新增：检查碰撞
-// 全新的碰撞检测方法 - 简单可靠
+// 碰撞检测与响应
 void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
 {
     // 步骤 1: 在每帧开始时，先假设马里奥不在地面上。
     m_bIsOnGround = FALSE;
 
-    // 步骤 2: 执行主要的碰撞检测和位置修正。
+    // 步骤 2: 遍历所有实体矩形，进行碰撞检测和位置修正。
     for (const auto& rect : solidRects)
     {
         CRect intersection;
@@ -362,52 +355,54 @@ void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
 
         if (intersection.IntersectRect(&marioRect, &rect))
         {
+            // 计算重叠区域的宽度和高度
             int overlapLeft = marioRect.right - rect.left;
             int overlapRight = rect.right - marioRect.left;
             int overlapTop = marioRect.bottom - rect.top;
             int overlapBottom = rect.bottom - marioRect.top;
 
-                int dx = min(overlapLeft, overlapRight);
+            // 找到最小的重叠量，以确定碰撞方向
+            int dx = min(overlapLeft, overlapRight);
             int dy = min(overlapTop, overlapBottom);
 
-            if (dy <= dx)
+            if (dy <= dx) // 垂直方向碰撞
             {
-                if (dy == overlapTop && m_fVelocityY >= 0) // 只有在下落或静止时才算落地
+                if (dy == overlapTop && m_fVelocityY >= 0) // 从上方碰撞（落地）
                 {
-                    m_nY = rect.top - m_nHeight;
-                    m_fVelocityY = 0;
-                    m_bIsOnGround = TRUE;
-                    m_bIsJumping = FALSE;
+                    m_nY = rect.top - m_nHeight; // 修正位置到平台上方
+                    m_fVelocityY = 0; // 垂直速度清零
+                    m_bIsOnGround = TRUE; // 标记在地面上
+                    m_bIsJumping = FALSE; // 结束跳跃状态
                 }
-                else if (dy == overlapBottom && m_fVelocityY < 0)
+                else if (dy == overlapBottom && m_fVelocityY < 0) // 从下方碰撞（撞头）
                 {
-                    m_nY = rect.bottom;
-                    m_fVelocityY = 0;
-                    m_bIsJumping = FALSE;
+                    m_nY = rect.bottom; // 修正位置到平台下方
+                    m_fVelocityY = 0; // 垂直速度清零
+                    m_bIsJumping = FALSE; // 结束跳跃状态
                 }
             }
-            else
+            else // 水平方向碰撞
             {
-                if (dx == overlapLeft && m_fVelocityX > 0)
+                if (dx == overlapLeft && m_fVelocityX > 0) // 从左侧碰撞
                 {
-                    m_nX = rect.left - m_nWidth;
-                    m_fVelocityX = 0;
+                    m_nX = rect.left - m_nWidth; // 修正位置到平台左侧
+                    m_fVelocityX = 0; // 水平速度清零
                 }
-                else if (dx == overlapRight && m_fVelocityX < 0)
+                else if (dx == overlapRight && m_fVelocityX < 0) // 从右侧碰撞
                 {
-                    m_nX = rect.right;
-                    m_fVelocityX = 0;
+                    m_nX = rect.right; // 修正位置到平台右侧
+                    m_fVelocityX = 0; // 水平速度清零
                 }
             }
         }
     }
 
-    // 步骤 3: 地面状态探测（滞后处理），防止边缘抖动。
+    // 步骤 3: 地面状态的滞后处理，防止在平台边缘抖动。
     // 如果经过上面的精确碰撞修正后，马里奥仍被判定为“空中”，我们再做一次宽松的检查。
     if (!m_bIsOnGround)
     {
         CRect feetProbe = GetFeetRect();
-        // 将探测框向下延伸2个像素，形成一个“缓冲区”。
+        // 将探测框向下延伸几个像素，形成一个“缓冲区”。
         feetProbe.OffsetRect(0, 2);
 
         for (const auto& rect : solidRects)
@@ -416,10 +411,10 @@ void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
             if (tmp.IntersectRect(&feetProbe, &rect))
             {
                 // 如果探测框接触到了地面，我们就强制认为马里奥在地面上。
-                // 注意：这里我们不修正位置，只更新状态标志。
+                // 注意：这里我们不修正位置，只更新状态标志，以增加稳定性。
                 m_bIsOnGround = TRUE;
                 m_bIsJumping = FALSE;
-                // 如果此时有微小的垂直速度，也将其清零以增加稳定性。
+                // 如果此时有微小的垂直速度，也将其清零。
                 if (m_fVelocityY > 0) {
                     m_fVelocityY = 0;
                 }
@@ -451,17 +446,17 @@ void CMario::StopMoving()
     m_bInputRight = FALSE;
 }
 
-// 设置状态并更新大小
+// 设置马里奥的状态（小、大、火焰）并更新大小
 void CMario::SetState(MarioState state)
 {
-    // 保存当前状态的底部位置
+    // 保存当前状态的底部Y坐标
     int currentBottom = m_nY + m_nHeight;
     m_State = state;
-    UpdateSize();
-    // 调整位置：保持脚部位置不变
+    UpdateSize(); // 根据新状态更新宽度和高度
+    // 调整Y坐标，保持脚部位置不变
     m_nY = currentBottom - m_nHeight;
 }
-// 根据状态更新马里奥大小
+// 根据状态更新马里奥的宽度和高度
 void CMario::UpdateSize()
 {
     switch (m_State)
@@ -481,22 +476,21 @@ void CMario::UpdateSize()
     }
 }
 
-// 新增：获取脚部碰撞区域
+// 获取脚部碰撞区域
 CRect CMario::GetFeetRect() const
 {
-    // 脚部区域：身体底部的一小部分区域
+    // 脚部区域：身体底部的一小块矩形，用于检测是否踩在地面上
     int feetHeight = 8;
     return CRect(m_nX + 5, m_nY + m_nHeight - feetHeight,
         m_nX + m_nWidth - 5, m_nY + m_nHeight);
 }
 
-// 新增：获取头部碰撞区域
+// 获取头部碰撞区域
 CRect CMario::GetHeadRect() const
 {
-    // 头部区域：只有当马里奥向上移动时才检测
-     // 减少检测区域的高度，使其更精确
-    int headHeight = 4;  // 更小的高度
-    int sideMargin = 8;  // 更大的边距
+    // 头部区域：身体顶部的一小块矩形，用于检测是否撞到上方的物体
+    int headHeight = 4;  // 检测区域的高度
+    int sideMargin = 8;  // 从两侧缩进的边距，使检测更精确
 
     if (m_State == MarioState::BIG || m_State == MarioState::FIRE)
     {
@@ -507,42 +501,42 @@ CRect CMario::GetHeadRect() const
     return CRect(m_nX + sideMargin, m_nY,
         m_nX + m_nWidth - sideMargin, m_nY + headHeight);
 }
-// 新增：获取身体碰撞区域
+// 获取身体碰撞区域
 CRect CMario::GetBodyRect() const
 {
-    // 身体区域：排除脚部和头部的中间部分
+    // 身体区域：排除脚部和头部的中间部分，用于检测与墙壁等的碰撞
     return CRect(m_nX + 3, m_nY + 10,
         m_nX + m_nWidth - 3, m_nY + m_nHeight - 8);
 }
 
-// 新增：头部碰撞响应
+// 头部碰撞响应
 void CMario::OnHeadCollision()
 {
     m_fVelocityY = 0; // 停止上升
     m_bIsJumping = FALSE;
 }
 
-// 新增：脚部碰撞响应
+// 脚部碰撞响应
 void CMario::OnFeetCollision(int surfaceY)
 {
-    m_nY = surfaceY - m_nHeight; // 站在平台上
-    m_fVelocityY = 0;
-    m_bIsOnGround = TRUE;
-    m_bIsJumping = FALSE;
-    m_fJumpTime = 0.0f;
+    m_nY = surfaceY - m_nHeight; // 将马里奥放在平台上
+    m_fVelocityY = 0; // 垂直速度清零
+    m_bIsOnGround = TRUE; // 标记在地面上
+    m_bIsJumping = FALSE; // 结束跳跃
+    m_fJumpTime = 0.0f; // 重置跳跃计时器
 }
 
-// 新增：左侧碰撞响应
+// 左侧碰撞响应
 void CMario::OnLeftCollision(int surfaceX)
 {
-    m_nX = surfaceX; // 停在障碍物右侧
-    m_fVelocityX = 0;
+    m_nX = surfaceX; // 将马里奥停在障碍物右侧
+    m_fVelocityX = 0; // 水平速度清零
 }
 
-// 新增：右侧碰撞响应
+// 右侧碰撞响应
 void CMario::OnRightCollision(int surfaceX)
 {
-    m_nX = surfaceX - m_nWidth; // 停在障碍物左侧
-    m_fVelocityX = 0;
+    m_nX = surfaceX - m_nWidth; // 将马里奥停在障碍物左侧
+    m_fVelocityX = 0; // 水平速度清零
 }
 
