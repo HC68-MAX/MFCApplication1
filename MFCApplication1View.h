@@ -61,7 +61,7 @@ protected:
 	int m_nScreenWidth = CGameConfig::SCREEN_WIDTH;
 	int m_nScreenHeight = CGameConfig::SCREEN_HEIGHT;
 
-// 添加新的马里奥对象
+	// 添加新的马里奥对象
 	CMario m_Mario;  // 马里奥对象实例
 
 	// 添加帧率计算相关
@@ -95,14 +95,13 @@ protected:
 	void CleanupGame();
 	void DrawDebugCollision(CDC* pDC);
 	void DrawDebugInfo(CDC* pDC);
-	// 新增调试绘制方法
+	// 调试绘制方法
 	void InitializeResources();
 	void InitializeTileMap();
 	void UpdateCamera();
-	// 新增：创建占位符位图
+	// 创建占位符位图
 	void CalculateDeltaTime();
-	void CheckCoinCollisions();
-	void ProcessBrickItems();
+
 };
 
 #ifndef _DEBUG  // MFCApplication1View.cpp 中的调试版本

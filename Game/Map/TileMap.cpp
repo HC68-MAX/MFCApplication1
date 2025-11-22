@@ -90,6 +90,7 @@ BOOL CTileMap::LoadLevel1()
     SetTile(21, 7, 6, TRUE, _T("pipe"));
     SetTile(21, 8, 8, TRUE, _T("pipe"));
     SetTile(21, 9, 8, TRUE, _T("pipe"));
+
     // 添加金币
     AddCoin(5 * CGameConfig::TILE_SIZE, 6 * CGameConfig::TILE_SIZE);
     AddCoin(6 * CGameConfig::TILE_SIZE, 6 * CGameConfig::TILE_SIZE);
@@ -143,7 +144,7 @@ BOOL CTileMap::LoadLevel3()
     return LoadLevel1(); // 暂时用第一关代替
 }
 
-// 修改绘制方法，同时绘制瓦片和独立对象
+// 同时绘制瓦片和独立对象
 void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
 {
     // 绘制瓦片（原有代码）
@@ -249,41 +250,22 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
             coin.DrawAt(pDC, screenX, screenY);
         }
     }
-
-}
-
-// 新增：获取所有碰撞矩形
-std::vector<CRect> CTileMap::GetAllCollisionRects() const
-{
-    std::vector<CRect> allRects = GetSolidTileRects();
-
-    // 添加砖块的碰撞矩形
-    for (const auto& brick : m_Bricks)
+    // 5. 绘制 Mario（新增）
+    if (m_pMario && m_pMario->IsVisible())
     {
-        allRects.push_back(brick.GetRect());
+        int marioScreenX = m_pMario->GetX() - offsetX;
+        int marioScreenY = m_pMario->GetY() - offsetY;
+
+        // 只绘制在屏幕范围内的 Mario
+        if (marioScreenX + m_pMario->GetWidth() < 0 || marioScreenX >= 800 ||
+            marioScreenY + m_pMario->GetHeight() < 0 || marioScreenY >= 600)
+        {
+            return;
+        }
+
+        m_pMario->DrawAt(pDC, marioScreenX, marioScreenY);
     }
 
-    // 添加水管的碰撞矩形
-    for (const auto& pipe : m_Pipes)
-    {
-        allRects.push_back(pipe.GetRect());
-    }
-
-    return allRects;
-}
-
-// 其他现有方法保持不变...
-BOOL CTileMap::IsSolid(int worldX, int worldY) const
-{
-    int tileX = worldX / m_nTileSize;
-    int tileY = worldY / m_nTileSize;
-
-    if (tileX >= 0 && tileX < m_nWidth && tileY >= 0 && tileY < m_nHeight)
-    {
-        return m_Tiles[tileY][tileX].solid;
-    }
-
-    return FALSE;
 }
 
 CRect CTileMap::GetTileRect(int tileX, int tileY) const
@@ -351,9 +333,10 @@ std::vector<CRect> CTileMap::GetSolidTileRects() const
         }
     }
 
+
     return solidRects;
 }
-
+//瓦片生成
 void CTileMap::SetTile(int x, int y, int tileID, BOOL solid, const CString& type)
 {
     if (x >= 0 && x < m_nWidth && y >= 0 && y < m_nHeight)
@@ -362,15 +345,6 @@ void CTileMap::SetTile(int x, int y, int tileID, BOOL solid, const CString& type
         m_Tiles[y][x].solid = solid;
         m_Tiles[y][x].type = type;
     }
-}
-
-int CTileMap::GetTile(int x, int y) const
-{
-    if (x >= 0 && x < m_nWidth && y >= 0 && y < m_nHeight)
-    {
-        return m_Tiles[y][x].tileID;
-    }
-    return -1;
 }
 // 新增：添加砖块
 void CTileMap::AddBrick(int x, int y, CBrick::BrickType type)
@@ -461,24 +435,4 @@ void CTileMap::UpdateCoins(float deltaTime)
 void CTileMap::ClearCoins()
 {
     m_Coins.clear();
-}
-
-// 在ClearObjects中调用ClearCoins
-// 砖块碰撞检测
-
-// 获取需要生成道具的砖块
-std::vector<CBrick*> CTileMap::GetBricksThatShouldSpawnItems()
-{
-    std::vector<CBrick*> result;
-
-    for (auto& brick : m_Bricks)
-    {
-        if (brick.ShouldSpawnItem())
-        {
-            result.push_back(&brick);
-            brick.SetSpawnItem(FALSE); // 重置状态
-        }
-    }
-
-    return result;
 }

@@ -54,13 +54,10 @@ CMFCApplication1Doc* CMFCApplication1View::GetDocument() const // 非调试版�
 
 CMFCApplication1View::CMFCApplication1View() noexcept
 {
-	// TODO: 在此处添加构造代码
-		// 初始化游戏变量
-
     m_nCameraX = 0;
     m_nCameraY = 0;
-	m_pOldBitmap = nullptr;
-	m_nTimerID = 0;
+    m_pOldBitmap = nullptr;
+    m_nTimerID = 0;
     // 初始化输入状态
     m_bKeyLeft = FALSE;
     m_bKeyRight = FALSE;
@@ -69,7 +66,8 @@ CMFCApplication1View::CMFCApplication1View() noexcept
     m_dwLastTime = std::chrono::steady_clock::now();
     m_nFrameCount = 0;
     m_fDeltaTime = 0.016f; // 默认1/60秒
-    m_fSmoothedFPS = 60.0f; // 默认60帧
+    m_fSmoothedFPS = 90.0f; // 默认60帧
+    m_bDebugMode = FALSE;
 }
 
 CMFCApplication1View::~CMFCApplication1View()
@@ -144,8 +142,7 @@ void CMFCApplication1View::OnDestroy()
 
     CView::OnDestroy();
 }
-// 新增：初始化瓦片地图
-// 修改 InitializeTileMap 方法
+// 初始化瓦片地图
 void CMFCApplication1View::InitializeTileMap()
 {
     TRACE(_T("=== 开始初始化瓦片地图 ===\n"));
@@ -163,7 +160,7 @@ void CMFCApplication1View::InitializeTileMap()
 
     TRACE(_T("=== 瓦片地图初始化完成 ===\n"));
 }
-// 新增：更新摄像机
+// 更新摄像机
 void CMFCApplication1View::UpdateCamera()
 {
     // 简单的摄像机跟随马里奥
@@ -205,12 +202,12 @@ void CMFCApplication1View::InitializeGame()
     m_pOldBitmap = m_memDC.SelectObject(&m_memBitmap);
     // 初始化资源
     InitializeResources();
-
     // 初始化瓦片地图
     InitializeTileMap();
+    // 设置 TileMap 中的 Mario 指针
+    m_TileMap.SetMario(&m_Mario);
 }
-
-// 新增：初始化资源
+// 初始化资源
 void CMFCApplication1View::InitializeResources()
 {
     TRACE(_T("开始初始化资源...\n"));
@@ -253,8 +250,7 @@ void CMFCApplication1View::InitializeResources()
        
     }
 }
-// 修改RenderGame方法
-// 修改 RenderGame 方法
+// RenderGame 渲染方法
 void CMFCApplication1View::RenderGame(CDC* pDC)
 {
     // 绘制背景 - 简单的天空色
@@ -262,11 +258,6 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
 
     // 使用瓦片地图绘制整个关卡（包括瓦片和独立对象）
     m_TileMap.Draw(pDC, m_nCameraX, m_nCameraY);
-
-    // 绘制马里奥
-    int marioScreenX = m_Mario.GetX() - m_nCameraX;
-    int marioScreenY = m_Mario.GetY() - m_nCameraY;
-    m_Mario.DrawWithSprite(pDC, marioScreenX, marioScreenY);
 
     // 调试模式：绘制碰撞信息
     if (m_bDebugMode)
@@ -297,7 +288,6 @@ void CMFCApplication1View::CleanupGame()
         m_memDC.DeleteDC();
     }
 }
-
 // 定时器消息处理 - 游戏主循环
 void CMFCApplication1View::OnTimer(UINT_PTR nIDEvent)
 {
@@ -315,20 +305,7 @@ void CMFCApplication1View::OnTimer(UINT_PTR nIDEvent)
 
     CView::OnTimer(nIDEvent);
 }
-// 修改 UpdateGame 方法
-void CMFCApplication1View::ProcessBrickItems()
-{
-    auto bricksWithItems = m_TileMap.GetBricksThatShouldSpawnItems();
 
-    for (auto brick : bricksWithItems)
-    {
-        // 生成金币（暂时先简单处理）
-        CGameState::GetInstance().AddCoin();
-        TRACE(_T("问号砖块生成金币! 当前金币: %d\n"), CGameState::GetInstance().GetCoins());
-
-        // 这里以后可以扩展为生成蘑菇、火焰花等道具
-    }
-}
 void CMFCApplication1View::UpdateGame()
 {
     // 将输入状态传递给马里奥
@@ -343,7 +320,7 @@ void CMFCApplication1View::UpdateGame()
     UpdateCamera();
 
     // 使用瓦片地图进行碰撞检测（现在包括独立对象）
-    std::vector<CRect> solidObjects = m_TileMap.GetAllCollisionRects();
+    std::vector<CRect> solidObjects = m_TileMap.GetSolidTileRects();
     m_Mario.CheckCollisions(solidObjects);
 
     // 检查金币碰撞
@@ -351,10 +328,8 @@ void CMFCApplication1View::UpdateGame()
     // 检查问号砖块碰撞，只有当马里奥向上移动时才检测
     CRect marioHead = m_Mario.GetHeadRect();
     m_TileMap.CheckQuestionBlockHit(marioHead, m_Mario.IsMovingUp());
-    ProcessBrickItems();
+ 
 }
-// 处理砖块生成的道具
-
 // 新增：绘制调试碰撞信息
 void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
 {
@@ -387,37 +362,7 @@ void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
         pDC->LineTo(screenRect.left, screenRect.bottom);
         pDC->LineTo(screenRect.left, screenRect.top);
     }
-    // 绘制砖块碰撞区域（紫色）
-    CPen purplePen(PS_SOLID, 2, RGB(255, 0, 255));
-    pDC->SelectObject(&purplePen);
 
-    for (const auto& brick : m_TileMap.GetBricks())
-    {
-        if (brick.CanBeHitFromBelow())
-        {
-            CRect brickRect = brick.GetRect();
-            CRect screenBrickRect(
-                brickRect.left - m_nCameraX,
-                brickRect.top - m_nCameraY,
-                brickRect.right - m_nCameraX,
-                brickRect.bottom - m_nCameraY
-            );
-
-            pDC->MoveTo(screenBrickRect.left, screenBrickRect.top);
-            pDC->LineTo(screenBrickRect.right, screenBrickRect.top);
-            pDC->LineTo(screenBrickRect.right, screenBrickRect.bottom);
-            pDC->LineTo(screenBrickRect.left, screenBrickRect.bottom);
-            pDC->LineTo(screenBrickRect.left, screenBrickRect.top);
-
-            // 在问号砖块上标记
-            if (brick.GetBrickType() == CBrick::QUESTION)
-            {
-                pDC->SetTextColor(RGB(255, 0, 255));
-                pDC->SetBkMode(TRANSPARENT);
-                pDC->TextOut(screenBrickRect.left + 5, screenBrickRect.top + 5, _T("?"));
-            }
-        }
-    }
     // 2. 绘制马里奥的碰撞框（绿色）- 使用屏幕坐标
     pDC->SelectObject(&greenPen);
 
@@ -505,7 +450,6 @@ void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
     pDC->SelectObject(pOldPen);
 }
 // 增强的调试信息显示
-// 在调试信息中添加瓦片大小信息
 void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
 {
     CString strInfo;
@@ -690,7 +634,7 @@ void CMFCApplication1View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
     CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
-
+// 键盘弹起事件
 void CMFCApplication1View::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
     // 清除按键状态
@@ -710,7 +654,6 @@ void CMFCApplication1View::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 
     CView::OnKeyUp(nChar, nRepCnt, nFlags);
 }
-
 // 计算帧时间差
 void CMFCApplication1View::CalculateDeltaTime()
 {
