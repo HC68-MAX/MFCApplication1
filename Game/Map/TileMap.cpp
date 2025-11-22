@@ -106,15 +106,18 @@ BOOL CTileMap::LoadLevel1()
     TRACE(_T("关卡1加载完成: 砖块=%d, 水管=%d\n"), m_Bricks.size(), m_Pipes.size());
     return TRUE;
 }
-// 第二关（示例）
+// 第二关
 BOOL CTileMap::LoadLevel2()
 {
-    // 初始化基础地图
+    // 初始化瓦片地图
     if (!LoadMap(CGameConfig::TILE_MAP_WIDTH, CGameConfig::TILE_MAP_HEIGHT, CGameConfig::TILE_SIZE))
         return FALSE;
 
-    // 第二关的地图设计...
-    int groundLevel = m_nHeight - 4;
+    TRACE(_T("加载关卡2\n"));
+
+    // 第二关的地面更高
+    int groundLevel = m_nHeight - 3; // 离底部3行的位置
+
     for (int x = 0; x < m_nWidth; x++)
     {
         for (int y = groundLevel; y < m_nHeight; y++)
@@ -123,27 +126,106 @@ BOOL CTileMap::LoadLevel2()
         }
     }
 
-    // 第二关的特殊设计...
-    for (int x = 5; x < 10; x++)
+    // 添加一些平台
+    for (int x = 5; x < 12; x++)
     {
         SetTile(x, 6, 2, TRUE, _T("brick"));
     }
 
-    // 第二关的独立对象
-    AddBrick(400, 250, CBrick::QUESTION);
-    AddBrick(450, 250, CBrick::QUESTION);
-    AddPipe(550, 300, 128);
+    // 添加问号砖块
+    for (int x = 15; x < 18; x++)
+    {
+        SetTile(x, 4, 3, TRUE, _T("question_brick"));
+    }
 
-    TRACE(_T("关卡2加载完成: 砖块=%d, 水管=%d\n"), m_Bricks.size(), m_Pipes.size());
+    // 添加水管
+    SetTile(25, 6, 5, TRUE, _T("pipe"));
+    SetTile(25, 7, 7, TRUE, _T("pipe"));
+    SetTile(26, 6, 6, TRUE, _T("pipe"));
+    SetTile(26, 7, 8, TRUE, _T("pipe"));
+
+    // 添加更多金币
+    for (int x = 8; x < 11; x++)
+    {
+        AddCoin(x * CGameConfig::TILE_SIZE, 5 * CGameConfig::TILE_SIZE);
+    }
+
+    for (int x = 16; x < 18; x++)
+    {
+        AddCoin(x * CGameConfig::TILE_SIZE, 3 * CGameConfig::TILE_SIZE);
+    }
+
+    TRACE(_T("关卡2加载完成: 砖块=%d, 水管=%d, 金币=%d\n"),
+        m_Bricks.size(), m_Pipes.size(), m_Coins.size());
     return TRUE;
 }
-// 第三关（示例）
+// 第三关 
 BOOL CTileMap::LoadLevel3()
 {
-    // 类似上面的实现...
-    return LoadLevel1(); // 暂时用第一关代替
-}
+    // 初始化瓦片地图
+    if (!LoadMap(CGameConfig::TILE_MAP_WIDTH, CGameConfig::TILE_MAP_HEIGHT, CGameConfig::TILE_SIZE))
+        return FALSE;
 
+    TRACE(_T("加载关卡3\n"));
+
+    // 第三关使用阶梯式地面
+    for (int x = 0; x < m_nWidth; x++)
+    {
+        int groundLevel = m_nHeight - 5 + (x / 10) % 3; // 每10个瓦片高度变化
+
+        for (int y = groundLevel; y < m_nHeight; y++)
+        {
+            SetTile(x, y, 1, TRUE, _T("ground"));
+        }
+    }
+
+    // 添加多个平台
+    for (int x = 4; x < 8; x++)
+    {
+        SetTile(x, 5, 2, TRUE, _T("brick"));
+    }
+
+    for (int x = 12; x < 16; x++)
+    {
+        SetTile(x, 4, 2, TRUE, _T("brick"));
+    }
+
+    for (int x = 20; x < 24; x++)
+    {
+        SetTile(x, 3, 2, TRUE, _T("brick"));
+    }
+
+    // 添加问号砖块
+    SetTile(6, 4, 3, TRUE, _T("question_brick"));
+    SetTile(14, 3, 3, TRUE, _T("question_brick"));
+    SetTile(22, 2, 3, TRUE, _T("question_brick"));
+
+    // 添加多个水管
+    SetTile(30, 6, 5, TRUE, _T("pipe"));
+    SetTile(30, 7, 7, TRUE, _T("pipe"));
+    SetTile(31, 6, 6, TRUE, _T("pipe"));
+    SetTile(31, 7, 8, TRUE, _T("pipe"));
+
+    // 大量金币
+    for (int x = 5; x < 8; x++)
+    {
+        AddCoin(x * CGameConfig::TILE_SIZE, 4 * CGameConfig::TILE_SIZE);
+    }
+
+    for (int x = 13; x < 16; x++)
+    {
+        AddCoin(x * CGameConfig::TILE_SIZE, 3 * CGameConfig::TILE_SIZE);
+    }
+
+    for (int x = 21; x < 24; x++)
+    {
+        AddCoin(x * CGameConfig::TILE_SIZE, 2 * CGameConfig::TILE_SIZE);
+    }
+
+    TRACE(_T("关卡3加载完成: 砖块=%d, 水管=%d, 金币=%d\n"),
+        m_Bricks.size(), m_Pipes.size(), m_Coins.size());
+    return TRUE;
+}
 // 同时绘制瓦片和独立对象
 void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
 {

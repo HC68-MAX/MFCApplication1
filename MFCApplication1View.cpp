@@ -31,6 +31,8 @@ BEGIN_MESSAGE_MAP(CMFCApplication1View, CView)
 	ON_WM_TIMER()
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
+    ON_WM_LBUTTONDOWN()      
+    ON_WM_MOUSEMOVE()      
 END_MESSAGE_MAP()
 #ifdef _DEBUG
 void CMFCApplication1View::AssertValid() const
@@ -53,6 +55,9 @@ CMFCApplication1Doc* CMFCApplication1View::GetDocument() const // 非调试版�
 // CMFCApplication1View 构造/析构
 
 CMFCApplication1View::CMFCApplication1View() noexcept
+    : m_GameState(STATE_MENU)  // 初始状态为菜单
+    , m_nCameraX(0)
+    , m_nCameraY(0)
 {
     m_nCameraX = 0;
     m_nCameraY = 0;
@@ -202,10 +207,7 @@ void CMFCApplication1View::InitializeGame()
     m_pOldBitmap = m_memDC.SelectObject(&m_memBitmap);
     // 初始化资源
     InitializeResources();
-    // 初始化瓦片地图
-    InitializeTileMap();
-    // 设置 TileMap 中的 Mario 指针
-    m_TileMap.SetMario(&m_Mario);
+    m_GameState = STATE_MENU;
 }
 // 初始化资源
 void CMFCApplication1View::InitializeResources()
@@ -253,11 +255,19 @@ void CMFCApplication1View::InitializeResources()
 // RenderGame 渲染方法
 void CMFCApplication1View::RenderGame(CDC* pDC)
 {
+    switch (m_GameState)
+    {
+    case STATE_MENU:
+        m_StartMenu.Draw(pDC);
+        break;
+
+    case STATE_PLAYING:
     // 绘制背景 - 简单的天空色
     pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(135, 206, 235));
 
     // 使用瓦片地图绘制整个关卡（包括瓦片和独立对象）
     m_TileMap.Draw(pDC, m_nCameraX, m_nCameraY);
+    // 添加马里奥的绘制 - 使用屏幕坐标
 
     // 调试模式：绘制碰撞信息
     if (m_bDebugMode)
@@ -267,6 +277,13 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
 
     // 绘制调试信息
     DrawDebugInfo(pDC);
+    break;
+
+    case STATE_PAUSED:
+        // 绘制暂停界面
+        RenderPauseMenu(pDC);
+        break;
+    }
 }
 // 清理游戏资源
 void CMFCApplication1View::CleanupGame()
@@ -308,27 +325,45 @@ void CMFCApplication1View::OnTimer(UINT_PTR nIDEvent)
 
 void CMFCApplication1View::UpdateGame()
 {
-    // 将输入状态传递给马里奥
-    m_Mario.HandleInput(m_bKeyLeft, m_bKeyRight, m_bKeyJump);
+    // 更新菜单动画
+    if (m_GameState == STATE_MENU)
+    {
+        m_StartMenu.Update(m_fDeltaTime);
+    }
 
-    // 更新马里奥状态（使用世界坐标）
-    m_Mario.Update(m_fDeltaTime);
+    switch (m_GameState)
+    {
+    case STATE_MENU:
+        // 检查是否需要开始游戏
+        if (m_StartMenu.ShouldStartGame())
+        {
+            StartGame();
+        }
+        break;
 
-    // 更新金币动画
-    m_TileMap.UpdateCoins(m_fDeltaTime);
-    // 更新摄像机
-    UpdateCamera();
+    case STATE_PLAYING:
+        // 将输入状态传递给马里奥
+        m_Mario.HandleInput(m_bKeyLeft, m_bKeyRight, m_bKeyJump);
 
-    // 使用瓦片地图进行碰撞检测（现在包括独立对象）
-    std::vector<CRect> solidObjects = m_TileMap.GetSolidTileRects();
-    m_Mario.CheckCollisions(solidObjects);
+        // 更新马里奥状态（使用世界坐标）
+        m_Mario.Update(m_fDeltaTime);
 
-    // 检查金币碰撞
-    m_TileMap.CheckCoinCollisions(m_Mario.GetRect());
-    // 检查问号砖块碰撞，只有当马里奥向上移动时才检测
-    CRect marioHead = m_Mario.GetHeadRect();
-    m_TileMap.CheckQuestionBlockHit(marioHead, m_Mario.IsMovingUp());
- 
+        // 更新金币动画
+        m_TileMap.UpdateCoins(m_fDeltaTime);
+        // 更新摄像机
+        UpdateCamera();
+
+        // 使用瓦片地图进行碰撞检测（现在包括独立对象）
+        std::vector<CRect> solidObjects = m_TileMap.GetSolidTileRects();
+        m_Mario.CheckCollisions(solidObjects);
+
+        // 检查金币碰撞
+        m_TileMap.CheckCoinCollisions(m_Mario.GetRect());
+        // 检查问号砖块碰撞，只有当马里奥向上移动时才检测
+        CRect marioHead = m_Mario.GetHeadRect();
+        m_TileMap.CheckQuestionBlockHit(marioHead, m_Mario.IsMovingUp());
+        break;
+    }
 }
 // 新增：绘制调试碰撞信息
 void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
@@ -452,6 +487,7 @@ void CMFCApplication1View::DrawDebugCollision(CDC* pDC)
 // 增强的调试信息显示
 void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
 {
+    if (m_GameState != STATE_PLAYING) return;
     CString strInfo;
 
     // 基本信息
@@ -577,6 +613,30 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
         pDC->TextOut(10, 120, _T("操作: 方向键移动, 空格跳跃, 1/2/3切换状态"));
     }
 }
+// 添加开始游戏方法
+void CMFCApplication1View::StartGame()
+{
+    m_GameState = STATE_PLAYING;
+    int selectedLevel = m_StartMenu.GetSelectedLevel();
+    // 重新设置TileMap的Mario指针
+    m_TileMap.SetMario(&m_Mario);
+    // 加载关卡
+    BOOL loadResult = m_TileMap.LoadLevel(selectedLevel);
+    m_TileMap.LoadLevel(selectedLevel);
+    m_StartMenu.ResetStartState();
+
+    // 设置马里奥初始位置
+    int marioStartX = 5 * CGameConfig::TILE_SIZE;
+    int marioStartY = 200;
+    m_Mario.SetPosition(marioStartX, marioStartY);
+
+    // 重置摄像机
+    m_nCameraX = 0;
+    m_nCameraY = 0;
+    // 重置马里奥状态
+    m_Mario.SetVisible(TRUE);
+}
+
 // 绘制游戏
 void CMFCApplication1View::OnDraw(CDC* pDC)
 {
@@ -594,42 +654,83 @@ void CMFCApplication1View::OnDraw(CDC* pDC)
 // 键盘按下事件
 void CMFCApplication1View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-    // 设置按键状态，而不是直接调用马里奥的方法
-    switch (nChar)
+    switch (m_GameState)
     {
-    case VK_LEFT:   // 左箭头
-        m_bKeyLeft = TRUE;
+    case STATE_MENU:
+        // 菜单状态下也可以使用键盘选择
+        switch (nChar)
+        {
+        case '1':
+        case VK_NUMPAD1:
+            m_StartMenu.HandleMouseClick(CPoint(0, 0)); // 简化处理，实际应该设置选中关卡1
+            break;
+        case '2':
+        case VK_NUMPAD2:
+            // 设置选中关卡2
+            break;
+        case '3':
+        case VK_NUMPAD3:
+            // 设置选中关卡3
+            break;
+        case VK_RETURN:
+            StartGame();
+            break;
+        }
         break;
-    case VK_RIGHT:  // 右箭头
-        m_bKeyRight = TRUE;
+
+    case STATE_PLAYING:
+        // 原有的游戏按键处理
+        switch (nChar)
+        {
+        case VK_LEFT:
+            m_bKeyLeft = TRUE;
+            break;
+        case VK_RIGHT:
+            m_bKeyRight = TRUE;
+            break;
+        case VK_UP:
+        case VK_SPACE:
+            m_bKeyJump = TRUE;
+            break;
+        case '1':
+            m_Mario.SetState(MarioState::SMALL);
+            break;
+        case '2':
+            m_Mario.SetState(MarioState::BIG);
+            break;
+        case '3':
+            m_Mario.SetState(MarioState::FIRE);
+            break;
+        case 'D':
+        case 'd':
+            m_bDebugMode = !m_bDebugMode;
+            break;
+        case 'M':
+        case 'm':
+        {
+            MarioSkin currentSkin = m_Mario.GetSkin();
+            if (currentSkin == MarioSkin::MARIO)
+                m_Mario.SetSkin(MarioSkin::MIKU);
+            else
+                m_Mario.SetSkin(MarioSkin::MARIO);
+        }
         break;
-    case VK_UP:     // 上箭头
-    case VK_SPACE:  // 空格键
-        m_bKeyJump = TRUE;
+        case VK_ESCAPE:
+            m_GameState = STATE_MENU;  // 按ESC返回菜单
+            break;
+        case 'P':
+        case 'p':
+            m_GameState = STATE_PAUSED;  // 暂停游戏
+            break;
+        }
         break;
-    case '1':       // 数字1 - 小马里奥
-        m_Mario.SetState(MarioState::SMALL);
+
+    case STATE_PAUSED:
+        if (nChar == 'P' || nChar == 'p' || nChar == VK_ESCAPE)
+        {
+            m_GameState = STATE_PLAYING;  // 恢复游戏
+        }
         break;
-    case '2':       // 数字2 - 大马里奥
-        m_Mario.SetState(MarioState::BIG);
-        break;
-    case '3':       // 数字3 - 火焰马里奥
-        m_Mario.SetState(MarioState::FIRE);
-        break;
-	case 'D':       // 切换调试模式
-    case 'd':
-        m_bDebugMode = !m_bDebugMode;
-		break;
-    case 'M':   // 按M键切换Miku皮肤
-    case 'm':
-    {
-        MarioSkin currentSkin = m_Mario.GetSkin();
-        if (currentSkin == MarioSkin::MARIO)
-            m_Mario.SetSkin(MarioSkin::MIKU);
-        else
-            m_Mario.SetSkin(MarioSkin::MARIO);
-    }
-    break;
     }
 
     CView::OnKeyDown(nChar, nRepCnt, nFlags);
@@ -685,4 +786,53 @@ void CMFCApplication1View::CalculateDeltaTime()
 
     // 使用平滑后的帧率
     m_fSmoothedFPS = frameSum / 10;
+}
+// 添加鼠标左键按下处理
+void CMFCApplication1View::OnLButtonDown(UINT nFlags, CPoint point)
+{
+    if (m_GameState == STATE_MENU)
+    {
+        // 将点击坐标传递给菜单处理
+        if (m_StartMenu.HandleMouseClick(point))
+        {
+            // 如果点击有效，重绘界面
+            Invalidate(FALSE);
+        }
+    }
+
+    CView::OnLButtonDown(nFlags, point);
+}
+
+// 添加鼠标移动处理（用于悬停效果）
+void CMFCApplication1View::OnMouseMove(UINT nFlags, CPoint point)
+{
+    // 这里可以添加悬停效果的处理
+    // 暂时留空，后续可以完善
+
+    CView::OnMouseMove(nFlags, point);
+}
+
+// 添加暂停菜单渲染
+void CMFCApplication1View::RenderPauseMenu(CDC* pDC)
+{
+    // 半透明黑色背景
+    pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(0, 0, 0));
+
+    // 暂停文字
+    pDC->SetTextColor(RGB(255, 255, 255));
+    pDC->SetBkMode(TRANSPARENT);
+
+    CFont pauseFont;
+    pauseFont.CreatePointFont(240, _T("Arial"));
+    CFont* pOldFont = pDC->SelectObject(&pauseFont);
+
+    CString pauseText = _T("游戏暂停");
+    CSize textSize = pDC->GetTextExtent(pauseText);
+    pDC->TextOut(m_nScreenWidth / 2 - textSize.cx / 2, m_nScreenHeight / 2 - 50, pauseText);
+
+    pDC->SelectObject(pOldFont);
+
+    // 提示文字
+    pDC->TextOut(m_nScreenWidth / 2 - 100, m_nScreenHeight / 2 + 20,
+        _T("按 P 或 ESC 继续游戏"));
 }

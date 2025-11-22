@@ -196,6 +196,7 @@
     <ClInclude Include="Game\Objects\GameObject.h" />
     <ClInclude Include="Game\Objects\Mario.h" />
     <ClInclude Include="Game\Objects\Pipe.h" />
+    <ClInclude Include="Game\UI\StartMenu.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MFCApplication1.h" />
     <ClInclude Include="MFCApplication1Doc.h" />
@@ -236,6 +237,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Game\Objects\Pipe.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Game\UI\StartMenu.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MainFrm.cpp" />

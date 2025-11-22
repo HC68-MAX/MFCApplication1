@@ -28,6 +28,9 @@
     <Filter Include="Game\Map">
       <UniqueIdentifier>{b3aa37ab-2cb5-4c88-9e18-e5e9c1eb87fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\UI">
+      <UniqueIdentifier>{9ad3f93b-b0fa-46bf-a00d-15f5637b35f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MFCApplication1.h">
@@ -90,6 +93,9 @@
     <ClInclude Include="Game\Core\GameState.h">
       <Filter>Game\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Game\UI\StartMenu.h">
+      <Filter>Game\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication1.cpp">
@@ -139,6 +145,9 @@
     </ClCompile>
     <ClCompile Include="Game\Core\GameState.cpp">
       <Filter>Game\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\UI\StartMenu.cpp">
+      <Filter>Game\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

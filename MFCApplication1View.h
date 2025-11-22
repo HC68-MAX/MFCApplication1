@@ -11,6 +11,8 @@
 #include "Game/Map/TileMap.h"
 #include "Game/Core/GameConfig.h" 
 #include "Game/Core/GameState.h" 
+#include "Game/UI/StartMenu.h"
+
 #include <vector>
 #include <chrono>
 class CMFCApplication1View : public CView
@@ -45,7 +47,15 @@ public:
 
 	// 游戏相关成员变量
 protected:
-	// 新系统
+	enum GameState
+	{
+		STATE_MENU,
+		STATE_PLAYING,
+		STATE_PAUSED
+	};
+	GameState m_GameState;
+	CStartMenu m_StartMenu;
+	// 当前游戏状态
 	CTileMap m_TileMap;
 	int m_nCameraX;
 	int m_nCameraY;
@@ -85,6 +95,8 @@ protected:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	DECLARE_MESSAGE_MAP()
 
 //游戏相关函数
@@ -101,7 +113,8 @@ protected:
 	void UpdateCamera();
 	// 创建占位符位图
 	void CalculateDeltaTime();
-
+	void StartGame();
+	void RenderPauseMenu(CDC* pDC);
 };
 
 #ifndef _DEBUG  // MFCApplication1View.cpp 中的调试版本
