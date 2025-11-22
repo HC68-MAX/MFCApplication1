@@ -74,10 +74,14 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 	// TODO: 在此处通过修改
 	//  CREATESTRUCT cs 来修改窗口类或样式
 		// 设置窗口大小
-	cs.cx = 850;  // 宽度 = 内容宽度 + 边框
-	cs.cy = 650;  // 高度 = 内容高度 + 标题栏 + 边框
 
-	// 去掉默认菜单（可选）
+	cs.cx = CGameConfig::SCREEN_WIDTH;   // 宽度 
+	cs.cy = CGameConfig::SCREEN_HEIGHT;  // 高度 
+	
+	cs.style &= ~WS_THICKFRAME;  // 去掉厚边框
+	cs.style |= WS_OVERLAPPEDWINDOW;  // 标准窗口样式
+	// 居中显示
+
 	 cs.hMenu = NULL;
 	return TRUE;
 }

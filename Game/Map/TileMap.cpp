@@ -244,8 +244,8 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
                 int screenY = y * m_nTileSize - offsetY;
 
                 // 只绘制在屏幕范围内的瓦片
-                if (screenX + m_nTileSize < 0 || screenX >= 800 ||
-                    screenY + m_nTileSize < 0 || screenY >= 600)
+                if (screenX + m_nTileSize < 0 || screenX >= CGameConfig::SCREEN_WIDTH ||
+                    screenY + m_nTileSize < 0 || screenY >= CGameConfig::SCREEN_HEIGHT)
                 {
                     continue;
                 }
@@ -322,8 +322,8 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
             int screenY = coin.GetY() - offsetY;
 
             // 只绘制在屏幕范围内的金币
-            if (screenX + coin.GetWidth() < 0 || screenX >= 800 ||
-                screenY + coin.GetHeight() < 0 || screenY >= 600)
+            if (screenX + m_nTileSize < 0 || screenX >= CGameConfig::SCREEN_WIDTH ||
+                screenY + m_nTileSize < 0 || screenY >= CGameConfig::SCREEN_HEIGHT)
             {
                 continue;
             }
@@ -339,8 +339,8 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
         int marioScreenY = m_pMario->GetY() - offsetY;
 
         // 只绘制在屏幕范围内的 Mario
-        if (marioScreenX + m_pMario->GetWidth() < 0 || marioScreenX >= 800 ||
-            marioScreenY + m_pMario->GetHeight() < 0 || marioScreenY >= 600)
+        if (marioScreenX + m_nTileSize < 0 || marioScreenX >= CGameConfig::SCREEN_WIDTH ||
+                marioScreenY + m_nTileSize < 0 || marioScreenY >= CGameConfig::SCREEN_HEIGHT)
         {
             return;
         }
@@ -505,6 +505,7 @@ void CTileMap::AddCoin(int x, int y)
 
     m_Coins.push_back(coin);
 }
+
 void CTileMap::UpdateCoins(float deltaTime)
 {
     // 现在只需要调用一次静态方法来更新所有金币的动画

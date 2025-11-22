@@ -23,8 +23,8 @@ public:
     static const int ENEMY_HEIGHT = 32;        // 敌人高度
 	static const int MARIO_WALK_SPEED = 400;   // 马里奥行走速度(贴图用)
     // 屏幕和游戏设置
-    static const int SCREEN_WIDTH = 800;       // 屏幕宽度
-    static const int SCREEN_HEIGHT = 600;      // 屏幕高度
+    static const int SCREEN_WIDTH = 1300;       // 屏幕宽度
+    static const int SCREEN_HEIGHT = 900;      // 屏幕高度
     static const int WORLD_WIDTH = 2400;       // 世界宽度
     static const int WORLD_HEIGHT = 600;       // 世界高度
     static const int FPS = 60;                 // 目标帧率

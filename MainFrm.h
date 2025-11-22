@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include "Game/Core/GameConfig.h"
 class CMainFrame : public CFrameWnd
 {
 	

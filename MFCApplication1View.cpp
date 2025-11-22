@@ -83,9 +83,12 @@ BOOL CMFCApplication1View::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO: 在此处通过修改
 	//  CREATESTRUCT cs 来修改窗口类或样式
-        // 设置窗口样式 - 去掉最大化和调整大小
-    cs.style &= ~WS_MAXIMIZEBOX;
-    cs.style &= ~WS_THICKFRAME;
+        // 设置窗口样式 - 去掉最大化和调整大小 
+  //  cs.cx = CGameConfig::SCREEN_WIDTH; 
+//    cs.cy = CGameConfig::SCREEN_HEIGHT; 
+  //  cs.style &= ~WS_MAXIMIZEBOX;
+  //  cs.style &= ~WS_THICKFRAME;
+
 	return CView::PreCreateWindow(cs);
 }
 
