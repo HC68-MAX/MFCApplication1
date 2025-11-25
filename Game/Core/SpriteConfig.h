@@ -36,6 +36,7 @@ public:
     static const SSpriteCoord MARIO_SMALL_WALK1_LEFT;
     static const SSpriteCoord MARIO_SMALL_WALK2_LEFT;
     static const SSpriteCoord MARIO_SMALL_JUMP_LEFT;
+    static const SSpriteCoord MARIO_SMALL_DEAD;
     // ÂíÀï°Â - Ð¡
     static const SSpriteCoord MARIO_SMALL_STAND_RIGHT;
     static const SSpriteCoord MARIO_SMALL_WALK1_RIGHT;

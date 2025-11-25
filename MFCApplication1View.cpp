@@ -316,6 +316,7 @@ void CMFCApplication1View::OnTimer(UINT_PTR nIDEvent)
     CView::OnTimer(nIDEvent);
 }
 
+// 在UpdateGame方法中添加死亡检测
 void CMFCApplication1View::UpdateGame()
 {
     // 更新菜单动画
@@ -327,7 +328,6 @@ void CMFCApplication1View::UpdateGame()
     switch (m_GameState)
     {
     case STATE_MENU:
-        // 检查是否需要开始游戏
         if (m_StartMenu.ShouldStartGame())
         {
             StartGame();
@@ -335,28 +335,164 @@ void CMFCApplication1View::UpdateGame()
         break;
 
     case STATE_PLAYING:
-        // 将输入状态传递给马里奥
-        m_Mario.HandleInput(m_bKeyLeft, m_bKeyRight, m_bKeyJump);
+        // 检查马里奥是否死亡
+        if (CheckMarioDeath())
+        {
+            // 死亡处理
+            HandleMarioDeath();
+            // 死亡状态下只更新马里奥（用于播放死亡动画）
+            m_Mario.Update(m_fDeltaTime);
 
-        // 更新马里奥状态（使用世界坐标）
-        m_Mario.Update(m_fDeltaTime);
+            break; // 死亡时不执行正常游戏逻辑
+        }
 
-        // 更新金币动画
-        m_TileMap.UpdateCoins(m_fDeltaTime);
-        // 更新摄像机
+        // 只有非死亡状态才处理输入和碰撞
+        if (!m_Mario.IsDying() && !m_Mario.IsDead())
+        {
+            // 将输入状态传递给马里奥
+            m_Mario.HandleInput(m_bKeyLeft, m_bKeyRight, m_bKeyJump);
+
+            // 更新马里奥状态（使用世界坐标）
+            m_Mario.Update(m_fDeltaTime);
+
+            // 更新金币动画
+            m_TileMap.UpdateCoins(m_fDeltaTime);
+
+            // 使用瓦片地图进行碰撞检测（现在包括独立对象）
+            std::vector<CRect> solidObjects = m_TileMap.GetSolidTileRects();
+            m_Mario.CheckCollisions(solidObjects);
+
+            // 检查金币碰撞
+            m_TileMap.CheckCoinCollisions(m_Mario.GetRect());
+
+            // 检查问号砖块碰撞，只有当马里奥向上移动时才检测
+            CRect marioHead = m_Mario.GetHeadRect();
+            m_TileMap.CheckQuestionBlockHit(marioHead, m_Mario.IsMovingUp());
+        }
+        else
+        {
+            // 死亡状态下只更新马里奥（用于播放死亡动画）
+            m_Mario.Update(m_fDeltaTime);
+        }
+
+        // 更新摄像机（死亡时也更新，可以跟随死亡动画）
         UpdateCamera();
-
-        // 使用瓦片地图进行碰撞检测（现在包括独立对象）
-        std::vector<CRect> solidObjects = m_TileMap.GetSolidTileRects();
-        m_Mario.CheckCollisions(solidObjects);
-
-        // 检查金币碰撞
-        m_TileMap.CheckCoinCollisions(m_Mario.GetRect());
-        // 检查问号砖块碰撞，只有当马里奥向上移动时才检测
-        CRect marioHead = m_Mario.GetHeadRect();
-        m_TileMap.CheckQuestionBlockHit(marioHead, m_Mario.IsMovingUp());
         break;
     }
+}
+
+// 添加死亡检测方法
+BOOL CMFCApplication1View::CheckMarioDeath()
+{
+    // 如果已经在死亡状态，返回true
+    if (m_Mario.IsDying() || m_Mario.IsDead())
+        return TRUE;
+
+    // 死亡条件1: 掉落出屏幕底部
+    if (m_Mario.GetY() > CGameConfig::WORLD_HEIGHT + 100)
+    {
+        TRACE(_T("马里奥掉落死亡！位置Y: %d\n"), m_Mario.GetY());
+        return TRUE;
+    }
+
+    // 死亡条件2: 被敌人碰到（将来实现）
+    // if (CheckEnemyCollision()) 
+    //     return TRUE;
+
+    // 死亡条件3: 超时（将来实现）
+    // if (IsTimeUp())
+    //     return TRUE;
+
+    return FALSE;
+}
+
+// 修改死亡处理方法，添加2秒定时器
+void CMFCApplication1View::HandleMarioDeath()
+{
+    // 静态变量用于计时
+    static float deathWaitTime = 0.0f;
+    static BOOL deathTimerStarted = FALSE;
+
+    // 如果还没有开始死亡动画，触发死亡
+    if (!m_Mario.IsDying() && !m_Mario.IsDead())
+    {
+        // 使用掉落死亡，会有更强的向上弹跳效果
+        m_Mario.DieFromFall();
+
+        // 减少生命值
+        CGameState::GetInstance().LoseLife();
+
+        // 启动死亡计时器
+        deathWaitTime = 0.0f;
+        deathTimerStarted = TRUE;
+
+        TRACE(_T("生命值减少，剩余: %d，开始死亡动画计时\n"), CGameState::GetInstance().GetLives());
+    }
+
+    // 如果计时器已启动，更新计时
+    if (deathTimerStarted)
+    {
+        deathWaitTime += m_fDeltaTime;
+
+        // 2秒后处理重生或游戏结束
+        if (deathWaitTime >= 2.0f)
+        {
+            deathTimerStarted = FALSE;
+
+            // 如果还有生命，重生
+            if (CGameState::GetInstance().GetLives() > 0)
+            {
+                RespawnMario();
+            }
+            else
+            {
+                // 游戏结束，返回主菜单
+                m_GameState = STATE_MENU;
+                // 重置游戏状态
+                CGameState::GetInstance().Reset();
+                TRACE(_T("游戏结束，返回主菜单\n"));
+            }
+        }
+    }
+
+    // 检查是否需要重生（兼容之前的逻辑）
+    if (m_Mario.IsDead() && !deathTimerStarted)
+    {
+        // 如果还有生命，重生
+        if (CGameState::GetInstance().GetLives() > 0)
+        {
+            RespawnMario();
+        }
+        else
+        {
+            // 游戏结束，返回主菜单
+            m_GameState = STATE_MENU;
+            // 重置游戏状态
+            CGameState::GetInstance().Reset();
+        }
+    }
+
+}
+// 添加重生方法
+void CMFCApplication1View::RespawnMario()
+{
+    TRACE(_T("马里奥重生\n"));
+
+    // 重生马里奥
+    m_Mario.Respawn();
+
+    // 设置重生位置（可以根据关卡设计设置检查点）
+    int respawnX = 5 * CGameConfig::TILE_SIZE;
+    int respawnY = 200;
+    m_Mario.SetPosition(respawnX, respawnY);
+
+    // 重置摄像机
+    m_nCameraX = 0;
+    m_nCameraY = 0;
+
+    // 重新加载当前关卡（或者保持当前状态）
+    // 如果需要重置关卡，可以取消下面的注释
+    // m_TileMap.LoadLevel(m_CurrentLevel);
 }
 // 新增：绘制调试碰撞信息
 void CMFCApplication1View::DrawDebugCollision(CDC* pDC)

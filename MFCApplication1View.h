@@ -115,6 +115,9 @@ protected:
 	void CalculateDeltaTime();
 	void StartGame();
 	void RenderPauseMenu(CDC* pDC);
+	BOOL CheckMarioDeath();
+	void HandleMarioDeath();
+	void RespawnMario();
 };
 
 #ifndef _DEBUG  // MFCApplication1View.cpp 中的调试版本

@@ -36,6 +36,12 @@ CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameCo
     m_fJumpTime = 0.0f;
     m_fMaxJumpTime = CGameConfig::MARIO_JUMP_MAX_TIME;  // 使用全局配置
     m_bCanJump = TRUE;
+
+    // 初始化死亡状态
+    m_bIsDying = FALSE;
+    m_fDeathTimer = 0.0f;
+    m_fDeathJumpVelocity = -12.0f; // 死亡时向上的弹跳力
+    m_fDeathAnimationTime = 2.0f;  // 死亡动画持续2秒
     // 根据状态更新大小
     UpdateSize();
 }
@@ -57,88 +63,140 @@ CMario::~CMario()
 void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
 {
     if (!m_bVisible) return; // 如果不可见，则不绘制
-
-    CResourceManager& resMgr = CResourceManager::GetInstance();
-    CBitmap* pBitmap = nullptr;
-    SSpriteCoord spriteCoord;
-    // 根据皮肤选择图集和精灵坐标
-    if (m_Skin == MarioSkin::MIKU)
+    if (m_bIsDying || m_State == MarioState::DEAD)
     {
-        // 使用Miku图集
-        pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMiku());
+        // 死亡时使用半透明效果
+        CDC memDC;
+        memDC.CreateCompatibleDC(pDC);
+        CBitmap tempBitmap;
+        tempBitmap.CreateCompatibleBitmap(pDC, m_nWidth, m_nHeight);
+        CBitmap* pOldMemBitmap = memDC.SelectObject(&tempBitmap);
 
-        // 使用新的动画系统获取Miku精灵坐标
-        spriteCoord = GetMikuSpriteCoord();
+        // 清空临时DC
+        memDC.FillSolidRect(0, 0, m_nWidth, m_nHeight, RGB(0, 0, 0));
+
+        // 正常绘制到临时DC
+        CResourceManager& resMgr = CResourceManager::GetInstance();
+        CBitmap* pBitmap = nullptr;
+        SSpriteCoord spriteCoord;
+
+        if (m_Skin == MarioSkin::MIKU)
+        {
+            pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMiku());
+            spriteCoord = GetMikuSpriteCoord();
+        }
+        else
+        {
+            pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
+            // 死亡时使用特定的精灵，比如向下掉落的样子
+            spriteCoord = CSpriteConfig::MARIO_SMALL_DEAD; // 需要在SpriteConfig中添加这个坐标
+        }
+
+        BOOL flipHorizontal = (m_Direction == Direction::LEFT);
+
+        CSpriteRenderer::DrawSprite(&memDC, pBitmap, 0, 0,
+            m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,
+            spriteCoord.width, spriteCoord.height, flipHorizontal);
+
+        // 使用半透明方式绘制到屏幕
+        BLENDFUNCTION blend = { 0 };
+        blend.BlendOp = AC_SRC_OVER;
+        blend.BlendFlags = 0;
+        blend.SourceConstantAlpha = 128; // 50% 透明度
+        blend.AlphaFormat = 0;
+
+        pDC->AlphaBlend(screenX, screenY, m_nWidth, m_nHeight,
+            &memDC, 0, 0, m_nWidth, m_nHeight, blend);
+
+        memDC.SelectObject(pOldMemBitmap);
+        memDC.DeleteDC();
+        tempBitmap.DeleteObject();
     }
     else
     {
-        // 原始马里奥皮肤（保持原有逻辑）
-        pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
-        // 根据状态和动作选择精灵（全部使用向右的贴图）
-        switch (m_State)
+        // 正常的绘制逻辑（你原有的代码）
+        CResourceManager& resMgr = CResourceManager::GetInstance();
+        CBitmap* pBitmap = nullptr;
+        SSpriteCoord spriteCoord;
+        // 根据皮肤选择图集和精灵坐标
+        if (m_Skin == MarioSkin::MIKU)
         {
-        case MarioState::SMALL:
-            if (m_bIsJumping)
-                spriteCoord = CSpriteConfig::MARIO_SMALL_JUMP_RIGHT;
-            else if (IsMoving())
-            {
-                // 三个行走动作循环
-                DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
-                if (animTime < 250)
-                    spriteCoord = CSpriteConfig::MARIO_SMALL_WALK1_RIGHT;
-                else if (animTime < 500)
-                    spriteCoord = CSpriteConfig::MARIO_SMALL_WALK2_RIGHT;
-                else
-                    spriteCoord = CSpriteConfig::MARIO_SMALL_WALK3_RIGHT;
-            }
-            else
-                spriteCoord = CSpriteConfig::MARIO_SMALL_STAND_RIGHT;
-            break;
+            // 使用Miku图集
+            pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMiku());
 
-        case MarioState::BIG:
-            if (m_bIsJumping)
-                spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
-            else if (IsMoving())
-            {
-                // 三个行走动作循环
-                DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
-                if (animTime < 250)
-                    spriteCoord = CSpriteConfig::MARIO_BIG_WALK1_RIGHT;
-                else if (animTime < 500)
-                    spriteCoord = CSpriteConfig::MARIO_BIG_WALK2_RIGHT;
-                else
-                    spriteCoord = CSpriteConfig::MARIO_BIG_WALK3_RIGHT;
-            }
-            else
-                spriteCoord = CSpriteConfig::MARIO_BIG_STAND_RIGHT;
-            break;
-
-        case MarioState::FIRE:
-            if (m_bIsJumping)
-                spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
-            else if (IsMoving())
-            {
-                // 三个行走动作循环
-                DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
-                if (animTime < 250)
-                    spriteCoord = CSpriteConfig::MARIO_FIRE_WALK1_RIGHT;
-                else if (animTime < 500)
-                    spriteCoord = CSpriteConfig::MARIO_FIRE_WALK2_RIGHT;
-                else
-                    spriteCoord = CSpriteConfig::MARIO_FIRE_WALK3_RIGHT;
-            }
-            else
-                spriteCoord = CSpriteConfig::MARIO_FIRE_STAND_RIGHT;
-            break;
+            // 使用新的动画系统获取Miku精灵坐标
+            spriteCoord = GetMikuSpriteCoord();
         }
-    }
-    // 判断是否需要水平翻转
-    BOOL flipHorizontal = (m_Direction == Direction::LEFT);
+        else
+        {
+            // 原始马里奥皮肤（保持原有逻辑）
+            pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
+            // 根据状态和动作选择精灵（全部使用向右的贴图）
+            switch (m_State)
+            {
+            case MarioState::SMALL:
+                if (m_bIsJumping)
+                    spriteCoord = CSpriteConfig::MARIO_SMALL_JUMP_RIGHT;
+                else if (IsMoving())
+                {
+                    // 三个行走动作循环
+                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                    if (animTime < 250)
+                        spriteCoord = CSpriteConfig::MARIO_SMALL_WALK1_RIGHT;
+                    else if (animTime < 500)
+                        spriteCoord = CSpriteConfig::MARIO_SMALL_WALK2_RIGHT;
+                    else
+                        spriteCoord = CSpriteConfig::MARIO_SMALL_WALK3_RIGHT;
+                }
+                else
+                    spriteCoord = CSpriteConfig::MARIO_SMALL_STAND_RIGHT;
+                break;
 
-    // 使用精灵渲染器绘制，添加翻转参数
-    CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-        m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,
-        spriteCoord.width, spriteCoord.height, flipHorizontal);
+            case MarioState::BIG:
+                if (m_bIsJumping)
+                    spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
+                else if (IsMoving())
+                {
+                    // 三个行走动作循环
+                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                    if (animTime < 250)
+                        spriteCoord = CSpriteConfig::MARIO_BIG_WALK1_RIGHT;
+                    else if (animTime < 500)
+                        spriteCoord = CSpriteConfig::MARIO_BIG_WALK2_RIGHT;
+                    else
+                        spriteCoord = CSpriteConfig::MARIO_BIG_WALK3_RIGHT;
+                }
+                else
+                    spriteCoord = CSpriteConfig::MARIO_BIG_STAND_RIGHT;
+                break;
+
+            case MarioState::FIRE:
+                if (m_bIsJumping)
+                    spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
+                else if (IsMoving())
+                {
+                    // 三个行走动作循环
+                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                    if (animTime < 250)
+                        spriteCoord = CSpriteConfig::MARIO_FIRE_WALK1_RIGHT;
+                    else if (animTime < 500)
+                        spriteCoord = CSpriteConfig::MARIO_FIRE_WALK2_RIGHT;
+                    else
+                        spriteCoord = CSpriteConfig::MARIO_FIRE_WALK3_RIGHT;
+                }
+                else
+                    spriteCoord = CSpriteConfig::MARIO_FIRE_STAND_RIGHT;
+                break;
+            }
+        }
+        // 判断是否需要水平翻转
+        BOOL flipHorizontal = (m_Direction == Direction::LEFT);
+
+        // 使用精灵渲染器绘制，添加翻转参数
+        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
+            m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,
+            spriteCoord.width, spriteCoord.height, flipHorizontal);
+    }
 }
 // 修改现有的DrawAt方法，使用新的精灵绘制方法
 void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
@@ -211,6 +269,12 @@ void CMario::SetSkin(MarioSkin skin)
 // 更新马里奥状态
 void CMario::Update(float deltaTime)
 {
+    // 如果正在死亡动画中
+    if (m_bIsDying)
+    {
+        UpdateDeathAnimation(deltaTime);
+        return; // 死亡状态下不执行正常更新
+    }
     // 处理输入
     HandleInput(m_bInputLeft, m_bInputRight, m_bInputJump);
 
@@ -231,6 +295,26 @@ void CMario::Update(float deltaTime)
         m_fVelocityX = 0;
     }
 
+}
+// 添加死亡动画更新方法
+void CMario::UpdateDeathAnimation(float deltaTime)
+{
+    m_fDeathTimer += deltaTime;
+
+    // 应用重力，但减弱一些
+    m_fVelocityY += m_fGravity * 0.8f;
+
+    // 更新位置
+    m_nX += static_cast<int>(m_fVelocityX);
+    m_nY += static_cast<int>(m_fVelocityY);
+
+    // 死亡动画结束后设置为完全死亡状态
+    if (m_fDeathTimer >= m_fDeathAnimationTime)
+    {
+        m_bIsDying = FALSE;
+        m_State = MarioState::DEAD;
+        TRACE(_T("死亡动画结束，马里奥进入完全死亡状态\n"));
+    }
 }
 // Miku动画更新
 void CMario::UpdateMikuAnimation(float deltaTime)
@@ -344,6 +428,10 @@ void CMario::ApplyPhysics(float deltaTime)
 // 碰撞检测与响应
 void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
 {
+    // 死亡状态下不进行碰撞检测
+    if (m_bIsDying || m_State == MarioState::DEAD)
+        return;
+
     // 步骤 1: 在每帧开始时，先假设马里奥不在地面上。
     m_bIsOnGround = FALSE;
 
@@ -540,3 +628,83 @@ void CMario::OnRightCollision(int surfaceX)
     m_fVelocityX = 0; // 水平速度清零
 }
 
+// 添加死亡触发方法
+void CMario::Die()
+{
+    if (m_bIsDying || m_State == MarioState::DEAD)
+        return;
+
+    TRACE(_T("马里奥死亡！当前位置: (%d, %d)\n"), m_nX, m_nY);
+
+    // 设置死亡状态
+    m_bIsDying = TRUE;
+    m_fDeathTimer = 0.0f;
+    m_State = MarioState::DEAD;
+    // 保存当前状态用于重生
+    // 死亡时给予向上的速度
+    m_fVelocityY = m_fDeathJumpVelocity;
+    m_fVelocityX = 0; // 水平速度清零
+
+    // 停止所有输入
+    m_bInputLeft = FALSE;
+    m_bInputRight = FALSE;
+    m_bInputJump = FALSE;
+
+    // 播放死亡音效（如果有的话）
+    // PlayDeathSound();
+}
+
+// 添加重生方法
+void CMario::Respawn()
+{
+    TRACE(_T("马里奥重生\n"));
+
+    // 重置状态
+    m_bIsDying = FALSE;
+    m_fDeathTimer = 0.0f;
+    m_State = MarioState::SMALL; // 重生为小马里奥
+
+    // 重置物理状态
+    m_fVelocityX = 0.0f;
+    m_fVelocityY = 0.0f;
+    m_bIsJumping = FALSE;
+    m_bIsOnGround = FALSE;
+
+    // 重置输入状态
+    m_bInputLeft = FALSE;
+    m_bInputRight = FALSE;
+    m_bInputJump = FALSE;
+
+    // 更新大小
+    UpdateSize();
+
+    // 设置重生位置（可以在外部设置）
+    // m_nX = respawnX;
+    // m_nY = respawnY;
+}
+
+
+// 新增：从高处掉落死亡方法
+void CMario::DieFromFall()
+{
+    if (m_bIsDying || m_State == MarioState::DEAD)
+        return;
+
+    TRACE(_T("马里奥掉落死亡！当前位置: (%d, %d)\n"), m_nX, m_nY);
+
+    // 设置死亡状态
+    m_bIsDying = TRUE;
+    m_fDeathTimer = 0.0f;
+
+    // 掉落死亡时给予更强的向上弹跳力，制造戏剧效果
+    m_fVelocityY = m_fDeathJumpVelocity * 1.5f; // 比普通死亡跳得更高
+    m_fVelocityX = 0; // 水平速度清零
+
+    // 停止所有输入
+    m_bInputLeft = FALSE;
+    m_bInputRight = FALSE;
+    m_bInputJump = FALSE;
+
+    // 播放死亡音效（如果有的话）
+    // PlayDeathSound();
+}

@@ -20,7 +20,8 @@ enum class MarioState
 {
     SMALL,      // 小马里奥
     BIG,        // 大马里奥  
-    FIRE        // 火焰马里奥
+    FIRE,        // 火焰马里奥
+    DEAD        // 死亡状态 - 新增
 };
 
 // 方向枚举
@@ -99,7 +100,14 @@ public:
     float GetGravity() const { return m_fGravity; } // 获取重力加速度
     float GetMaxSpeed() const { return m_fMaxSpeed; } // 获取最大移动速度
     float GetJumpForce() const { return m_fJumpForce; } // 获取跳跃力
- 
+
+    // 死亡状态管理
+    void Die();                    // 触发死亡
+    BOOL IsDying() const { return m_bIsDying; }
+    BOOL IsDead() const { return m_State == MarioState::DEAD; }
+    void Respawn();                // 重生
+    void UpdateDeathAnimation(float deltaTime);
+    void DieFromFall();            // 新增：从高处掉落死亡
 private:
     // =================================================================
     // 私有辅助函数
@@ -113,6 +121,11 @@ private:
     // =================================================================
     // 成员变量
     // =================================================================
+     // 死亡状态相关
+    BOOL m_bIsDying;               // 是否正在死亡动画中
+    float m_fDeathTimer;           // 死亡动画计时器
+    float m_fDeathJumpVelocity;    // 死亡时向上的弹跳速度
+    float m_fDeathAnimationTime;   // 死亡动画总时间
 
     // 物理与速度
     float m_fVelocityX, m_fVelocityY; // X和Y方向速度

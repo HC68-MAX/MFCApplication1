@@ -42,6 +42,7 @@ const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK1_RIGHT = { 6 * size, (mario_y
 const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK2_RIGHT = { 7 * size, (mario_y + 2) * size, 16, 16  };
 const SSpriteCoord CSpriteConfig::MARIO_SMALL_WALK3_RIGHT = { 5 * size, (mario_y + 2) * size, 16, 16  };
 const SSpriteCoord CSpriteConfig::MARIO_SMALL_JUMP_RIGHT  = { 15 * size,(mario_y + 2) * size, 16, 16  };
+const SSpriteCoord CSpriteConfig::MARIO_SMALL_DEAD = { 10 * size,11 * size, 16, 16 };
 // ÂíÀï°Â - ´ó
 const SSpriteCoord CSpriteConfig::MARIO_BIG_STAND_RIGHT = { 11 * size, mario_y * size, 16, 32 };
 const SSpriteCoord CSpriteConfig::MARIO_BIG_WALK1_RIGHT = { 6  * size, mario_y * size, 16, 32 };
