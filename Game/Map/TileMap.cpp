@@ -69,40 +69,33 @@ BOOL CTileMap::LoadLevel1()
     // 平台1
     for (int x = 3; x < 8; x++)
     {
-        SetTile(x, 7, 2, TRUE, _T("brick"));
+        int y = 16;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y-1) * CGameConfig::TILE_SIZE);
     }
 
     // 平台2
     for (int x = 10; x < 15; x++)
     {
-        SetTile(x, 5, 2, TRUE, _T("brick"));
+        int y = 14;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y-1) * CGameConfig::TILE_SIZE);
     }
     // 硬砖块
     for (int x = 12; x < 14; x++)
     {
-        SetTile(x, 2, 3, TRUE, _T("question_brick"));
+        SetTile(x, 10, 3, TRUE, _T("question_brick"));
+          
     }
 
     // 水管
-    SetTile(20, 7, 5, TRUE, _T("pipe"));
-    SetTile(20, 8, 7, TRUE, _T("pipe"));
-    SetTile(20, 9, 7, TRUE, _T("pipe"));
-    SetTile(21, 7, 6, TRUE, _T("pipe"));
-    SetTile(21, 8, 8, TRUE, _T("pipe"));
-    SetTile(21, 9, 8, TRUE, _T("pipe"));
+    SetTile(20, 17, 5, TRUE, _T("pipe"));
+    SetTile(20, 18, 7, TRUE, _T("pipe"));
+    SetTile(20, 19, 7, TRUE, _T("pipe"));
+    SetTile(21, 17, 6, TRUE, _T("pipe"));
+    SetTile(21, 18, 8, TRUE, _T("pipe"));
+    SetTile(21, 19, 8, TRUE, _T("pipe"));
 
-    // 添加金币
-    AddCoin(5 * CGameConfig::TILE_SIZE, 6 * CGameConfig::TILE_SIZE);
-    AddCoin(6 * CGameConfig::TILE_SIZE, 6 * CGameConfig::TILE_SIZE);
-    AddCoin(11 * CGameConfig::TILE_SIZE, 4 * CGameConfig::TILE_SIZE);
-    AddCoin(12 * CGameConfig::TILE_SIZE, 4 * CGameConfig::TILE_SIZE);
-    AddCoin(13 * CGameConfig::TILE_SIZE, 4 * CGameConfig::TILE_SIZE);
-
-    // 在平台上放金币
-    for (int x = 3; x < 8; x++)
-    {
-        AddCoin(x * CGameConfig::TILE_SIZE, 6 * CGameConfig::TILE_SIZE);
-    }
     TRACE(_T("关卡1加载完成: 砖块=%d, 水管=%d\n"), m_Bricks.size(), m_Pipes.size());
     return TRUE;
 }
@@ -129,31 +122,30 @@ BOOL CTileMap::LoadLevel2()
     // 添加一些平台
     for (int x = 5; x < 12; x++)
     {
-        SetTile(x, 6, 2, TRUE, _T("brick"));
+        int y = 16;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y-1) * CGameConfig::TILE_SIZE);
     }
-
+    // 添加一些平台
+    for (int x = 14; x < 20; x++)
+    {
+        int y = 18;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
+    }
     // 添加问号砖块
     for (int x = 15; x < 18; x++)
     {
-        SetTile(x, 4, 3, TRUE, _T("question_brick"));
+        int y = 14;
+        SetTile(x, y, 3, TRUE, _T("question_brick"));
     }
 
     // 添加水管
-    SetTile(25, 6, 5, TRUE, _T("pipe"));
-    SetTile(25, 7, 7, TRUE, _T("pipe"));
-    SetTile(26, 6, 6, TRUE, _T("pipe"));
-    SetTile(26, 7, 8, TRUE, _T("pipe"));
+    SetTile(25, 20, 5, TRUE, _T("pipe"));
+    SetTile(25, 21, 7, TRUE, _T("pipe"));
+    SetTile(26, 20, 6, TRUE, _T("pipe"));
+    SetTile(26, 21, 8, TRUE, _T("pipe"));
 
-    // 添加更多金币
-    for (int x = 8; x < 11; x++)
-    {
-        AddCoin(x * CGameConfig::TILE_SIZE, 5 * CGameConfig::TILE_SIZE);
-    }
-
-    for (int x = 16; x < 18; x++)
-    {
-        AddCoin(x * CGameConfig::TILE_SIZE, 3 * CGameConfig::TILE_SIZE);
-    }
 
     TRACE(_T("关卡2加载完成: 砖块=%d, 水管=%d, 金币=%d\n"),
         m_Bricks.size(), m_Pipes.size(), m_Coins.size());
@@ -182,46 +174,32 @@ BOOL CTileMap::LoadLevel3()
     // 添加多个平台
     for (int x = 4; x < 8; x++)
     {
-        SetTile(x, 5, 2, TRUE, _T("brick"));
+        int y = 15;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y-1) * CGameConfig::TILE_SIZE);
     }
 
     for (int x = 12; x < 16; x++)
     {
-        SetTile(x, 4, 2, TRUE, _T("brick"));
+        int y = 15;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
     }
 
     for (int x = 20; x < 24; x++)
     {
-        SetTile(x, 3, 2, TRUE, _T("brick"));
+        int y = 14;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
     }
 
     // 添加问号砖块
-    SetTile(6, 4, 3, TRUE, _T("question_brick"));
-    SetTile(14, 3, 3, TRUE, _T("question_brick"));
-    SetTile(22, 2, 3, TRUE, _T("question_brick"));
+    SetTile(6, 12, 3, TRUE, _T("question_brick"));
+    SetTile(14, 12, 3, TRUE, _T("question_brick"));
+    SetTile(22, 11, 3, TRUE, _T("question_brick"));
 
-    // 添加多个水管
-    SetTile(30, 6, 5, TRUE, _T("pipe"));
-    SetTile(30, 7, 7, TRUE, _T("pipe"));
-    SetTile(31, 6, 6, TRUE, _T("pipe"));
-    SetTile(31, 7, 8, TRUE, _T("pipe"));
 
-    // 大量金币
-    for (int x = 5; x < 8; x++)
-    {
-        AddCoin(x * CGameConfig::TILE_SIZE, 4 * CGameConfig::TILE_SIZE);
-    }
-
-    for (int x = 13; x < 16; x++)
-    {
-        AddCoin(x * CGameConfig::TILE_SIZE, 3 * CGameConfig::TILE_SIZE);
-    }
-
-    for (int x = 21; x < 24; x++)
-    {
-        AddCoin(x * CGameConfig::TILE_SIZE, 2 * CGameConfig::TILE_SIZE);
-    }
-
+   
     TRACE(_T("关卡3加载完成: 砖块=%d, 水管=%d, 金币=%d\n"),
         m_Bricks.size(), m_Pipes.size(), m_Coins.size());
     return TRUE;
@@ -229,7 +207,7 @@ BOOL CTileMap::LoadLevel3()
 // 同时绘制瓦片和独立对象
 void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
 {
-    // 绘制瓦片（原有代码）
+    // 绘制瓦片（静态事物）
     CResourceManager& resMgr = CResourceManager::GetInstance();
     CBitmap* pBitmap = resMgr.GetBitmap(_T("TilesetMain"));
 
@@ -313,7 +291,7 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
         }
     }
 
-    // 绘制金币 - 使用正确的屏幕坐标
+    // 绘制金币 
     for (auto& coin : m_Coins)
     {
         if (coin.IsVisible() && !coin.IsCollected())
@@ -332,7 +310,7 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
             coin.DrawAt(pDC, screenX, screenY);
         }
     }
-    // 5. 绘制 Mario（新增）
+    // 5. 绘制 Mario
     if (m_pMario && m_pMario->IsVisible())
     {
         int marioScreenX = m_pMario->GetX() - offsetX;
@@ -485,12 +463,7 @@ void CTileMap::RemoveCoin(int index)
         m_Coins[index].Collect();
     }
 }
-// 新增：添加水管
-void CTileMap::AddPipe(int x, int y, int height)
-{
-    CPipe pipe(x, y, height);
-    m_Pipes.push_back(pipe);
-}
+
 // 新增：添加金币
 void CTileMap::ClearObjects()
 {

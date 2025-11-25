@@ -8,8 +8,8 @@ class CGameConfig
 public:
     // 贴图尺寸
     static const int TILE_SIZE = 32;           // 瓦片基本尺寸
-    static const int MIKU_WIDTH  = 128;        // 初音未来宽度
-    static const int MIKU_HEIGHT = 128;        // 初音未来高度
+    static const int MIKU_WIDTH  = 64;        // 初音未来宽度
+    static const int MIKU_HEIGHT = 64;        // 初音未来高度
     static const int MARIO_SMALL_WIDTH = 32;   // 小马里奥宽度
     static const int MARIO_SMALL_HEIGHT = 32;  // 小马里奥高度
     static const int MARIO_BIG_WIDTH = 32;     // 大马里奥宽度  
@@ -25,11 +25,11 @@ public:
     // 屏幕和游戏设置
     static const int SCREEN_WIDTH = 1300;       // 屏幕宽度
     static const int SCREEN_HEIGHT = 900;      // 屏幕高度
-    static const int WORLD_WIDTH = 2400;       // 世界宽度
-    static const int WORLD_HEIGHT = 600;       // 世界高度
+    static const int WORLD_WIDTH = 900;       // 世界宽度
+    static const int WORLD_HEIGHT = 800;       // 世界高度
     static const int FPS = 60;                 // 目标帧率
-    static const int TILE_MAP_WIDTH = 75;      // 瓦片地图宽度 (2400/32=75)
-    static const int TILE_MAP_HEIGHT = 15;     // 瓦片地图高度 (600/32=18.75，向上取整)
+    static const int TILE_MAP_WIDTH  = WORLD_WIDTH/32;      // 瓦片地图宽度 
+    static const int TILE_MAP_HEIGHT = WORLD_HEIGHT/32;     // 瓦片地图高度 
 
     // 物理常量定义(float类型改为constexpr)
     static constexpr float CGameConfig::GRAVITY = 0.8f;				    // 重力

@@ -186,18 +186,8 @@ void CMFCApplication1View::UpdateCamera()
     if (m_nCameraX > maxCameraX && maxCameraX > 0)
         m_nCameraX = maxCameraX;
 
-    // 垂直方向也做简单跟随（如果需要）
-    int marioCenterY = m_Mario.GetY() + m_Mario.GetHeight() / 2;
-    int targetCameraY = marioCenterY - m_nScreenHeight / 2;
-
-    // 限制垂直摄像机范围（通常不需要垂直滚动，或者限制在一定范围内）
-    if (targetCameraY < 0) targetCameraY = 0;
-    int maxCameraY = m_TileMap.GetHeight() * m_TileMap.GetTileSize() - m_nScreenHeight;
-    if (targetCameraY > maxCameraY && maxCameraY > 0)
-        targetCameraY = maxCameraY;
-
     // 垂直方向缓动
-    m_nCameraY += (targetCameraY - m_nCameraY) * 0.1f;
+    m_nCameraY = 0;
 }
 // 初始化游戏
 void CMFCApplication1View::InitializeGame()
