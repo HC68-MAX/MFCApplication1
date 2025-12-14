@@ -4,8 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                // 手动添加MFC/ATL头文件路径（如果env:INCLUDE没生效，这一步是关键）
-              //  "${env:VSINSTALLDIR}/ATLMFC/include",
+                // 1. 取消注释MFC/ATL头文件路径（核心修改：IntelliSense需要找到MFC头文件）
+                "${env:VSINSTALLDIR}/ATLMFC/include",
                 "${env:VCToolsInstallDir}/include",
                 "${env:WindowsSdkDir}/Include/${env:WindowsSDKVersion}/um",
                 "${env:WindowsSdkDir}/Include/${env:WindowsSDKVersion}/ucrt",
@@ -14,26 +14,32 @@
             "defines": [
                 "_UNICODE",
                 "UNICODE",
-                "_AFXDLL", // 动态链接MFC的核心宏（必须有）
-                "_MSC_VER=1930",
+                "_AFXDLL", // 动态链接MFC的核心宏（必须保留）
+                // 2. 建议注释或删除固定的_MSC_VER，让IntelliSense自动匹配（避免版本不匹配）
+                // "_MSC_VER=1930",
                 "WIN32",
                 "_WINDOWS",
-                "_DEBUG", // 调试模式宏，匹配你的Debug编译配置
-                "AFX_DATA_SEG(x)=__declspec(allocate(x))", // 解决MFC的段定义未定义
+                "_DEBUG",
+                "AFX_DATA_SEG(x)=__declspec(allocate(x))",
                 "AFX_DATA_DECL=__declspec(dllimport)",
                 "AFX_CORE_DATA=__declspec(dllimport)",
-                "AFX_EXT_CLASS=__declspec(dllimport)"
+                "AFX_EXT_CLASS=__declspec(dllimport)",
+                // 3. 补充MFC常用宏，减少报错
+                "_MBCS",
+                "AFX_EXT_API=__declspec(dllimport)",
+                "AFX_MANAGE_STATE(AfxGetStaticModuleState())"
             ],
             "compilerPath": "${env:VC_ExecutablePath_x64_x64}/cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-msvc-x64",
-            // 新增：告诉IntelliSense启用MFC的扩展解析
-            "configurationProvider": "ms-vscode.cpptools",
+            // 4. 删除多余的configurationProvider（该配置一般用于CMake，手动配置时会冲突）
+            // "configurationProvider": "ms-vscode.cpptools",
             "browse": {
                 "path": [
                     "${workspaceFolder}/**",
-                 //   "${env:VSINSTALLDIR}/ATLMFC/include",
+                    // 同步取消注释MFC路径
+                    "${env:VSINSTALLDIR}/ATLMFC/include",
                     "${env:VCToolsInstallDir}/include"
                 ],
                 "limitSymbolsToIncludedHeaders": true,

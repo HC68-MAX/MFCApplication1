@@ -3,7 +3,7 @@
 #include "TileMap.h"
 
 CTileMap::CTileMap()
-    : m_nWidth(0), m_nHeight(0), m_nTileSize(0)
+    : m_nWidth(0), m_nHeight(0), m_nTileSize(0), m_MarioStartX(0), m_MarioStartY(0)
 {
 }
 
@@ -38,17 +38,29 @@ BOOL CTileMap::LoadLevel(int levelNumber)
 
     TRACE(_T("加载关卡: %d\n"), levelNumber);
 
+    BOOL result = FALSE;
     switch (levelNumber)
     {
     case 1:
-        return LoadLevel1();
+        result = LoadLevel1();
+        break;
     case 2:
-        return LoadLevel2();
+        result = LoadLevel2();
+        break;
     case 3:
-        return LoadLevel3();
+        result = LoadLevel3();
+        break;
     default:
-        return LoadLevel1(); // 默认加载第一关
+        result = LoadLevel1(); // 默认加载第一关
+        break;
     }
+
+    if (result && m_pMario)
+    {
+        m_pMario->SetPosition(m_MarioStartX, m_MarioStartY);
+    }
+
+    return result;
 }
 // 第一关
 BOOL CTileMap::LoadLevel1()
@@ -56,6 +68,11 @@ BOOL CTileMap::LoadLevel1()
     // 初始化基础地图
     if (!LoadMap(CGameConfig::TILE_MAP_WIDTH, CGameConfig::TILE_MAP_HEIGHT, CGameConfig::TILE_SIZE))
         return FALSE;
+
+    // 设置马里奥初始位置
+    m_MarioStartX = 5 * CGameConfig::TILE_SIZE;
+    m_MarioStartY = 19*CGameConfig::TILE_SIZE;
+
     // 创建地面
     int groundLevel = m_nHeight - 5; // 离底部5行的位置
     for (int x = 0; x < m_nWidth; x++)
@@ -97,10 +114,11 @@ BOOL CTileMap::LoadLevel1()
     SetTile(21, 19, 8, TRUE, _T("pipe"));
 
     // 添加怪物 (使用瓦片坐标)
-    AddMonsterAtTile(14, 13); // 在平台2上
+    AddMonsterAtTile(12, 12); // 在平台2上
+    AddMonsterAtTile(5, 14);  // 在平台1上
     AddMonsterAtTile(25, 18); // 地面上
     AddMonsterAtTile(35, 18); // 地面上
- //   AddMonster(25 * CGameConfig::TILE_SIZE, 13 * CGameConfig::TILE_SIZE);
+  
 
     TRACE(_T("关卡1加载完成: 砖块=%d, 水管=%d, 怪物=%d\n"), m_Bricks.size(), m_Pipes.size(), m_Monsters.size());
     return TRUE;
@@ -111,6 +129,10 @@ BOOL CTileMap::LoadLevel2()
     // 初始化瓦片地图
     if (!LoadMap(CGameConfig::TILE_MAP_WIDTH, CGameConfig::TILE_MAP_HEIGHT, CGameConfig::TILE_SIZE))
         return FALSE;
+
+    // 设置马里奥初始位置
+    m_MarioStartX = 2 * CGameConfig::TILE_SIZE;
+    m_MarioStartY = 21*CGameConfig::TILE_SIZE;
 
     TRACE(_T("加载关卡2\n"));
 
@@ -163,6 +185,10 @@ BOOL CTileMap::LoadLevel3()
     // 初始化瓦片地图
     if (!LoadMap(CGameConfig::TILE_MAP_WIDTH, CGameConfig::TILE_MAP_HEIGHT, CGameConfig::TILE_SIZE))
         return FALSE;
+
+    // 设置马里奥初始位置
+    m_MarioStartX = 2 * CGameConfig::TILE_SIZE;
+    m_MarioStartY = 19*CGameConfig::TILE_SIZE;
 
     TRACE(_T("加载关卡3\n"));
 

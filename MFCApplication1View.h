@@ -110,7 +110,6 @@ protected:
 	void DrawDebugInfo(CDC* pDC);
 	// 调试绘制方法
 	void InitializeResources();
-	void InitializeTileMap();
 	void UpdateCamera();
 	// 创建占位符位图
 	void CalculateDeltaTime();

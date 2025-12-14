@@ -80,6 +80,10 @@ private:
     int m_nHeight;          // 地图高度（瓦片数）
     int m_nTileSize;        // 瓦片尺寸（像素）
 
+    // 马里奥初始位置
+    int m_MarioStartX;
+    int m_MarioStartY;
+
     std::vector<std::vector<Tile>> m_Tiles;  // 瓦片数据
     std::vector<CBrick> m_Bricks;
     std::vector<CPipe> m_Pipes;

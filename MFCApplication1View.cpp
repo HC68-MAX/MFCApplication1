@@ -151,24 +151,7 @@ void CMFCApplication1View::OnDestroy()
     CView::OnDestroy();
 }
 // 初始化瓦片地图
-void CMFCApplication1View::InitializeTileMap()
-{
-    TRACE(_T("=== 开始初始化瓦片地图 ===\n"));
 
-    // 使用新的 LoadLevel 方法加载第一关
-    BOOL result = m_TileMap.LoadLevel(1);
-    TRACE(_T("地图加载结果: %s\n"), result ? _T("成功") : _T("失败"));
-    TRACE(_T("地图尺寸: %dx%d, 瓦片大小: %d\n"),
-        m_TileMap.GetWidth(), m_TileMap.GetHeight(), m_TileMap.GetTileSize());
-
-    // 设置马里奥初始位置
-    int marioStartX = 5 * CGameConfig::TILE_SIZE;
-    int marioStartY = 200; // 适当的位置
-    m_Mario.SetPosition(marioStartX, marioStartY);
-    m_TileMap.SetMario(&m_Mario);
-
-    TRACE(_T("=== 瓦片地图初始化完成 ===\n"));
-}
 // 更新摄像机
 void CMFCApplication1View::UpdateCamera()
 {
@@ -756,11 +739,6 @@ void CMFCApplication1View::StartGame()
     // 加载关卡
     BOOL loadResult = m_TileMap.LoadLevel(selectedLevel);
     m_StartMenu.ResetStartState();
-
-    // 设置马里奥初始位置
-    int marioStartX = 5 * CGameConfig::TILE_SIZE;
-    int marioStartY = 200;
-    m_Mario.SetPosition(marioStartX, marioStartY);
 
     // 重置摄像机
     m_nCameraX = 0;
