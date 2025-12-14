@@ -265,6 +265,7 @@
     <ResourceCompile Include="MFCApplication1.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Game\Resources\README.md" />
     <None Include="README.md" />
     <None Include="res\MFCApplication1.rc2" />
   </ItemGroup>

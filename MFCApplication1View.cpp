@@ -406,7 +406,7 @@ BOOL CMFCApplication1View::CheckMarioDeath()
     return FALSE;
 }
 
-// 修改死亡处理方法，添加2秒定时器
+// 修改死亡处理方法，添加1秒定时器
 void CMFCApplication1View::HandleMarioDeath()
 {
     // 如果计时器未启动，说明刚进入死亡流程
@@ -431,8 +431,8 @@ void CMFCApplication1View::HandleMarioDeath()
     {
         m_fDeathWaitTime += m_fDeltaTime;
 
-        // 2秒后处理重生或游戏结束
-        if (m_fDeathWaitTime >= 2.0f)
+        // 1秒后处理重生或游戏结束
+        if (m_fDeathWaitTime >= 1.0f)
         {
             m_bDeathTimerStarted = FALSE;
 
