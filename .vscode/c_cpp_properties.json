@@ -3,14 +3,42 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**", // 你的项目所有头文件路径
-                "${env:INCLUDE}" // 自动读取VS2022的MFC/ATL/v143头文件路径
+                "${workspaceFolder}/**",
+                // 手动添加MFC/ATL头文件路径（如果env:INCLUDE没生效，这一步是关键）
+              //  "${env:VSINSTALLDIR}/ATLMFC/include",
+                "${env:VCToolsInstallDir}/include",
+                "${env:WindowsSdkDir}/Include/${env:WindowsSDKVersion}/um",
+                "${env:WindowsSdkDir}/Include/${env:WindowsSDKVersion}/ucrt",
+                "${env:WindowsSdkDir}/Include/${env:WindowsSDKVersion}/shared"
             ],
-            "defines": ["_UNICODE", "UNICODE", "_AFXDLL", "_MSC_VER=1930"],
-            "compilerPath": "${env:VC_ExecutablePath_x64_x64}/cl.exe", // 自动识别MSVC编译器
+            "defines": [
+                "_UNICODE",
+                "UNICODE",
+                "_AFXDLL", // 动态链接MFC的核心宏（必须有）
+                "_MSC_VER=1930",
+                "WIN32",
+                "_WINDOWS",
+                "_DEBUG", // 调试模式宏，匹配你的Debug编译配置
+                "AFX_DATA_SEG(x)=__declspec(allocate(x))", // 解决MFC的段定义未定义
+                "AFX_DATA_DECL=__declspec(dllimport)",
+                "AFX_CORE_DATA=__declspec(dllimport)",
+                "AFX_EXT_CLASS=__declspec(dllimport)"
+            ],
+            "compilerPath": "${env:VC_ExecutablePath_x64_x64}/cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-msvc-x64"
+            "intelliSenseMode": "windows-msvc-x64",
+            // 新增：告诉IntelliSense启用MFC的扩展解析
+            "configurationProvider": "ms-vscode.cpptools",
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**",
+                 //   "${env:VSINSTALLDIR}/ATLMFC/include",
+                    "${env:VCToolsInstallDir}/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
         }
     ],
     "version": 4

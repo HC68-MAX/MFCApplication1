@@ -26,9 +26,14 @@ BOOL CResourceManager::LoadGameResources()
     // 加载马里奥贴图集
     success &= LoadBitmap(IDB_MARIO_SPRITES, _T("MarioSprites"));
     TRACE(_T("马里奥贴图集加载: %s\n"), success ? _T("成功") : _T("失败"));
-    // 加载马里奥贴图集
+
+    // 加载初音未来贴图集
     success &= LoadBitmap(IDB_MIKU, _T("Miku"));
     TRACE(_T("初音未来贴图集加载: %s\n"), success ? _T("成功") : _T("失败"));
+
+    // 加载怪物贴图集
+    success &= LoadBitmap(IDB_ENEMYSPRITES, _T("EnemySprites"));
+    TRACE(_T("怪物贴图集加载: %s\n"), success ? _T("成功") : _T("失败"));
 
     if (!success) {
         TRACE(_T("错误: 无法加载主贴图集!\n"));

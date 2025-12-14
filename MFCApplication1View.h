@@ -3,6 +3,7 @@
 
 #pragma once
 #include "Game/Objects/Mario.h"
+#include "Game/Objects/Monster.h"
 #include "Game/Objects/Pipe.h"
 #include "Game/Objects/Brick.h"
 #include "Game/Objects/Coin.h"
@@ -87,6 +88,7 @@ protected:
 	// 地图元素容器
 	std::vector<CBrick> m_Bricks;
 	std::vector<CPipe> m_Pipes;
+	std::vector<CMonster> m_Monsters;
 // 生成的消息映射函数
 protected:
 

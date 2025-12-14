@@ -60,6 +60,9 @@
     <ClInclude Include="Game\Objects\Mario.h">
       <Filter>Game\Objects</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Objects\Monster.h">
+      <Filter>Game\Objects</Filter>
+    </ClInclude>
     <ClInclude Include="Game\Objects\GameObject.h">
       <Filter>Game\Objects</Filter>
     </ClInclude>
@@ -114,6 +117,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Game\Objects\Mario.cpp">
+      <Filter>Game\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Objects\Monster.cpp">
       <Filter>Game\Objects</Filter>
     </ClCompile>
     <ClCompile Include="Game\Objects\GameObject.cpp">
@@ -195,6 +201,9 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="Game\Resources\miku_48_atlas.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="Game\Resources\smb_enemies_sheet.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

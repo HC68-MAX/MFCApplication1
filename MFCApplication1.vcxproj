@@ -195,6 +195,7 @@
     <ClInclude Include="Game\Objects\Coin.h" />
     <ClInclude Include="Game\Objects\GameObject.h" />
     <ClInclude Include="Game\Objects\Mario.h" />
+    <ClInclude Include="Game\Objects\Monster.h" />
     <ClInclude Include="Game\Objects\Pipe.h" />
     <ClInclude Include="Game\UI\StartMenu.h" />
     <ClInclude Include="MainFrm.h" />
@@ -236,6 +237,9 @@
     <ClCompile Include="Game\Objects\Mario.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Game\Objects\Monster.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Game\Objects\Pipe.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -266,6 +270,7 @@
     <Image Include="Game\Resources\miku.bmp.bmp" />
     <Image Include="Game\Resources\miku_32_atlas.bmp" />
     <Image Include="Game\Resources\miku_48_atlas.bmp" />
+    <Image Include="Game\Resources\smb_enemies_sheet.bmp" />
     <Image Include="Game\Resources\tile_set.bmp" />
     <Image Include="Game\Resources\viewfile.bmp" />
     <Image Include="Game\Resources\viewfile_resized.bmp" />

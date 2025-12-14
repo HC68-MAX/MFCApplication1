@@ -260,7 +260,15 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
 
     // 使用瓦片地图绘制整个关卡（包括瓦片和独立对象）
     m_TileMap.Draw(pDC, m_nCameraX, m_nCameraY);
+
+    // 绘制怪物
+    for (auto& monster : m_Monsters)
+    {
+        monster.DrawAt(pDC, monster.GetX() - m_nCameraX, monster.GetY() - m_nCameraY);
+    }
+
     // 添加马里奥的绘制 - 使用屏幕坐标
+    m_Mario.DrawWithSprite(pDC, m_Mario.GetX() - m_nCameraX, m_Mario.GetY() - m_nCameraY);
 
     // 调试模式：绘制碰撞信息
     if (m_bDebugMode)
@@ -368,6 +376,33 @@ void CMFCApplication1View::UpdateGame()
             // 检查问号砖块碰撞，只有当马里奥向上移动时才检测
             CRect marioHead = m_Mario.GetHeadRect();
             m_TileMap.CheckQuestionBlockHit(marioHead, m_Mario.IsMovingUp());
+
+            // 更新怪物
+            for (auto& monster : m_Monsters)
+            {
+                monster.Update(m_fDeltaTime);
+                monster.CheckCollisions(solidObjects);
+
+                // 检查与 Mario 的碰撞
+                if (!monster.IsDead() && !monster.IsSquished())
+                {
+                    if (m_Mario.CheckCollision(&monster))
+                    {
+                        // 如果 Mario 在下落且在怪物上方
+                        if (m_Mario.GetVelocityY() > 0 && m_Mario.GetY() + m_Mario.GetHeight() < monster.GetY() + monster.GetHeight() / 2 + 5)
+                        {
+                            monster.OnCollisionWithMario(true);
+                            m_Mario.SetVelocity(m_Mario.GetVelocityX(), -10.0f); // 弹起
+                            CGameState::GetInstance().AddScore(100);
+                        }
+                        else
+                        {
+                            // Mario 受伤或死亡
+                            HandleMarioDeath();
+                        }
+                    }
+                }
+            }
         }
         else
         {
@@ -764,6 +799,14 @@ void CMFCApplication1View::StartGame()
     m_nCameraY = 0;
     // 重置马里奥状态
     m_Mario.SetVisible(TRUE);
+
+    // 清空旧怪物
+    m_Monsters.clear();
+    // 添加一些测试怪物 - 生成在马里奥附近以便观察
+    // 马里奥在 5 * 16 = 80
+    m_Monsters.emplace_back(200, 200); 
+    m_Monsters.emplace_back(300, 200);
+    m_Monsters.emplace_back(400, 200);
 }
 
 // 绘制游戏

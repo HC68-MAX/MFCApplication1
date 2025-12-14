@@ -5,7 +5,7 @@
 // 这里只是示例，您需要根据您的贴图集实际布局来设置
 const CString CSpriteConfig::TILESET_MAIN = _T("TilesetMain");
 const CString CSpriteConfig::TILESET_MARIO = _T("MarioSprites");
-const CString CSpriteConfig::TILESET_ENEMIES = _T("EnemySprites");
+const CString CSpriteConfig::TILESET_ENEMIES = _T("EnemySprites"); 
 const CString CSpriteConfig::TILESET_MIKU = _T("Miku");
 CString CSpriteConfig::GetSpritesheetForMario()
 {
@@ -84,9 +84,9 @@ const SSpriteCoord CSpriteConfig::BACKGROUND_HILL = { 112, 0, 48, 32 };
 // === 敌人物品精灵表坐标 ===
 
 // 敌人
-const SSpriteCoord CSpriteConfig::GOOMBA_WALK1 = { 0, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::GOOMBA_WALK2 = { 16, 0, 16, 16 };
-const SSpriteCoord CSpriteConfig::GOOMBA_SQUISHED = { 32, 0, 16, 8 };
+const SSpriteCoord CSpriteConfig::GOOMBA_WALK1 = { 0, 4, 16, 16 };
+const SSpriteCoord CSpriteConfig::GOOMBA_WALK2 = { 32, 4, 16, 16 };
+const SSpriteCoord CSpriteConfig::GOOMBA_SQUISHED = { 32, 4, 16, 16 };
 
 // 金币
 const SSpriteCoord CSpriteConfig::COIN_SPIN1 = { 24 * size, 1 * size, 16, 16 };
