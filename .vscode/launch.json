@@ -1,0 +1,24 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "MFC Debug (SLN)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/x64/Debug/MFCApplication1.exe", // 匹配默认输出路径
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "MFC Build (SLN)",
+            "setupCommands": [
+                {
+                    "description": "启用MFC调试的美观打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}

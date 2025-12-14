@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "MFC Build (SLN)",
+            "type": "shell",
+            "command": "msbuild.exe",
+            "args": [
+                "${workspaceFolder}/MFCApplication1.sln", // 已替换为你的sln文件名
+                "/p:Configuration=Debug",
+                "/p:Platform=x64",
+                "/p:Toolset=v143",
+                "/m" // 多核编译，加快速度
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$msCompile"],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**", // 你的项目所有头文件路径
+                "${env:INCLUDE}" // 自动读取VS2022的MFC/ATL/v143头文件路径
+            ],
+            "defines": ["_UNICODE", "UNICODE", "_AFXDLL", "_MSC_VER=1930"],
+            "compilerPath": "${env:VC_ExecutablePath_x64_x64}/cl.exe", // 自动识别MSVC编译器
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-msvc-x64"
+        }
+    ],
+    "version": 4
+}
