@@ -96,7 +96,13 @@ BOOL CTileMap::LoadLevel1()
     SetTile(21, 18, 8, TRUE, _T("pipe"));
     SetTile(21, 19, 8, TRUE, _T("pipe"));
 
-    TRACE(_T("关卡1加载完成: 砖块=%d, 水管=%d\n"), m_Bricks.size(), m_Pipes.size());
+    // 添加怪物 (使用瓦片坐标)
+    AddMonsterAtTile(14, 13); // 在平台2上
+    AddMonsterAtTile(25, 18); // 地面上
+    AddMonsterAtTile(35, 18); // 地面上
+ //   AddMonster(25 * CGameConfig::TILE_SIZE, 13 * CGameConfig::TILE_SIZE);
+
+    TRACE(_T("关卡1加载完成: 砖块=%d, 水管=%d, 怪物=%d\n"), m_Bricks.size(), m_Pipes.size(), m_Monsters.size());
     return TRUE;
 }
 // 第二关
@@ -310,6 +316,23 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
             coin.DrawAt(pDC, screenX, screenY);
         }
     }
+
+    // 绘制怪物
+    for (auto& monster : m_Monsters)
+    {
+        if (monster.IsVisible())
+        {
+            int screenX = monster.GetX() - offsetX;
+            int screenY = monster.GetY() - offsetY;
+
+            // 简单的屏幕剔除
+            if (screenX + monster.GetWidth() > 0 && screenX < CGameConfig::SCREEN_WIDTH)
+            {
+                monster.DrawAt(pDC, screenX, screenY);
+            }
+        }
+    }
+
     // 5. 绘制 Mario
     if (m_pMario && m_pMario->IsVisible())
     {
@@ -470,6 +493,7 @@ void CTileMap::ClearObjects()
     m_Bricks.clear();
     m_Pipes.clear();
     m_Coins.clear();  // 清空金币
+    m_Monsters.clear(); // 清空怪物
 }
 // 添加金币方法
 void CTileMap::AddCoin(int x, int y)
@@ -479,6 +503,23 @@ void CTileMap::AddCoin(int x, int y)
     m_Coins.push_back(coin);
 }
 
+// 添加怪物方法
+void CTileMap::AddMonster(int x, int y)
+{
+    CMonster monster(x, y);
+    m_Monsters.push_back(monster);
+}
+
+// 在瓦片坐标添加怪物
+void CTileMap::AddMonsterAtTile(int tileX, int tileY)
+{
+    // 怪物通常在地面上，所以Y坐标可能需要微调
+    // 假设tileY是怪物脚下的瓦片Y坐标，或者怪物所在的瓦片Y坐标
+    // 如果是所在的瓦片，那么 y = tileY * TILE_SIZE
+    // 如果怪物高度是32，正好占一个瓦片。
+    AddMonster(tileX * m_nTileSize, tileY * m_nTileSize);
+}
+
 void CTileMap::UpdateCoins(float deltaTime)
 {
     // 现在只需要调用一次静态方法来更新所有金币的动画
@@ -486,6 +527,69 @@ void CTileMap::UpdateCoins(float deltaTime)
 
     // 不再需要遍历每个金币来更新动画
     // 所有金币共享同一个动画状态
+}
+
+void CTileMap::UpdateMonsters(float deltaTime)
+{
+    std::vector<CRect> platforms = GetSolidTileRects();
+    // 添加砖块作为平台
+    for (const auto& brick : m_Bricks)
+    {
+        platforms.push_back(brick.GetRect());
+    }
+    // 添加水管作为平台
+    for (const auto& pipe : m_Pipes)
+    {
+        platforms.push_back(pipe.GetRect());
+    }
+
+    for (auto it = m_Monsters.begin(); it != m_Monsters.end(); )
+    {
+        if (it->IsDead())
+        {
+            // 如果怪物死亡且不可见（动画播放完毕），则移除
+            if (!it->IsVisible())
+            {
+                it = m_Monsters.erase(it);
+                continue;
+            }
+        }
+        
+        it->Update(deltaTime);
+        it->CheckCollisions(platforms);
+        ++it;
+    }
+}
+
+void CTileMap::CheckMonsterCollisions(CMario* pMario)
+{
+    if (!pMario) return;
+
+    CRect marioRect = pMario->GetRect();
+    float marioVelocityY = pMario->GetVelocityY();
+
+    for (auto& monster : m_Monsters)
+    {
+        if (monster.IsDead() || monster.IsSquished()) continue;
+
+        if (monster.CheckCollision(marioRect))
+        {
+            // 检查是否踩在怪物头上
+            // 简单的判定：Mario在下落，且Mario底部在怪物中心以上
+            if (marioVelocityY > 0 && marioRect.bottom < monster.GetY() + monster.GetHeight() / 2 + 10)
+            {
+                monster.OnCollisionWithMario(true);
+                pMario->SetVelocity(pMario->GetVelocityX(), -15.0f); // 弹起
+                CGameState::GetInstance().AddScore(100);
+            }
+            else
+            {
+                monster.OnCollisionWithMario(false);
+                // Mario 受伤或死亡
+                pMario->Die();
+            }
+        }
+    }
 }
 // 清空金币
 void CTileMap::ClearCoins()

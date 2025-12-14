@@ -85,8 +85,8 @@ const SSpriteCoord CSpriteConfig::BACKGROUND_HILL = { 112, 0, 48, 32 };
 
 // µÐÈË
 const SSpriteCoord CSpriteConfig::GOOMBA_WALK1 = { 0, 4, 16, 16 };
-const SSpriteCoord CSpriteConfig::GOOMBA_WALK2 = { 32, 4, 16, 16 };
-const SSpriteCoord CSpriteConfig::GOOMBA_SQUISHED = { 32, 4, 16, 16 };
+const SSpriteCoord CSpriteConfig::GOOMBA_WALK2 = { 30, 4, 16, 16 };
+const SSpriteCoord CSpriteConfig::GOOMBA_SQUISHED = { 60, 4, 16, 8 };
 
 // ½ð±Ò
 const SSpriteCoord CSpriteConfig::COIN_SPIN1 = { 24 * size, 1 * size, 16, 16 };

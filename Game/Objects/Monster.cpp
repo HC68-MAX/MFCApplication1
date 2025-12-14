@@ -1,8 +1,10 @@
 #include "Monster.h"
 
-CMonster::CMonster(int x, int y) : CGameObject(x, y, 16, 16)
+CMonster::CMonster(int x, int y) : CGameObject(x, y, CGameConfig::ENEMY_WIDTH, CGameConfig::ENEMY_HEIGHT)
 {
-    m_fVelocityX = -30.0f; // 向左移动
+    m_fX = (float)x;
+    m_fY = (float)y;
+    m_fVelocityX = -1.0f; // 向左移动 (pixels per frame)
     m_fVelocityY = 0.0f;
     m_fGravity = CGameConfig::GRAVITY;
     m_bIsDead = FALSE;
@@ -32,12 +34,15 @@ void CMonster::Update(float deltaTime)
         return;
     }
 
-    // 应用重力
-    m_fVelocityY += m_fGravity * deltaTime;
+    // 应用重力 (Frame-based physics to match Mario)
+    m_fVelocityY += m_fGravity;
 
     // 更新位置
-    m_nX += (int)(m_fVelocityX * deltaTime);
-    m_nY += (int)(m_fVelocityY * deltaTime);
+    m_fX += m_fVelocityX;
+    m_fY += m_fVelocityY;
+
+    m_nX = (int)m_fX;
+    m_nY = (int)m_fY;
 
     // 动画更新
     m_fAnimTimer += deltaTime;
@@ -65,6 +70,7 @@ void CMonster::CheckCollisions(const std::vector<CRect>& platforms)
                 if (m_nY < platform.top) // 在上方
                 {
                     m_nY = platform.top - m_nHeight;
+                    m_fY = (float)m_nY;
                     m_fVelocityY = 0;
                 }
             }
@@ -75,11 +81,13 @@ void CMonster::CheckCollisions(const std::vector<CRect>& platforms)
                 if (m_fVelocityX < 0 && m_nX > platform.right - 5) // 向左撞墙
                 {
                      m_nX = platform.right;
+                     m_fX = (float)m_nX;
                      m_fVelocityX = -m_fVelocityX;
                 }
                 else if (m_fVelocityX > 0 && m_nX + m_nWidth < platform.left + 5) // 向右撞墙
                 {
                     m_nX = platform.left - m_nWidth;
+                    m_fX = (float)m_nX;
                     m_fVelocityX = -m_fVelocityX;
                 }
                 else 
@@ -102,13 +110,16 @@ void CMonster::OnCollisionWithMario(bool fromTop)
         m_bIsSquished = TRUE;
         m_fVelocityX = 0;
         // 调整高度为压扁的高度
-        // m_nHeight = 8; // 视觉上变矮，但为了简单可能保持原样或调整绘制
+        int oldHeight = m_nHeight;
+        m_nHeight = 16; // 变矮
+        m_nY += (oldHeight - m_nHeight); // 底部对齐
+        m_fY = (float)m_nY;
     }
 }
 
 void CMonster::Draw(CDC* pDC)
 {
-    // 默认实现，可能不被调用
+    DrawAt(pDC, m_nX, m_nY);
 }
 
 void CMonster::DrawAt(CDC* pDC, int screenX, int screenY)
@@ -126,16 +137,21 @@ void CMonster::DrawAt(CDC* pDC, int screenX, int screenY)
     }
 
     SSpriteCoord spriteCoord;
+    int drawHeight = m_nHeight;
+    int drawY = screenY;
+
     if (m_bIsSquished)
     {
         spriteCoord = CSpriteConfig::GOOMBA_SQUISHED;
+        drawHeight = m_nHeight / 2; // 压扁后高度减半
+        drawY = screenY + m_nHeight / 2; // 向下偏移以对齐底部
     }
     else
     {
         spriteCoord = (m_nAnimFrame == 0) ? CSpriteConfig::GOOMBA_WALK1 : CSpriteConfig::GOOMBA_WALK2;
     }
 
-    CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-        m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,
+    CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, drawY,
+        m_nWidth, drawHeight, spriteCoord.x, spriteCoord.y,
         spriteCoord.width, spriteCoord.height);
 }

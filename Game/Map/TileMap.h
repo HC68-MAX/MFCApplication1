@@ -14,6 +14,8 @@
 #include "../Objects/Coin.h"  
 #include "../Core/GameState.h"   
 #include "../Objects/Mario.h"
+#include "../Objects/Monster.h"
+
 struct Tile
 {
     int tileID;     // 瓦片ID
@@ -38,6 +40,8 @@ public:
     void AddBrick(int x, int y, CBrick::BrickType type = CBrick::NORMAL);
     void AddPipe(int x, int y, int height = CGameConfig::PIPE_HEIGHT);  
     void AddCoin(int x, int y);
+    void AddMonster(int x, int y); // 新增：添加怪物
+    void AddMonsterAtTile(int tileX, int tileY); // 新增：在瓦片坐标添加怪物
     void ClearObjects();  // 清空所有对象
 
     // 新增：设置 Mario 指针
@@ -58,6 +62,7 @@ public:
     // 金币更新
     void ClearCoins();
     void UpdateCoins(float deltaTime);
+    void UpdateMonsters(float deltaTime); // 新增：更新怪物
 
     // 金币碰撞检测
     BOOL CheckCoinCollisions(const CRect& rect);
@@ -65,6 +70,8 @@ public:
     BOOL CheckBrickCollisions(const CRect& rect);
     // 检查问号砖块碰撞
     BOOL CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp);
+    // 检查怪物碰撞
+    void CheckMonsterCollisions(CMario* pMario);
 
     void RemoveCoin(int index);
 private:
@@ -77,6 +84,7 @@ private:
     std::vector<CBrick> m_Bricks;
     std::vector<CPipe> m_Pipes;
     std::vector<CCoin> m_Coins;
+    std::vector<CMonster> m_Monsters; // 新增：怪物列表
     CMario* m_pMario = nullptr;  // 指向 Mario 对象的指针
     // 新增：关卡加载方法
     BOOL LoadLevel1();

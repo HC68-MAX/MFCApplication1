@@ -28,6 +28,10 @@ private:
     float m_fVelocityY;
     float m_fGravity;
     
+    // 精确坐标
+    float m_fX;
+    float m_fY;
+
     BOOL m_bIsDead;
     BOOL m_bIsSquished;
     float m_fSquishTimer;

@@ -25,7 +25,7 @@ public:
     // 屏幕和游戏设置
     static const int SCREEN_WIDTH = 1300;       // 屏幕宽度
     static const int SCREEN_HEIGHT = 900;      // 屏幕高度
-    static const int WORLD_WIDTH = 900;       // 世界宽度
+    static const int WORLD_WIDTH = 1500;       // 世界宽度
     static const int WORLD_HEIGHT = 800;       // 世界高度
     static const int FPS = 60;                 // 目标帧率
     static const int TILE_MAP_WIDTH  = WORLD_WIDTH/32;      // 瓦片地图宽度 

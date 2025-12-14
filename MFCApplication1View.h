@@ -88,7 +88,6 @@ protected:
 	// 地图元素容器
 	std::vector<CBrick> m_Bricks;
 	std::vector<CPipe> m_Pipes;
-	std::vector<CMonster> m_Monsters;
 // 生成的消息映射函数
 protected:
 
