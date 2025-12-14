@@ -85,6 +85,11 @@ protected:
 	BOOL m_bKeyRight;
 	BOOL m_bKeyJump;
 	BOOL m_bDebugMode;
+
+    // 死亡处理相关
+    float m_fDeathWaitTime;
+    BOOL m_bDeathTimerStarted;
+
 	// 地图元素容器
 	std::vector<CBrick> m_Bricks;
 	std::vector<CPipe> m_Pipes;

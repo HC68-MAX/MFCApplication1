@@ -58,6 +58,8 @@ CMFCApplication1View::CMFCApplication1View() noexcept
     : m_GameState(STATE_MENU)  // 初始状态为菜单
     , m_nCameraX(0)
     , m_nCameraY(0)
+    , m_fDeathWaitTime(0.0f)
+    , m_bDeathTimerStarted(FALSE)
 {
     m_nCameraX = 0;
     m_nCameraY = 0;
@@ -396,35 +398,32 @@ BOOL CMFCApplication1View::CheckMarioDeath()
 // 修改死亡处理方法，添加2秒定时器
 void CMFCApplication1View::HandleMarioDeath()
 {
-    // 静态变量用于计时
-    static float deathWaitTime = 0.0f;
-    static BOOL deathTimerStarted = FALSE;
-
-    // 如果还没有开始死亡动画，触发死亡
-    if (!m_Mario.IsDying() && !m_Mario.IsDead())
+    // 如果计时器未启动，说明刚进入死亡流程
+    if (!m_bDeathTimerStarted)
     {
-        // 使用掉落死亡，会有更强的向上弹跳效果
-        m_Mario.DieFromFall();
-
-        // 减少生命值
+        // 如果还没有开始死亡动画（例如掉落死亡），触发死亡
+        if (!m_Mario.IsDying() && !m_Mario.IsDead())
+        {
+            m_Mario.DieFromFall();
+        }
+        
+        // 无论是因为掉落还是被怪撞，只要刚开始处理死亡，就扣命并启动计时器
         CGameState::GetInstance().LoseLife();
-
-        // 启动死亡计时器
-        deathWaitTime = 0.0f;
-        deathTimerStarted = TRUE;
-
+        m_fDeathWaitTime = 0.0f;
+        m_bDeathTimerStarted = TRUE;
+        
         TRACE(_T("生命值减少，剩余: %d，开始死亡动画计时\n"), CGameState::GetInstance().GetLives());
     }
 
     // 如果计时器已启动，更新计时
-    if (deathTimerStarted)
+    if (m_bDeathTimerStarted)
     {
-        deathWaitTime += m_fDeltaTime;
+        m_fDeathWaitTime += m_fDeltaTime;
 
         // 2秒后处理重生或游戏结束
-        if (deathWaitTime >= 2.0f)
+        if (m_fDeathWaitTime >= 2.0f)
         {
-            deathTimerStarted = FALSE;
+            m_bDeathTimerStarted = FALSE;
 
             // 如果还有生命，重生
             if (CGameState::GetInstance().GetLives() > 0)
@@ -441,24 +440,6 @@ void CMFCApplication1View::HandleMarioDeath()
             }
         }
     }
-
-    // 检查是否需要重生（兼容之前的逻辑）
-    if (m_Mario.IsDead() && !deathTimerStarted)
-    {
-        // 如果还有生命，重生
-        if (CGameState::GetInstance().GetLives() > 0)
-        {
-            RespawnMario();
-        }
-        else
-        {
-            // 游戏结束，返回主菜单
-            m_GameState = STATE_MENU;
-            // 重置游戏状态
-            CGameState::GetInstance().Reset();
-        }
-    }
-
 }
 // 添加重生方法
 void CMFCApplication1View::RespawnMario()
@@ -468,10 +449,8 @@ void CMFCApplication1View::RespawnMario()
     // 重生马里奥
     m_Mario.Respawn();
 
-    // 设置重生位置（可以根据关卡设计设置检查点）
-    int respawnX = 5 * CGameConfig::TILE_SIZE;
-    int respawnY = 200;
-    m_Mario.SetPosition(respawnX, respawnY);
+    // 重生在关卡初始化生成的位置
+    m_Mario.SetPosition(m_TileMap.GetMarioStartX(), m_TileMap.GetMarioStartY());
 
     // 重置摄像机
     m_nCameraX = 0;
@@ -745,6 +724,10 @@ void CMFCApplication1View::StartGame()
     m_nCameraY = 0;
     // 重置马里奥状态
     m_Mario.SetVisible(TRUE);
+
+    // 重置死亡状态
+    m_fDeathWaitTime = 0.0f;
+    m_bDeathTimerStarted = FALSE;
 }
 
 // 绘制游戏

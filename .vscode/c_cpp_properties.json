@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 // 1. 取消注释MFC/ATL头文件路径（核心修改：IntelliSense需要找到MFC头文件）
-                "${env:VSINSTALLDIR}/ATLMFC/include",
+                "D:\\Microsoft Visual Studio\\VC\\Tools\\MSVC\\14.16.27023\\atlmfc\\include",
                 "${env:VCToolsInstallDir}/include",
                 "${env:WindowsSdkDir}/Include/${env:WindowsSDKVersion}/um",
                 "${env:WindowsSdkDir}/Include/${env:WindowsSDKVersion}/ucrt",
@@ -39,7 +39,7 @@
                 "path": [
                     "${workspaceFolder}/**",
                     // 同步取消注释MFC路径
-                    "${env:VSINSTALLDIR}/ATLMFC/include",
+                    "D:\\Microsoft Visual Studio\\VC\\Tools\\MSVC\\14.16.27023\\atlmfc\\include",
                     "${env:VCToolsInstallDir}/include"
                 ],
                 "limitSymbolsToIncludedHeaders": true,

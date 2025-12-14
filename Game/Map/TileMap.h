@@ -18,10 +18,10 @@
 
 struct Tile
 {
-    int tileID;     // ÍßÆ¬ID
-    int x, y;       // Î»ÖÃ
-    BOOL solid;     // ÊÇ·ñ¿ÉÅö×²
-    CString type;   // ÀàĞÍ£¨ground, brick, question, etc.£©
+    int tileID;     // ï¿½ï¿½Æ¬ID
+    int x, y;       // Î»ï¿½ï¿½
+    BOOL solid;     // ï¿½Ç·ï¿½ï¿½ï¿½ï¿½×²
+    CString type;   // ï¿½ï¿½ï¿½Í£ï¿½ground, brick, question, etc.ï¿½ï¿½
 };
 
 class CTileMap
@@ -30,67 +30,70 @@ public:
     CTileMap();
     ~CTileMap();
 
-    // µØÍ¼²Ù×÷
+    // ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
     BOOL LoadMap(int width, int height, int tileSize);
-    // ĞÂÔö£º¼ÓÔØÖ¸¶¨¹Ø¿¨
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ø¿ï¿½
     BOOL LoadLevel(int levelNumber); 
-    // Éú³ÉÍßÆ¬
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬
     void SetTile(int x, int y, int tileID, BOOL solid = FALSE, const CString& type = _T(""));
-    // ¶ÀÁ¢¶ÔÏó¹ÜÀí
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void AddBrick(int x, int y, CBrick::BrickType type = CBrick::NORMAL);
     void AddPipe(int x, int y, int height = CGameConfig::PIPE_HEIGHT);  
     void AddCoin(int x, int y);
-    void AddMonster(int x, int y); // ĞÂÔö£ºÌí¼Ó¹ÖÎï
-    void AddMonsterAtTile(int tileX, int tileY); // ĞÂÔö£ºÔÚÍßÆ¬×ø±êÌí¼Ó¹ÖÎï
-    void ClearObjects();  // Çå¿ÕËùÓĞ¶ÔÏó
+    void AddMonster(int x, int y); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½
+    void AddMonsterAtTile(int tileX, int tileY); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¹ï¿½ï¿½ï¿½
+    void ClearObjects();  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¶ï¿½ï¿½ï¿½
 
-    // ĞÂÔö£ºÉèÖÃ Mario Ö¸Õë
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Mario Ö¸ï¿½ï¿½
     void SetMario(CMario* pMario) { m_pMario = pMario; }
-    // äÖÈ¾
+    // ï¿½ï¿½È¾
     void Draw(CDC* pDC, int offsetX = 0, int offsetY = 0);
 
-    // »ñÈ¡ËùÓĞ¾ØĞÎ
+    // ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ğ¾ï¿½ï¿½ï¿½
     CRect GetTileRect(int tileX, int tileY) const;
-    // »ñÈ¡¹ÌÌå¾ØĞÎ
+    // ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     std::vector<CRect> GetSolidTileRects() const;
 
-    // µØÍ¼ĞÅÏ¢
+    // ï¿½ï¿½Í¼ï¿½ï¿½Ï¢
     int GetWidth() const { return m_nWidth; }
     int GetHeight() const { return m_nHeight; }
     int GetTileSize() const { return m_nTileSize; }
    
-    // ½ğ±Ò¸üĞÂ
+    // ï¿½ï¿½Ò¸ï¿½ï¿½ï¿½
     void ClearCoins();
     void UpdateCoins(float deltaTime);
-    void UpdateMonsters(float deltaTime); // ĞÂÔö£º¸üĞÂ¹ÖÎï
+    void UpdateMonsters(float deltaTime); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¹ï¿½ï¿½ï¿½
 
-    // ½ğ±ÒÅö×²¼ì²â
+    // ï¿½ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½ï¿½
     BOOL CheckCoinCollisions(const CRect& rect);
-    // ×©¿éÅö×²¼ì²â
+    // ×©ï¿½ï¿½ï¿½ï¿½×²ï¿½ï¿½ï¿½
     BOOL CheckBrickCollisions(const CRect& rect);
-    // ¼ì²éÎÊºÅ×©¿éÅö×²
+    // ï¿½ï¿½ï¿½ï¿½Êºï¿½×©ï¿½ï¿½ï¿½ï¿½×²
     BOOL CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp);
-    // ¼ì²é¹ÖÎïÅö×²
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×²
     void CheckMonsterCollisions(CMario* pMario);
 
     void RemoveCoin(int index);
+    // æ–°å¢ï¼šè·å–é©¬é‡Œå¥¥åˆå§‹ä½ç½®
+    int GetMarioStartX() const { return m_MarioStartX; }
+    int GetMarioStartY() const { return m_MarioStartY; }
 private:
 
-    int m_nWidth;           // µØÍ¼¿í¶È£¨ÍßÆ¬Êı£©
-    int m_nHeight;          // µØÍ¼¸ß¶È£¨ÍßÆ¬Êı£©
-    int m_nTileSize;        // ÍßÆ¬³ß´ç£¨ÏñËØ£©
+    int m_nWidth;           // ï¿½ï¿½Í¼ï¿½ï¿½ï¿½È£ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½ï¿½
+    int m_nHeight;          // ï¿½ï¿½Í¼ï¿½ß¶È£ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½ï¿½
+    int m_nTileSize;        // ï¿½ï¿½Æ¬ï¿½ß´ç£¨ï¿½ï¿½ï¿½Ø£ï¿½
 
-    // ÂíÀï°Â³õÊ¼Î»ÖÃ
+    // ï¿½ï¿½ï¿½ï¿½Â³ï¿½Ê¼Î»ï¿½ï¿½
     int m_MarioStartX;
     int m_MarioStartY;
 
-    std::vector<std::vector<Tile>> m_Tiles;  // ÍßÆ¬Êı¾İ
+    std::vector<std::vector<Tile>> m_Tiles;  // ï¿½ï¿½Æ¬ï¿½ï¿½ï¿½ï¿½
     std::vector<CBrick> m_Bricks;
     std::vector<CPipe> m_Pipes;
     std::vector<CCoin> m_Coins;
-    std::vector<CMonster> m_Monsters; // ĞÂÔö£º¹ÖÎïÁĞ±í
-    CMario* m_pMario = nullptr;  // Ö¸Ïò Mario ¶ÔÏóµÄÖ¸Õë
-    // ĞÂÔö£º¹Ø¿¨¼ÓÔØ·½·¨
+    std::vector<CMonster> m_Monsters; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
+    CMario* m_pMario = nullptr;  // Ö¸ï¿½ï¿½ Mario ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½ï¿½ï¿½Ø·ï¿½ï¿½ï¿½
     BOOL LoadLevel1();
     BOOL LoadLevel2();
     BOOL LoadLevel3();
