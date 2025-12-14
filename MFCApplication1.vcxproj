@@ -193,6 +193,7 @@
     <ClInclude Include="Game\Map\TileMap.h" />
     <ClInclude Include="Game\Objects\Brick.h" />
     <ClInclude Include="Game\Objects\Coin.h" />
+    <ClInclude Include="Game\Objects\Flagpole.h" />
     <ClInclude Include="Game\Objects\GameObject.h" />
     <ClInclude Include="Game\Objects\Mario.h" />
     <ClInclude Include="Game\Objects\Monster.h" />
@@ -229,6 +230,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Game\Objects\Coin.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Game\Objects\Flagpole.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Game\Objects\GameObject.cpp">

@@ -69,6 +69,11 @@ const SSpriteCoord CSpriteConfig::PIPE_TOP_RIGHT = { 16, 8* size, 16, 16 };
 const SSpriteCoord CSpriteConfig::PIPE_BODY_LEFT = { 0, 9* size, 16, 16 };
 const SSpriteCoord CSpriteConfig::PIPE_BODY_RIGHT = { 16, 9 * size, 16, 16 };
 
+// Flagpole
+const SSpriteCoord CSpriteConfig::FLAGPOLE_TOP =  { 16 * size, 8 * size, 16, 16 };
+const SSpriteCoord CSpriteConfig::FLAGPOLE_POLE = { 16 * size, 9 * size, 16, 16 };
+const SSpriteCoord CSpriteConfig::FLAG = { 8 * size, 8 * size, 16, 16 };
+
 // === 瓦片精灵表坐标 ===
 
 // 地面

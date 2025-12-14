@@ -118,7 +118,10 @@ BOOL CTileMap::LoadLevel1()
     AddMonsterAtTile(5, 14);  // 在平台1上
     AddMonsterAtTile(25, 18); // 地面上
     AddMonsterAtTile(35, 18); // 地面上
-  
+
+    // Add Flagpole
+    AddFlagpole(40 * CGameConfig::TILE_SIZE, 10 * CGameConfig::TILE_SIZE);
+   
 
     TRACE(_T("关卡1加载完成: 砖块=%d, 水管=%d, 怪物=%d\n"), m_Bricks.size(), m_Pipes.size(), m_Monsters.size());
     return TRUE;
@@ -360,6 +363,14 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
     }
 
     // 5. 绘制 Mario
+    // Draw Flagpoles
+    for (auto& flagpole : m_Flagpoles)
+    {
+        int screenX = flagpole.GetX() - offsetX;
+        int screenY = flagpole.GetY() - offsetY;
+        flagpole.DrawWithSprite(pDC, screenX, screenY);
+    }
+
     if (m_pMario && m_pMario->IsVisible())
     {
         int marioScreenX = m_pMario->GetX() - offsetX;
@@ -518,6 +529,7 @@ void CTileMap::ClearObjects()
 {
     m_Bricks.clear();
     m_Pipes.clear();
+    m_Flagpoles.clear();
     m_Coins.clear();  // 清空金币
     m_Monsters.clear(); // 清空怪物
 }
@@ -621,4 +633,22 @@ void CTileMap::CheckMonsterCollisions(CMario* pMario)
 void CTileMap::ClearCoins()
 {
     m_Coins.clear();
+}
+
+void CTileMap::AddFlagpole(int x, int y)
+{
+    CFlagpole flagpole(x, y);
+    m_Flagpoles.push_back(flagpole);
+}
+
+BOOL CTileMap::CheckFlagpoleCollision(const CRect& rect)
+{
+    for (auto& flagpole : m_Flagpoles)
+    {
+        if (flagpole.CheckTouch(rect))
+        {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }

@@ -99,6 +99,9 @@
     <ClInclude Include="Game\UI\StartMenu.h">
       <Filter>Game\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Objects\Flagpole.h">
+      <Filter>Game\Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MFCApplication1.cpp">
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="Game\UI\StartMenu.cpp">
       <Filter>Game\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Objects\Flagpole.cpp">
+      <Filter>Game\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

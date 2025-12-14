@@ -350,6 +350,17 @@ void CMFCApplication1View::UpdateGame()
             // 检查金币碰撞
             m_TileMap.CheckCoinCollisions(m_Mario.GetRect());
 
+            // 检查旗杆碰撞
+            if (m_TileMap.CheckFlagpoleCollision(m_Mario.GetRect()))
+            {
+                // 暂时屏蔽通关逻辑
+                // AfxMessageBox(_T("Congratulations! Level Cleared!"));
+                // CGameState::GetInstance().Reset();
+                // m_TileMap.LoadLevel(1);
+                // return;
+                TRACE(_T("Touched Flagpole!\n"));
+            }
+
             // 检查问号砖块碰撞，只有当马里奥向上移动时才检测
             CRect marioHead = m_Mario.GetHeadRect();
             m_TileMap.CheckQuestionBlockHit(marioHead, m_Mario.IsMovingUp());

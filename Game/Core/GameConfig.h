@@ -18,6 +18,8 @@ public:
     static const int BRICK_HEIGHT = 32;        // 砖块高度
     static const int PIPE_WIDTH = 64;          // 水管宽度
     static const int PIPE_HEIGHT = 96;         // 水管高度
+    static const int FLAGPOLE_WIDTH = 32;
+    static const int FLAGPOLE_HEIGHT = 320;
     static const int COIN_SIZE = 24;           // 金币尺寸
     static const int ENEMY_WIDTH = 32;         // 敌人宽度
     static const int ENEMY_HEIGHT = 32;        // 敌人高度

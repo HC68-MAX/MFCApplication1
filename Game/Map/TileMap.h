@@ -8,6 +8,7 @@
 
 #include "../Objects/Brick.h"
 #include "../Objects/Pipe.h"
+#include "../Objects/Flagpole.h"
 #include "../Core/ResourceManager.h"
 #include "../Core/SpriteRenderer.h"
 #include "../Core/SpriteConfig.h"
@@ -20,7 +21,7 @@ struct Tile
 {
     int tileID;     // ��ƬID
     int x, y;       // λ��
-    BOOL solid;     // �Ƿ����ײ
+    BOOL solid;     // �Ƿ�����?
     CString type;   // ���ͣ�ground, brick, question, etc.��
 };
 
@@ -36,13 +37,14 @@ public:
     BOOL LoadLevel(int levelNumber); 
     // ������Ƭ
     void SetTile(int x, int y, int tileID, BOOL solid = FALSE, const CString& type = _T(""));
-    // �����������
+    // �����������?
     void AddBrick(int x, int y, CBrick::BrickType type = CBrick::NORMAL);
     void AddPipe(int x, int y, int height = CGameConfig::PIPE_HEIGHT);  
+    void AddFlagpole(int x, int y);
     void AddCoin(int x, int y);
     void AddMonster(int x, int y); // ���������ӹ���
     void AddMonsterAtTile(int tileX, int tileY); // ����������Ƭ�������ӹ���
-    void ClearObjects();  // ������ж���
+    void ClearObjects();  // ������ж���?
 
     // ���������� Mario ָ��
     void SetMario(CMario* pMario) { m_pMario = pMario; }
@@ -51,7 +53,7 @@ public:
 
     // ��ȡ���о���
     CRect GetTileRect(int tileX, int tileY) const;
-    // ��ȡ�������
+    // ��ȡ�������?
     std::vector<CRect> GetSolidTileRects() const;
 
     // ��ͼ��Ϣ
@@ -59,19 +61,20 @@ public:
     int GetHeight() const { return m_nHeight; }
     int GetTileSize() const { return m_nTileSize; }
    
-    // ��Ҹ���
+    // ��Ҹ���?
     void ClearCoins();
     void UpdateCoins(float deltaTime);
     void UpdateMonsters(float deltaTime); // ���������¹���
 
     // �����ײ���
     BOOL CheckCoinCollisions(const CRect& rect);
-    // ש����ײ���
+    // ש����ײ���?
     BOOL CheckBrickCollisions(const CRect& rect);
-    // ����ʺ�ש����ײ
+    // ����ʺ�ש�����?
     BOOL CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp);
     // ��������ײ
     void CheckMonsterCollisions(CMario* pMario);
+    BOOL CheckFlagpoleCollision(const CRect& rect);
 
     void RemoveCoin(int index);
     // 新增：获取马里奥初始位置
@@ -83,16 +86,17 @@ private:
     int m_nHeight;          // ��ͼ�߶ȣ���Ƭ����
     int m_nTileSize;        // ��Ƭ�ߴ磨���أ�
 
-    // ����³�ʼλ��
+    // ����³�ʼλ��?
     int m_MarioStartX;
     int m_MarioStartY;
 
     std::vector<std::vector<Tile>> m_Tiles;  // ��Ƭ����
     std::vector<CBrick> m_Bricks;
     std::vector<CPipe> m_Pipes;
+    std::vector<CFlagpole> m_Flagpoles;
     std::vector<CCoin> m_Coins;
     std::vector<CMonster> m_Monsters; // �����������б�
-    CMario* m_pMario = nullptr;  // ָ�� Mario �����ָ��
+    CMario* m_pMario = nullptr;  // ָ�� Mario �����ָ��?
     // �������ؿ����ط���
     BOOL LoadLevel1();
     BOOL LoadLevel2();

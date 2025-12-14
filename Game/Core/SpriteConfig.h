@@ -69,6 +69,11 @@ public:
     static const SSpriteCoord PIPE_BODY_LEFT;
     static const SSpriteCoord PIPE_BODY_RIGHT;
 
+    // Flagpole
+    static const SSpriteCoord FLAGPOLE_TOP;
+    static const SSpriteCoord FLAGPOLE_POLE;
+    static const SSpriteCoord FLAG;
+
     // === 瓦片精灵表 (SpritesheetTiles) ===
 
     // 地面
