@@ -37,13 +37,24 @@ void CMonster::Update(float deltaTime)
     // 应用重力 (Frame-based physics to match Mario)
     m_fVelocityY += m_fGravity;
 
-    // 更新位置
-    m_fX += m_fVelocityX;
-    m_fY += m_fVelocityY;
+    // 水平移动范围检测（核心修改）
+    m_fX += m_fVelocityX;  // 按时间更新位置（原代码可能缺少deltaTime，建议加上）
 
+    // 碰到左边界，向右转向
+    if (m_fX <= m_fLeftBound) {
+        m_fX = m_fLeftBound;
+        m_fVelocityX = fabs(m_fVelocityX);  // 确保向右
+    }
+    // 碰到右边界，向左转向
+    else if (m_fX + m_nWidth >= m_fRightBound) {
+        m_fX = m_fRightBound - m_nWidth;
+        m_fVelocityX = -fabs(m_fVelocityX); // 确保向左
+    }
+
+    // 垂直位置更新（保留重力效果）
+    m_fY += m_fVelocityY * deltaTime;
     m_nX = (int)m_fX;
     m_nY = (int)m_fY;
-
     // 动画更新
     m_fAnimTimer += deltaTime;
     if (m_fAnimTimer >= m_fAnimSpeed)
@@ -74,33 +85,11 @@ void CMonster::CheckCollisions(const std::vector<CRect>& platforms)
                     m_fVelocityY = 0;
                 }
             }
-            // 水平碰撞
-            else
-            {
-                // 简单的反向逻辑
-                if (m_fVelocityX < 0 && m_nX > platform.right - 5) // 向左撞墙
-                {
-                     m_nX = platform.right;
-                     m_fX = (float)m_nX;
-                     m_fVelocityX = -m_fVelocityX;
-                }
-                else if (m_fVelocityX > 0 && m_nX + m_nWidth < platform.left + 5) // 向右撞墙
-                {
-                    m_nX = platform.left - m_nWidth;
-                    m_fX = (float)m_nX;
-                    m_fVelocityX = -m_fVelocityX;
-                }
-                else 
-                {
-                     // 如果无法区分，简单反向
-                     m_fVelocityX = -m_fVelocityX;
-                }
-            }
         }
     }
     
     // 简单的边界检查
-    if (m_nY > 800) m_bIsDead = TRUE; // 掉出屏幕
+    if (m_nY > 1200) m_bIsDead = TRUE; // 掉出屏幕
 }
 
 void CMonster::OnCollisionWithMario(bool fromTop)

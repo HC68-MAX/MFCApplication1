@@ -51,8 +51,7 @@ public:
     void AddPipe(int x, int y, int height = CGameConfig::PIPE_HEIGHT);
     void AddFlagpole(int x, int y);
     void AddCoin(int x, int y);
-    void AddMonster(int x, int y); // 在指定像素坐标添加怪物
-    void AddMonsterAtTile(int tileX, int tileY); // 在指定瓦片坐标添加怪物
+    void AddMonsterAtTile(int tileX, int tileY, int leftBound_, int rightBound_);
 
     // =================================================================
     // 游戏循环接口
@@ -70,7 +69,6 @@ public:
     BOOL CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp);
     void CheckMonsterCollisions(CMario* pMario);
     BOOL CheckFlagpoleCollision(const CRect& rect);
-
     // =================================================================
     // Getters & Setters
     // =================================================================

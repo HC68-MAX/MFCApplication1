@@ -114,10 +114,10 @@ BOOL CTileMap::LoadLevel1()
     SetTile(21, 19, 8, TRUE, _T("pipe"));
 
     // 添加怪物 (使用瓦片坐标)
-    AddMonsterAtTile(12, 12); // 在平台2上
-    AddMonsterAtTile(5, 14);  // 在平台1上
-    AddMonsterAtTile(25, 18); // 地面上
-    AddMonsterAtTile(35, 18); // 地面上
+    AddMonsterAtTile(12, 13,2,3); // 在平台2上
+    AddMonsterAtTile(5, 15,2,3);  // 在平台1上
+    AddMonsterAtTile(25, 19,2,5); // 地面上
+    AddMonsterAtTile(35, 19,5,5); // 地面上
 
     // Add Flagpole
     AddFlagpole(40 * CGameConfig::TILE_SIZE, 10 * CGameConfig::TILE_SIZE);
@@ -438,24 +438,6 @@ BOOL CTileMap::CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp)
 
     return hitAny;
 }
-std::vector<CRect> CTileMap::GetSolidTileRects() const
-{
-    std::vector<CRect> solidRects;
-
-    for (int y = 0; y < m_nHeight; y++)
-    {
-        for (int x = 0; x < m_nWidth; x++)
-        {
-            if (m_Tiles[y][x].solid && m_Tiles[y][x].tileID > 0)
-            {
-                solidRects.push_back(GetTileRect(x, y));
-            }
-        }
-    }
-
-
-    return solidRects;
-}
 //瓦片生成
 void CTileMap::SetTile(int x, int y, int tileID, BOOL solid, const CString& type)
 {
@@ -541,21 +523,21 @@ void CTileMap::AddCoin(int x, int y)
     m_Coins.push_back(coin);
 }
 
-// 添加怪物方法
-void CTileMap::AddMonster(int x, int y)
-{
-    CMonster monster(x, y);
-    m_Monsters.push_back(monster);
-}
-
 // 在瓦片坐标添加怪物
-void CTileMap::AddMonsterAtTile(int tileX, int tileY)
+void CTileMap::AddMonsterAtTile(int tileX, int tileY,int leftBound_,int rightBound_)
 {
-    // 怪物通常在地面上，所以Y坐标可能需要微调
-    // 假设tileY是怪物脚下的瓦片Y坐标，或者怪物所在的瓦片Y坐标
-    // 如果是所在的瓦片，那么 y = tileY * TILE_SIZE
-    // 如果怪物高度是32，正好占一个瓦片。
-    AddMonster(tileX * m_nTileSize, tileY * m_nTileSize);
+    int x = tileX * m_nTileSize;
+    int y = tileY * m_nTileSize;
+
+    // 创建怪物并添加到列表
+    m_Monsters.emplace_back(x, y);
+    // 获取刚添加的怪物引用
+    CMonster& monster = m_Monsters.back();
+
+    // 设置移动范围：以生成位置为中心，左右各3格瓦片（可根据需要调整）
+    float leftBound = x - leftBound_ * m_nTileSize;
+    float rightBound = x + rightBound_ * m_nTileSize;
+    monster.SetMoveBounds(leftBound, rightBound);
 }
 
 void CTileMap::UpdateCoins(float deltaTime)
@@ -569,33 +551,29 @@ void CTileMap::UpdateCoins(float deltaTime)
 
 void CTileMap::UpdateMonsters(float deltaTime)
 {
+    // 获取所有固体碰撞平台（包括瓦片砖块、地面等）
     std::vector<CRect> platforms = GetSolidTileRects();
-    // 添加砖块作为平台
+
+    // 如果m_Bricks是独立于瓦片的特殊砖块（如可击碎的动态砖块），再添加
     for (const auto& brick : m_Bricks)
     {
         platforms.push_back(brick.GetRect());
     }
-    // 添加水管作为平台
+
+    // 添加水管碰撞
     for (const auto& pipe : m_Pipes)
     {
         platforms.push_back(pipe.GetRect());
     }
 
-    for (auto it = m_Monsters.begin(); it != m_Monsters.end(); )
+    // 更新每个怪物的状态并检测碰撞
+    for (auto& monster : m_Monsters)
     {
-        if (it->IsDead())
+        if (!monster.IsDead())
         {
-            // 如果怪物死亡且不可见（动画播放完毕），则移除
-            if (!it->IsVisible())
-            {
-                it = m_Monsters.erase(it);
-                continue;
-            }
+            monster.Update(deltaTime);
+            monster.CheckCollisions(platforms);
         }
-        
-        it->Update(deltaTime);
-        it->CheckCollisions(platforms);
-        ++it;
     }
 }
 
@@ -651,4 +629,31 @@ BOOL CTileMap::CheckFlagpoleCollision(const CRect& rect)
         }
     }
     return FALSE;
+}
+
+// 在TileMap.cpp中添加实现
+std::vector<CRect> CTileMap::GetSolidTileRects() const
+{
+    std::vector<CRect> solidRects;
+
+    // 遍历所有瓦片，收集固体瓦片的碰撞矩形
+    for (int y = 0; y < m_nHeight; y++)
+    {
+        for (int x = 0; x < m_nWidth; x++)
+        {
+            const Tile& tile = m_Tiles[y][x];
+            if (tile.solid) // 只处理固体瓦片
+            {
+                // 计算瓦片在世界坐标系中的矩形
+                int tileX = x * m_nTileSize;
+                int tileY = y * m_nTileSize;
+                CRect tileRect(tileX, tileY,
+                    tileX + m_nTileSize,
+                    tileY + m_nTileSize);
+                solidRects.push_back(tileRect);
+            }
+        }
+    }
+
+    return solidRects;
 }

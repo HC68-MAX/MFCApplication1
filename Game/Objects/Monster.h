@@ -22,6 +22,10 @@ public:
 
     BOOL IsDead() const { return m_bIsDead; }
     BOOL IsSquished() const { return m_bIsSquished; }
+    void SetMoveBounds(float left, float right) {
+        m_fLeftBound = left;
+        m_fRightBound = right;
+    }
 
 private:
     float m_fVelocityX;
@@ -40,4 +44,7 @@ private:
     float m_fAnimTimer;
     int m_nAnimFrame;
     float m_fAnimSpeed;
+
+    float m_fLeftBound = 0.0f;   // 左边界
+    float m_fRightBound = 0.0f;  // 右边界
 };
