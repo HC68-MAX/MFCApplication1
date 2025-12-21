@@ -22,18 +22,6 @@ CCoin::CCoin(int x, int y)
 CCoin::~CCoin()
 {
 }
-
-void CCoin::Update(float deltaTime)
-{
-    // 现在动画由静态方法统一更新，这里不需要做任何事情
-}
-
-void CCoin::Draw(CDC* pDC)
-{
-    // 这个方法不应该被直接调用
-    ASSERT(FALSE);
-}
-
 void CCoin::DrawAt(CDC* pDC, int screenX, int screenY)
 {
     if (!m_bVisible || m_bCollected) return;

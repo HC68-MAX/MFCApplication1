@@ -241,10 +241,7 @@ void CMario::UpdateSkinResources()
     }
 }
 // 修改现有的Draw方法
-void CMario::Draw(CDC* pDC)
-{
-    DrawWithSprite(pDC, m_nX, m_nY);
-}
+
 // 设置皮肤方法
 void CMario::SetSkin(MarioSkin skin)
 {

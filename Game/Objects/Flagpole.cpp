@@ -17,15 +17,6 @@ CFlagpole::~CFlagpole()
 {
 }
 
-void CFlagpole::Update(float deltaTime)
-{
-}
-
-void CFlagpole::Draw(CDC* pDC)
-{
-    // 这里的Draw通常不被直接调用，而是由TileMap调用DrawWithSprite
-}
-
 BOOL CFlagpole::CheckTouch(const CRect& rect) const
 {
     // 简单的矩形碰撞检测

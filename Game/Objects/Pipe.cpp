@@ -18,16 +18,5 @@ CPipe::~CPipe()
 {
 }
 
-// 更新
-void CPipe::Update(float deltaTime)
-{
-    // 水管是静态的，不需要更新
-}
-
-// 绘制 - 使用精灵渲染器
-void CPipe::Draw(CDC* pDC)
-{
-
-}
 
      

@@ -32,16 +32,6 @@ CBrick::CBrick(int x, int y, int width, int height)
 CBrick::~CBrick()
 {
 }
-
-// 更新
-void CBrick::Update(float deltaTime)
-{
-    if (m_bIsHit)
-    {
-        UpdateHitAnimation(deltaTime);
-    }
-}
-
 // 更新击中动画
 void CBrick::UpdateHitAnimation(float deltaTime)
 {
@@ -68,13 +58,6 @@ void CBrick::UpdateHitAnimation(float deltaTime)
         }
     }
 }
-
-// 绘制 - 使用精灵渲染器
-void CBrick::Draw(CDC* pDC)
-{
-    DrawAt(pDC, m_nX, m_nY);
-}
-
 // 使用精灵渲染器绘制
 void CBrick::DrawAt(CDC* pDC, int screenX, int screenY)
 {

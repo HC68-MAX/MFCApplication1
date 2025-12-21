@@ -11,10 +11,6 @@ public:
     CGameObject(int x, int y, int width, int height);
     virtual ~CGameObject();
 
-    // 虚函数 - 子类必须实现
-    virtual void Update(float deltaTime) = 0;  // 纯虚函数
-    virtual void Draw(CDC* pDC) = 0;           // 纯虚函数
-
     // 通用方法
     virtual void SetPosition(int x, int y) { m_nX = x; m_nY = y; }
     virtual void SetSize(int width, int height) { m_nWidth = width; m_nHeight = height; }

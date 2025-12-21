@@ -12,8 +12,6 @@ public:
     CFlagpole(int x, int y);
     virtual ~CFlagpole();
 
-    virtual void Update(float deltaTime) override;
-    virtual void Draw(CDC* pDC) override;
     void DrawWithSprite(CDC* pDC, int screenX, int screenY);
     // 触发旗子下落（碰撞后调用）
     // 绘制旗子（核心：在这里处理下落的Y偏移）

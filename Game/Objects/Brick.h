@@ -14,9 +14,6 @@ public:
     CBrick(int x, int y, int width = CGameConfig::BRICK_WIDTH, int height = CGameConfig::BRICK_HEIGHT);
     virtual ~CBrick();
 
-    // 重写基类虚函数
-    void Update(float deltaTime) override;
-    void Draw(CDC* pDC) override;
     // 新增：使用屏幕坐标绘制
     void DrawAt(CDC* pDC, int screenX, int screenY);
 

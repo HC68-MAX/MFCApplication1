@@ -14,10 +14,6 @@ public:
     CCoin(int x, int y);
     virtual ~CCoin();
 
-    // 重写基类虚函数
-    virtual void Update(float deltaTime) override;
-    virtual void Draw(CDC* pDC) override;
-
     // 新增：使用屏幕坐标绘制
     void DrawAt(CDC* pDC, int screenX, int screenY);
 

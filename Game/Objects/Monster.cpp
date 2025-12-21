@@ -106,11 +106,6 @@ void CMonster::OnCollisionWithMario(bool fromTop)
     }
 }
 
-void CMonster::Draw(CDC* pDC)
-{
-    DrawAt(pDC, m_nX, m_nY);
-}
-
 void CMonster::DrawAt(CDC* pDC, int screenX, int screenY)
 {
     if (!m_bVisible) return;

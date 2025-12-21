@@ -13,10 +13,8 @@ public:
     CMonster(int x, int y);
     virtual ~CMonster();
 
-    virtual void Update(float deltaTime) override;
-    virtual void Draw(CDC* pDC) override;
     void DrawAt(CDC* pDC, int screenX, int screenY);
-
+    void Update(float deltaTime);
     void CheckCollisions(const std::vector<CRect>& platforms);
     void OnCollisionWithMario(bool fromTop);
 
