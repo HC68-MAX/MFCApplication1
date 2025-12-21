@@ -17,7 +17,7 @@ public:
     static void DrawSprite(CDC* pDC, CBitmap* pBitmap,
         int destX, int destY, int destWidth, int destHeight,
         int srcX, int srcY, int srcWidth, int srcHeight,
-        BOOL flipHorizontal = FALSE);
+        BOOL flipHorizontal = FALSE, COLORREF transparentColor = RGB(135, 206, 235));
     // ªÒ»°ŒªÕº≥ﬂ¥Á
     static BOOL GetBitmapSize(CBitmap* pBitmap, CSize& size);
 };

@@ -535,8 +535,8 @@ void CTileMap::AddMonsterAtTile(int tileX, int tileY,int leftBound_,int rightBou
     CMonster& monster = m_Monsters.back();
 
     // 设置移动范围：以生成位置为中心，左右各3格瓦片（可根据需要调整）
-    float leftBound = x - leftBound_ * m_nTileSize;
-    float rightBound = x + rightBound_ * m_nTileSize;
+    int leftBound = x - leftBound_ * m_nTileSize;
+    int rightBound = x + rightBound_ * m_nTileSize;
     monster.SetMoveBounds(leftBound, rightBound);
 }
 

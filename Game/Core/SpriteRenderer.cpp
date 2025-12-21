@@ -7,7 +7,7 @@
 void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap,
     int destX, int destY, int destWidth, int destHeight,
     int srcX, int srcY, int srcWidth, int srcHeight,
-   BOOL flipHorizontal)
+   BOOL flipHorizontal,COLORREF transparentColor)
 {
     if (!pBitmap || !pDC)
     {
@@ -27,15 +27,29 @@ void CSpriteRenderer::DrawSprite(CDC* pDC, CBitmap* pBitmap,
 
     if (flipHorizontal)
     {
-        // 水平翻转：将目标宽度设为负值，并将目标x坐标设为右边起点
-        pDC->StretchBlt(destX + destWidth, destY, -destWidth, destHeight,
-            &memDC, srcX, srcY, srcWidth, srcHeight, SRCCOPY);
+        // 水平翻转：目标宽度设为负值，x坐标偏移到右侧起点
+        TransparentBlt(
+            pDC->m_hDC,
+            destX + destWidth, destY,  // 翻转时从右侧开始绘制
+            -destWidth, destHeight,    // 负宽度实现水平翻转
+            memDC.m_hDC,
+            srcX, srcY,
+            srcWidth, srcHeight,
+            transparentColor           // 透明色参数
+        );
     }
     else
     {
-        // 正常绘制
-        pDC->StretchBlt(destX, destY, destWidth, destHeight,
-            &memDC, srcX, srcY, srcWidth, srcHeight, SRCCOPY);
+        // 正常绘制（带透明处理）
+        TransparentBlt(
+            pDC->m_hDC,
+            destX, destY,
+            destWidth, destHeight,
+            memDC.m_hDC,
+            srcX, srcY,
+            srcWidth, srcHeight,
+            transparentColor           // 透明色参数
+        );
     }
 
     memDC.SelectObject(pOldBitmap);
