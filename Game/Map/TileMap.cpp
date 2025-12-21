@@ -119,10 +119,13 @@ BOOL CTileMap::LoadLevel1()
     AddMonsterAtTile(25, 19,2,5); // 地面上
     AddMonsterAtTile(35, 19,5,5); // 地面上
 
-    // Add Flagpole
-    AddFlagpole(40 * CGameConfig::TILE_SIZE, 10 * CGameConfig::TILE_SIZE);
-   
-
+    AddFlagpole(40 * CGameConfig::TILE_SIZE-20, 14 * CGameConfig::TILE_SIZE+10);
+    // 顶部（tileID=10）
+    SetTile(40, 13, 10, FALSE, _T("flagpole_top"));
+    // 杆体（tileID=11，堆叠5个瓦片）
+    for (int y = 14; y <= 19; y++) {
+    SetTile(40, y, 11, FALSE, _T("flagpole_pole"));
+    }
     TRACE(_T("关卡1加载完成: 砖块=%d, 水管=%d, 怪物=%d\n"), m_Bricks.size(), m_Pipes.size(), m_Monsters.size());
     return TRUE;
 }
@@ -295,6 +298,12 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
                 case 9: // 被顶过的问号砖块
                     spriteCoord = CSpriteConfig::BRICK_QUESTION_HIT;
                     break;
+                case 10:  // 旗杆顶部
+                    spriteCoord = CSpriteConfig::FLAGPOLE_TOP;
+                    break;
+                case 11:  // 旗杆主体
+                    spriteCoord = CSpriteConfig::FLAGPOLE_POLE;
+                    break;
                 default:
                     spriteCoord = CSpriteConfig::BRICK_NORMAL; // 默认
                     break;
@@ -325,7 +334,19 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
             }
         }
     }
-
+    // 2.1 绘制动态旗子（带动画）
+    for (auto& flagpole : m_Flagpoles) {
+        if (!flagpole.IsVisible()) continue;
+        int screenX = flagpole.GetX() - offsetX;
+        int screenY = flagpole.GetY() - offsetY;
+        // 只绘制屏幕范围内的旗子
+        if (screenX + 16 < 0 || screenX >= CGameConfig::SCREEN_WIDTH ||
+            screenY + 16 < 0 || screenY >= CGameConfig::SCREEN_HEIGHT) {
+            continue;
+        }
+        // 绘制动态旗子（仅绘制旗子部分，杆体已在静态瓦片绘制）
+        flagpole.DrawFlag(pDC, screenX, screenY);
+    }
     // 绘制金币 
     for (auto& coin : m_Coins)
     {
@@ -368,7 +389,7 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
     {
         int screenX = flagpole.GetX() - offsetX;
         int screenY = flagpole.GetY() - offsetY;
-        flagpole.DrawWithSprite(pDC, screenX, screenY);
+        flagpole.DrawFlag(pDC, screenX, screenY);
     }
 
     if (m_pMario && m_pMario->IsVisible())
@@ -405,8 +426,8 @@ BOOL CTileMap::CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp)
     int tileRight = rect.right / m_nTileSize;
     int tileY = rect.top / m_nTileSize;
 
-    TRACE(_T("检查问号砖块碰撞 - 头部区域: (%d,%d,%d,%d), 向上移动: %d\n"),
-        rect.left, rect.top, rect.right, rect.bottom, isMovingUp);
+  //  TRACE(_T("检查问号砖块碰撞 - 头部区域: (%d,%d,%d,%d), 向上移动: %d\n"),
+ //       rect.left, rect.top, rect.right, rect.bottom, isMovingUp);
 
     BOOL hitAny = FALSE;
 
@@ -625,6 +646,10 @@ BOOL CTileMap::CheckFlagpoleCollision(const CRect& rect)
     {
         if (flagpole.CheckTouch(rect))
         {
+            TRACE(_T("马里奥碰到旗杆了！触发旗子下落\n"));
+            // 触发旗子下落（调用旗子类的方法）
+            flagpole.TriggerFlagDown();
+            // 碰撞后直接返回（避免多次触发）
             return TRUE;
         }
     }

@@ -72,7 +72,7 @@ public:
     // Flagpole
     static const SSpriteCoord FLAGPOLE_TOP;
     static const SSpriteCoord FLAGPOLE_POLE;
-    static const SSpriteCoord FLAG;
+    static const SSpriteCoord FLAGPOLE_FLAG;
 
     // === ÍßÆ¬¾«Áé±í (SpritesheetTiles) ===
 

@@ -353,11 +353,6 @@ void CMFCApplication1View::UpdateGame()
             // 检查旗杆碰撞
             if (m_TileMap.CheckFlagpoleCollision(m_Mario.GetRect()))
             {
-                // 暂时屏蔽通关逻辑
-                // AfxMessageBox(_T("Congratulations! Level Cleared!"));
-                // CGameState::GetInstance().Reset();
-                // m_TileMap.LoadLevel(1);
-                // return;
                 TRACE(_T("Touched Flagpole!\n"));
             }
 

@@ -92,7 +92,7 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
             spriteCoord = CSpriteConfig::MARIO_SMALL_DEAD; // 需要在SpriteConfig中添加这个坐标
         }
 
-        BOOL flipHorizontal = (m_Direction == Direction::LEFT);
+        BOOL flipHorizontal = (m_Direction == Direction::RIGHT);
 
         CSpriteRenderer::DrawSprite(&memDC, pBitmap, 0, 0,
             m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,

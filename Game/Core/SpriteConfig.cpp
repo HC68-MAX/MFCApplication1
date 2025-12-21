@@ -72,7 +72,7 @@ const SSpriteCoord CSpriteConfig::PIPE_BODY_RIGHT = { 16, 9 * size, 16, 16 };
 // Flagpole
 const SSpriteCoord CSpriteConfig::FLAGPOLE_TOP =  { 16 * size, 8 * size, 16, 16 };
 const SSpriteCoord CSpriteConfig::FLAGPOLE_POLE = { 16 * size, 9 * size, 16, 16 };
-const SSpriteCoord CSpriteConfig::FLAG = { 8 * size, 8 * size, 16, 16 };
+const SSpriteCoord CSpriteConfig::FLAGPOLE_FLAG = { 8 * size, 8 * size, 16, 16 };
 
 // === ÍßÆ¬¾«Áé±í×ø±ê ===
 
