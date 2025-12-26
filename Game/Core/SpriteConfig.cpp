@@ -5,8 +5,8 @@
 // 这里只是示例，您需要根据您的贴图集实际布局来设置
 const CString CSpriteConfig::TILESET_MAIN = _T("TilesetMain");
 const CString CSpriteConfig::TILESET_MARIO = _T("MarioSprites");
-const CString CSpriteConfig::TILESET_ENEMIES = _T("EnemySprites"); 
 const CString CSpriteConfig::TILESET_MIKU = _T("Miku");
+const CString CSpriteConfig::TILESET_ENEMIES = _T("EnemySprites"); 
 CString CSpriteConfig::GetSpritesheetForMario()
 {
     return TILESET_MARIO;

@@ -195,21 +195,6 @@
     <Image Include="Game\Resources\mario_hatsune_spritesheet.bmp">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="Game\Resources\viewfile.bmp">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="Game\Resources\viewfile_resized.bmp">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="Game\Resources\miku.bmp.bmp">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="Game\Resources\miku_32_atlas.bmp">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="Game\Resources\miku_48_atlas.bmp">
-      <Filter>资源文件</Filter>
-    </Image>
     <Image Include="Game\Resources\smb_enemies_sheet.bmp">
       <Filter>资源文件</Filter>
     </Image>

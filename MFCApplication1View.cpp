@@ -200,36 +200,6 @@ void CMFCApplication1View::InitializeResources()
 
     TRACE(_T("资源初始化: %s\n"), success ? _T("成功") : _T("失败"));
 
-    // 测试获取贴图 - 使用新的名称
-    TRACE(_T("测试获取贴图...\n"));
-    CBitmap* testMain  = resMgr.GetBitmap(CSpriteConfig::TILESET_MAIN);
-    CBitmap* testMario = resMgr.GetBitmap(CSpriteConfig::TILESET_MARIO);
-    CBitmap* testMiku  = resMgr.GetBitmap(CSpriteConfig::TILESET_MIKU);
-    TRACE(_T("主贴图集: %p\n"), testMain);
-    TRACE(_T("马里奥贴图集: %p\n"), testMario);
-    TRACE(_T("初音未来图集: %p\n"), testMiku);
-    if (testMain)
-    {
-        BITMAP bm;
-        testMain->GetBitmap(&bm);
-        TRACE(_T("主贴图集尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
-       
-    }
-    if (testMario) {
-        BITMAP bm;
-        testMario->GetBitmap(&bm);
-        TRACE(_T("马里奥贴图集尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
-    }
-    if (testMiku) {
-        BITMAP bm;
-        testMiku->GetBitmap(&bm);
-        TRACE(_T("初音未来贴图集尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
-    }
-    else
-    {
-        TRACE(_T("错误: 无法获取主贴图集\n"));
-       
-    }
 }
 // RenderGame 渲染方法
 void CMFCApplication1View::RenderGame(CDC* pDC)

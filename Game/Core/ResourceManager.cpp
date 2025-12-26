@@ -40,27 +40,6 @@ BOOL CResourceManager::LoadGameResources()
         // 创建占位符
         CreatePlaceholderBitmap(_T("TilesetMain"), RGB(255, 0, 0)); // 红色占位符
     }
-
-    // 测试获取贴图
-    CBitmap* pTest = GetBitmap(_T("TilesetMain"));
-    if (pTest)
-    {
-        BITMAP bm;
-        pTest->GetBitmap(&bm);
-        TRACE(_T("贴图尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
-    }
-    else
-    {
-        TRACE(_T("错误: 获取贴图失败!\n"));
-    }
-    // 测试获取马里奥贴图
-    CBitmap* pMarioTest = GetBitmap(_T("MarioSprites"));
-    if (pMarioTest)
-    {
-        BITMAP bm;
-        pMarioTest->GetBitmap(&bm);
-        TRACE(_T("马里奥贴图尺寸: %dx%d\n"), bm.bmWidth, bm.bmHeight);
-    }
     return success;
 }
 

@@ -272,13 +272,8 @@
   <ItemGroup>
     <Image Include="Game\Resources\mario_bros.bmp" />
     <Image Include="Game\Resources\mario_hatsune_spritesheet.bmp" />
-    <Image Include="Game\Resources\miku.bmp.bmp" />
-    <Image Include="Game\Resources\miku_32_atlas.bmp" />
-    <Image Include="Game\Resources\miku_48_atlas.bmp" />
     <Image Include="Game\Resources\smb_enemies_sheet.bmp" />
     <Image Include="Game\Resources\tile_set.bmp" />
-    <Image Include="Game\Resources\viewfile.bmp" />
-    <Image Include="Game\Resources\viewfile_resized.bmp" />
     <Image Include="res\MFCApplication1.ico" />
     <Image Include="res\MFCApplication1Doc.ico" />
     <Image Include="res\Toolbar.bmp" />
