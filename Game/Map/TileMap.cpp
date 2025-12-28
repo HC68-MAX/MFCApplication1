@@ -167,6 +167,34 @@ BOOL CTileMap::LoadLevel2()
         SetTile(x, y, 2, TRUE, _T("brick"));
         AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
     }
+    // 添加一些平台
+    for (int x = 20; x < 27; x++)
+    {
+        int y = 12;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
+    }
+    // 添加一些平台
+    for (int x = 30; x <35; x++)
+    {
+        int y = 18;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
+    }
+    // 添加一些平台
+    for (int x = 30; x < 35; x++)
+    {
+        int y = 10;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
+    }
+    // 添加一些平台
+    for (int x = 40; x < 45; x++)
+    {
+        int y = 15;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+      //  AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
+    }
     // 添加问号砖块
     for (int x = 15; x < 18; x++)
     {
@@ -180,7 +208,18 @@ BOOL CTileMap::LoadLevel2()
     SetTile(26, 20, 6, TRUE, _T("pipe"));
     SetTile(26, 21, 8, TRUE, _T("pipe"));
 
+    AddMonsterAtTile(10, 15, 5, 2); 
+    AddMonsterAtTile(16, 17, 2, 4);  
+    AddMonsterAtTile(16, 13, 1, 2); 
+    AddMonsterAtTile(35, 21, 5, 5); 
 
+    AddFlagpole(42 * CGameConfig::TILE_SIZE - 20, 9 * CGameConfig::TILE_SIZE + 10);
+    // 顶部（tileID=10）
+    SetTile(42, 9, 10, FALSE, _T("flagpole_top"));
+    // 杆体（tileID=11，堆叠5个瓦片）
+    for (int y = 9; y <= 14; y++) {
+        SetTile(42, y, 11, FALSE, _T("flagpole_pole"));
+    }
     TRACE(_T("关卡2加载完成: 砖块=%d, 水管=%d, 金币=%d\n"),
         m_Bricks.size(), m_Pipes.size(), m_Coins.size());
     return TRUE;
@@ -212,7 +251,7 @@ BOOL CTileMap::LoadLevel3()
     // 添加多个平台
     for (int x = 4; x < 8; x++)
     {
-        int y = 15;
+        int y = 16;
         SetTile(x, y, 2, TRUE, _T("brick"));
         AddCoin(x * CGameConfig::TILE_SIZE, (y-1) * CGameConfig::TILE_SIZE);
     }
@@ -230,14 +269,37 @@ BOOL CTileMap::LoadLevel3()
         SetTile(x, y, 2, TRUE, _T("brick"));
         AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
     }
-
+    for (int x = 27; x < 34; x++)
+    {
+        int y = 10;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+        AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
+    }
+    for (int x = 37; x < 43; x++)
+    {
+        int y = 12;
+        SetTile(x, y, 2, TRUE, _T("brick"));
+      //  AddCoin(x * CGameConfig::TILE_SIZE, (y - 1) * CGameConfig::TILE_SIZE);
+    }
     // 添加问号砖块
     SetTile(6, 12, 3, TRUE, _T("question_brick"));
-    SetTile(14, 12, 3, TRUE, _T("question_brick"));
-    SetTile(22, 11, 3, TRUE, _T("question_brick"));
+    SetTile(14, 11, 3, TRUE, _T("question_brick"));
+    SetTile(22, 10, 3, TRUE, _T("question_brick"));
 
+    AddMonsterAtTile(6, 15, 2, 2);
+    AddMonsterAtTile(13, 14, 1, 3);
+    AddMonsterAtTile(22, 13, 2, 2);
+    AddMonsterAtTile(35, 19, 5, 5);
+    AddMonsterAtTile(25, 21, 5, 5);
+    AddMonsterAtTile(15, 20, 5, 5);
 
-   
+    AddFlagpole(40 * CGameConfig::TILE_SIZE - 20, 7 * CGameConfig::TILE_SIZE + 10);
+    // 顶部（tileID=10）
+    SetTile(40, 7, 10, FALSE, _T("flagpole_top"));
+    // 杆体（tileID=11，堆叠5个瓦片）
+    for (int y = 7; y <= 11; y++) {
+        SetTile(40, y, 11, FALSE, _T("flagpole_pole"));
+    }
     TRACE(_T("关卡3加载完成: 砖块=%d, 水管=%d, 金币=%d\n"),
         m_Bricks.size(), m_Pipes.size(), m_Coins.size());
     return TRUE;
@@ -469,14 +531,6 @@ void CTileMap::SetTile(int x, int y, int tileID, BOOL solid, const CString& type
         m_Tiles[y][x].type = type;
     }
 }
-// 新增：添加砖块
-void CTileMap::AddBrick(int x, int y, CBrick::BrickType type)
-{
-    CBrick brick(x, y);
-    brick.SetBrickType(type);
-    m_Bricks.push_back(brick);
-}
-
 // 金币碰撞检测
 BOOL CTileMap::CheckCoinCollisions(const CRect& rect)
 {
@@ -500,33 +554,6 @@ BOOL CTileMap::CheckCoinCollisions(const CRect& rect)
 
     return collectedAny;
 }
-// 移除金币（标记为已收集）
-BOOL CTileMap::CheckBrickCollisions(const CRect& rect)
-{
-    BOOL hitAny = FALSE;
-
-    for (auto& brick : m_Bricks)
-    {
-        // 检查砖块是否可以被顶并且与头部矩形相交
-        if (brick.CanBeHitFromBelow() && brick.CheckCollision(rect))
-        {
-            TRACE(_T("检测到砖块碰撞! 砖块位置: (%d, %d)\n"), brick.GetX(), brick.GetY());
-            brick.OnHitFromBelow();
-            hitAny = TRUE;
-        }
-    }
-
-    return hitAny;
-}
-
-void CTileMap::RemoveCoin(int index)
-{
-    if (index >= 0 && index < m_Coins.size())
-    {
-        m_Coins[index].Collect();
-    }
-}
-
 // 新增：添加金币
 void CTileMap::ClearObjects()
 {
@@ -627,11 +654,6 @@ void CTileMap::CheckMonsterCollisions(CMario* pMario)
             }
         }
     }
-}
-// 清空金币
-void CTileMap::ClearCoins()
-{
-    m_Coins.clear();
 }
 
 void CTileMap::AddFlagpole(int x, int y)

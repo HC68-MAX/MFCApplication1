@@ -47,8 +47,6 @@ public:
     // 对象添加
     // =================================================================
     void SetTile(int x, int y, int tileID, BOOL solid = FALSE, const CString& type = _T(""));
-    void AddBrick(int x, int y, CBrick::BrickType type = CBrick::NORMAL);
-    void AddPipe(int x, int y, int height = CGameConfig::PIPE_HEIGHT);
     void AddFlagpole(int x, int y);
     void AddCoin(int x, int y);
     void AddMonsterAtTile(int tileX, int tileY, int leftBound_, int rightBound_);
@@ -66,7 +64,6 @@ public:
     // =================================================================
     std::vector<CRect> GetSolidTileRects() const; // 获取所有实体瓦片的碰撞矩形
     BOOL CheckCoinCollisions(const CRect& rect);
-    BOOL CheckBrickCollisions(const CRect& rect);
     BOOL CheckQuestionBlockHit(const CRect& rect, BOOL isMovingUp);
     void CheckMonsterCollisions(CMario* pMario);
     BOOL CheckFlagpoleCollision(const CRect& rect);
@@ -84,8 +81,6 @@ public:
     // =================================================================
     // 其他操作
     // =================================================================
-    void RemoveCoin(int index);
-    void ClearCoins();
 
 private:
     // =================================================================

@@ -6,7 +6,6 @@
 #include "../Core/ResourceManager.h"
 #include "../Core/SpriteRenderer.h"
 #include "../Core/GameConfig.h"
-#include <vector>
 class CMonster : public CGameObject
 {
 public:
