@@ -52,7 +52,8 @@ protected:
 	{
 		STATE_MENU,
 		STATE_PLAYING,
-		STATE_PAUSED
+		STATE_PAUSED,
+		STATE_WIN
 	};
 	GameState m_GameState;
 	CStartMenu m_StartMenu;
@@ -120,6 +121,8 @@ protected:
 	void CalculateDeltaTime();
 	void StartGame();
 	void RenderPauseMenu(CDC* pDC);
+	void RenderWinScreen(CDC* pDC);
+	void DrawStars(CDC* pDC);
 	BOOL CheckMarioDeath();
 	void HandleMarioDeath();
 	void RespawnMario();

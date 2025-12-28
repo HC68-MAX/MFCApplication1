@@ -682,3 +682,15 @@ std::vector<CRect> CTileMap::GetSolidTileRects() const
 
     return solidRects;
 }
+// 新增：检查胜利条件
+BOOL CTileMap::CheckWinCondition() const
+{
+    for (const auto& flagpole : m_Flagpoles)
+    {
+        if (flagpole.IsWinTriggered())
+        {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}

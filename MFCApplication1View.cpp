@@ -231,6 +231,10 @@ void CMFCApplication1View::RenderGame(CDC* pDC)
         // 绘制暂停界面
         RenderPauseMenu(pDC);
         break;
+    case STATE_WIN:
+        // 绘制通关界面
+        RenderWinScreen(pDC);
+        break;
     }
 }
 // 清理游戏资源
@@ -291,6 +295,12 @@ void CMFCApplication1View::UpdateGame()
 
     case STATE_PLAYING:
         // 检查马里奥是否死亡
+        if (m_TileMap.CheckWinCondition())
+        {
+            TRACE(_T("胜利条件达成，进入胜利状态\n"));
+            m_GameState = STATE_WIN;
+            break;
+        }
         if (CheckMarioDeath())
         {
             // 死亡处理
@@ -342,6 +352,11 @@ void CMFCApplication1View::UpdateGame()
 
         // 更新摄像机（死亡时也更新，可以跟随死亡动画）
         UpdateCamera();
+        break;
+
+    case STATE_WIN:
+        // 胜利状态下可以更新一些动画效果
+        // 例如星星闪烁效果
         break;
     }
 }
@@ -602,7 +617,7 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
         m_bKeyRight ? _T("→") : _T(" "),
         m_bKeyJump ? _T("↑") : _T(" "));
     pDC->TextOut(10, 50, strInfo);
-
+  
     // 第4行：游戏状态信息
     strInfo.Format(_T("金币: %d   分数: %d   生命: %d"),
         CGameState::GetInstance().GetCoins(),
@@ -679,9 +694,12 @@ void CMFCApplication1View::DrawDebugInfo(CDC* pDC)
     else
     {
         // 非调试模式提示
-        pDC->SetTextColor(RGB(200, 200, 200)); // 灰色
-        pDC->TextOut(10, 100, _T("按 D 键开启调试模式"));
-        pDC->TextOut(10, 120, _T("操作: 方向键移动, 空格跳跃, 1/2/3切换状态"));
+        pDC->SetTextColor(RGB(255, 255, 0)); // 灰色
+        pDC->TextOut(900, 60, _T("按 M 键可切换皮肤"));
+        pDC->TextOut(900, 80, _T("按 D 键开启调试模式"));
+        pDC->TextOut(900, 120, _T("按 P 建可暂停游戏，Esc可返回开始界面"));
+        pDC->TextOut(900, 100, _T("操作: 方向键(←→)移动, 空格/↑跳跃"));
+  
     }
 }
 // 添加开始游戏方法
@@ -800,6 +818,30 @@ void CMFCApplication1View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
             m_GameState = STATE_PLAYING;  // 恢复游戏
         }
         break;
+    case STATE_WIN:
+        switch (nChar)
+        {
+        case VK_ESCAPE:
+            // ESC 返回主菜单
+            m_GameState = STATE_MENU;
+            // 重置游戏状态
+            CGameState::GetInstance().Reset();
+            // 重置马里奥
+            m_Mario.Respawn();
+            TRACE(_T("从胜利界面返回主菜单\n"));
+            break;
+
+        case 'R':
+        case 'r':
+            // R 键重新开始当前关卡
+            m_GameState = STATE_PLAYING;
+            // 重新加载当前关卡
+            StartGame();
+            TRACE(_T("重新开始当前关卡\n"));
+            break;
+        }
+        break;
+    
     }
 
     CView::OnKeyDown(nChar, nRepCnt, nFlags);
@@ -904,4 +946,100 @@ void CMFCApplication1View::RenderPauseMenu(CDC* pDC)
     // 提示文字
     pDC->TextOut(m_nScreenWidth / 2 - 100, m_nScreenHeight / 2 + 20,
         _T("按 P 或 ESC 继续游戏"));
+}
+
+void CMFCApplication1View::RenderWinScreen(CDC* pDC)
+{
+    // 黑色背景
+    pDC->FillSolidRect(0, 0, m_nScreenWidth, m_nScreenHeight, RGB(0, 0, 0));
+
+    // 设置文字属性
+    pDC->SetTextColor(RGB(255, 215, 0));  // 金色
+    pDC->SetBkMode(TRANSPARENT);
+
+    // 绘制"恭喜通关"文字
+    CFont winFont;
+    winFont.CreatePointFont(360, _T("Arial"));  // 36点字体
+    CFont* pOldFont = pDC->SelectObject(&winFont);
+
+    CString winText = _T("恭喜通关!");
+    CSize winSize = pDC->GetTextExtent(winText);
+    int winX = m_nScreenWidth / 2 - winSize.cx / 2;
+    int winY = m_nScreenHeight / 2 - 200;
+    pDC->TextOut(winX, winY, winText);
+
+    // 绘制金币和分数信息
+    CFont infoFont;
+    infoFont.CreatePointFont(180, _T("Arial"));  // 18点字体
+    pDC->SelectObject(&infoFont);
+    pDC->SetTextColor(RGB(255, 255, 255));
+
+    // 显示金币数量
+    CString coinText;
+    coinText.Format(_T("收集金币: %d"), CGameState::GetInstance().GetCoins());
+    CSize coinSize = pDC->GetTextExtent(coinText);
+    pDC->TextOut(m_nScreenWidth / 2 - coinSize.cx / 2, winY + 80, coinText);
+
+    // 显示分数
+    CString scoreText;
+    scoreText.Format(_T("最终分数: %d"), CGameState::GetInstance().GetScore());
+    CSize scoreSize = pDC->GetTextExtent(scoreText);
+    pDC->TextOut(m_nScreenWidth / 2 - scoreSize.cx / 2, winY + 110, scoreText);
+
+    // 绘制操作提示
+    CFont hintFont;
+    hintFont.CreatePointFont(120, _T("Arial"));  // 12点字体
+    pDC->SelectObject(&hintFont);
+    pDC->SetTextColor(RGB(200, 200, 255));
+
+    CString hintText = _T("按 ESC 键选择其他关卡");
+    CSize hintSize = pDC->GetTextExtent(hintText);
+    pDC->TextOut(m_nScreenWidth / 2 - hintSize.cx / 2, winY + 150, hintText);
+
+    CString hintText2 = _T("按 R 键重新开始当前关卡");
+    CSize hintSize2 = pDC->GetTextExtent(hintText2);
+    pDC->TextOut(m_nScreenWidth / 2 - hintSize2.cx / 2, winY + 180, hintText2);
+
+    // 恢复原来的字体
+    pDC->SelectObject(pOldFont);
+
+    // 绘制星星装饰
+    DrawStars(pDC);
+}
+
+void CMFCApplication1View::DrawStars(CDC* pDC)
+{
+    // 绘制闪烁的星星
+    static float starTime = 0.0f;
+    starTime += m_fDeltaTime;
+
+    pDC->SetTextColor(RGB(255, 255, 0));
+
+    // 左上角星星
+    int starX1 = 100;
+    int starY1 = 100;
+    if (static_cast<int>(starTime * 3) % 2 == 0) {
+        pDC->TextOut(starX1, starY1, _T("★"));
+    }
+
+    // 右上角星星
+    int starX2 = m_nScreenWidth - 120;
+    int starY2 = 100;
+    if (static_cast<int>(starTime * 4) % 2 == 0) {
+        pDC->TextOut(starX2, starY2, _T("★"));
+    }
+
+    // 左下角星星
+    int starX3 = 100;
+    int starY3 = m_nScreenHeight - 120;
+    if (static_cast<int>(starTime * 5) % 2 == 0) {
+        pDC->TextOut(starX3, starY3, _T("★"));
+    }
+
+    // 右下角星星
+    int starX4 = m_nScreenWidth - 120;
+    int starY4 = m_nScreenHeight - 120;
+    if (static_cast<int>(starTime * 6) % 2 == 0) {
+        pDC->TextOut(starX4, starY4, _T("★"));
+    }
 }

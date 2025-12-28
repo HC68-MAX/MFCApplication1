@@ -19,12 +19,13 @@ public:
     // 检查是否触碰到旗杆
     BOOL CheckTouch(const CRect& rect) const;
     void TriggerFlagDown(){ m_bFlagDown = true; }
-  
+    BOOL IsWinTriggered() const { return m_bWinTriggered; }
 private:
     // 旗帜的位置（相对于旗杆顶部）
     bool m_bFlagDown;  // 是否触发旗子下落（默认false）
     int m_nFlagY;      // 旗子下落的Y轴偏移量（初始为0，向下增加）
-    // 可自定义的参数（直接改数值即可调整效果）
+    bool m_bWinTriggered;   // 新增：是否触发了胜利
     const int m_nFallStep = 1;     // 每次绘制旗子的下落步长（数字越大下落越快）
     const int m_nMaxFallY = 128;   // 旗子最大下落距离（限制下落的最低位置）
+
 };

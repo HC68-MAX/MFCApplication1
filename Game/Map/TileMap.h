@@ -58,6 +58,7 @@ public:
     // =================================================================
     void UpdateCoins(float deltaTime);
     void UpdateMonsters(float deltaTime); // 更新怪物状态
+    BOOL CheckWinCondition() const;
     void Draw(CDC* pDC, int offsetX = 0, int offsetY = 0); // 渲染地图
 
     // =================================================================

@@ -5,12 +5,14 @@ CFlagpole::CFlagpole() : CGameObject(0, 0, CGameConfig::FLAGPOLE_WIDTH, CGameCon
 {
     m_nFlagY = 0;
     m_bFlagDown = FALSE;
+    m_bWinTriggered = FALSE;
 }
 
 CFlagpole::CFlagpole(int x, int y) : CGameObject(x, y, CGameConfig::FLAGPOLE_WIDTH, CGameConfig::FLAGPOLE_HEIGHT)
 {
     m_nFlagY = 0;
     m_bFlagDown = FALSE;
+    m_bWinTriggered = FALSE;
 }
 
 CFlagpole::~CFlagpole()
@@ -42,6 +44,13 @@ void CFlagpole::DrawFlag(CDC* pDC, int screenX, int screenY)
         // 防止超出最大下落距离（兜底）
         if (m_nFlagY > m_nMaxFallY)
             m_nFlagY = m_nMaxFallY;
+        // 新增：当旗子落到底部时，触发胜利
+        if (m_nFlagY >= m_nMaxFallY && !m_bWinTriggered)
+        {
+            m_bWinTriggered = true;
+            TRACE(_T("旗子已落到底部，触发胜利条件\n"));
+            // 这里可以发送消息或设置标志，让游戏进入胜利状态
+        }
     }
 
     // 2. 获取主瓦片集（和砖块、旗杆共用，避免贴图缺失）

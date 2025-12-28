@@ -84,8 +84,23 @@ void CStartMenu::Draw(CDC* pDC)
     // 绘制操作提示
     pDC->SetTextColor(RGB(255, 255, 255));
     pDC->SetBkMode(TRANSPARENT);
-    pDC->TextOut(20, CGameConfig::SCREEN_HEIGHT - 30,
+    pDC->TextOut(20, CGameConfig::SCREEN_HEIGHT - 150,
         _T("点击关卡选择，点击开始游戏"));
+    // 绘制操作说明
+    pDC->SetTextColor(RGB(255, 255, 200));  // 淡黄色
+    pDC->SetBkMode(TRANSPARENT);
+
+    CFont hintFont;
+    hintFont.CreatePointFont(80, _T("Arial"));
+    CFont* pOldFont = pDC->SelectObject(&hintFont);
+
+    // 操作说明
+    CString controls = _T("游戏操作: ←→移动 空格跳跃 1/2/3切换状态 M切换皮肤 ESC返回菜单");
+    CSize textSize = pDC->GetTextExtent(controls);
+    pDC->TextOut(CGameConfig::SCREEN_WIDTH / 2 - textSize.cx / 2,
+        CGameConfig::SCREEN_HEIGHT - 220, controls);
+
+    pDC->SelectObject(pOldFont);
 }
 
 void CStartMenu::DrawTitle(CDC* pDC)
