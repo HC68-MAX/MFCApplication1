@@ -5,43 +5,55 @@
 // 构造函数：初始化马里奥的默认状态
 CMario::CMario() : CGameObject(100, 400, CGameConfig::MARIO_SMALL_WIDTH, CGameConfig::MARIO_SMALL_HEIGHT)  // 调用基类构造函数，设置初始位置和大小
 {
-
     // 初始化速度
     m_fVelocityX = 0.0f;
     m_fVelocityY = 0.0f;
-    // 初始化皮肤和动画
-    m_Skin = MarioSkin::MARIO;
-    m_fMikuAnimTimer = 0.0f;
-    m_nMikuCurrentFrame = 1;
+    m_fPreviousVelocityY = 0.0f;
+
     // 使用全局配置的物理参数
     m_fAcceleration = CGameConfig::MARIO_ACCELERATION;
     m_fMaxSpeed = CGameConfig::MARIO_MAX_SPEED;
     m_fJumpForce = CGameConfig::MARIO_JUMP_FORCE;
     m_fGravity = CGameConfig::GRAVITY;
 
-    m_Skin = MarioSkin::MARIO; // 默认使用马里奥皮肤
+    // 跳跃相关参数
+    m_fJumpHoldTime = 0.0f;
+    m_fMaxJumpHoldTime = CGameConfig::MARIO_JUMP_HOLD_TIME;
+    m_fJumpGravity = CGameConfig::MARIO_JUMP_GRAVITY;
+    m_fFallGravity = CGameConfig::MARIO_FALL_GRAVITY;
+
+    // 跳跃峰值相关
+    m_bReachedJumpPeak = FALSE;
+    m_fPeakHoldTime = 0.0f;
+    m_fMaxPeakHoldTime = CGameConfig::MARIO_PEAK_HOLD_TIME;
+
     // 初始化状态
     m_bIsJumping = FALSE;
     m_bIsOnGround = FALSE;
+    m_bJumpPressed = FALSE;
+    m_bJumpWasPressed = FALSE;
+    m_bCanJump = TRUE;
     m_bIsMoving = FALSE;
 
-    m_Direction = Direction::RIGHT; // 默认朝向右
-    m_State = MarioState::SMALL; // 默认是小马里奥
+    m_Direction = Direction::RIGHT;
+    m_State = MarioState::SMALL;
+    m_Skin = MarioSkin::MARIO;
+
     // 初始化输入状态
     m_bInputLeft = FALSE;
     m_bInputRight = FALSE;
     m_bInputJump = FALSE;
 
-    // 初始化跳跃相关
-    m_fJumpTime = 0.0f;
-    m_fMaxJumpTime = CGameConfig::MARIO_JUMP_MAX_TIME;  // 使用全局配置
-    m_bCanJump = TRUE;
-
     // 初始化死亡状态
     m_bIsDying = FALSE;
     m_fDeathTimer = 0.0f;
-    m_fDeathJumpVelocity = -12.0f; // 死亡时向上的弹跳力
-    m_fDeathAnimationTime = 2.0f;  // 死亡动画持续2秒
+    m_fDeathJumpVelocity = -10.0f;
+    m_fDeathAnimationTime = 2.0f;
+
+    // Miku动画相关
+    m_fMikuAnimTimer = 0.0f;
+    m_nMikuCurrentFrame = 1;
+
     // 根据状态更新大小
     UpdateSize();
 }
@@ -270,28 +282,27 @@ void CMario::Update(float deltaTime)
     if (m_bIsDying)
     {
         UpdateDeathAnimation(deltaTime);
-        return; // 死亡状态下不执行正常更新
+        return;
     }
-    // 处理输入
-    HandleInput(m_bInputLeft, m_bInputRight, m_bInputJump);
 
-    // 应用物理
+    // 应用物理（包括跳跃逻辑）
     ApplyPhysics(deltaTime);
-    // 更新Miku动画
-    if (m_Skin == MarioSkin::MIKU)
-    {
-        UpdateMikuAnimation(deltaTime);
-    }
-    // 更新移动状态 - 基于实际速度
-    m_bIsMoving = (abs(m_fVelocityX) > 0.01f);
 
-    // 简单的边界检查（临时）
+    // 更新移动状态
+    m_bIsMoving = (abs(m_fVelocityX) > 0.1f);
+
+    // 边界检查
     if (m_nX < 0)
     {
         m_nX = 0;
         m_fVelocityX = 0;
     }
 
+    // 更新Miku动画
+    if (m_Skin == MarioSkin::MIKU)
+    {
+        UpdateMikuAnimation(deltaTime);
+    }
 }
 // 添加死亡动画更新方法
 void CMario::UpdateDeathAnimation(float deltaTime)
@@ -353,69 +364,154 @@ SSpriteCoord CMario::GetMikuSpriteCoord() const
 // 新的输入处理方法
 void CMario::HandleInput(BOOL left, BOOL right, BOOL jump)
 {
+    // 保存上一帧的跳跃状态
+    m_bJumpWasPressed = m_bJumpPressed;
+    m_bJumpPressed = jump;
+
     // 处理左右移动
     if (left && !right)
     {
-        m_fVelocityX = -m_fMaxSpeed;
+        // 向左加速
+        m_fVelocityX -= m_fAcceleration;
+        if (m_fVelocityX < -m_fMaxSpeed)
+            m_fVelocityX = -m_fMaxSpeed;
         m_Direction = Direction::LEFT;
     }
     else if (right && !left)
     {
-        m_fVelocityX = m_fMaxSpeed;
+        // 向右加速
+        m_fVelocityX += m_fAcceleration;
+        if (m_fVelocityX > m_fMaxSpeed)
+            m_fVelocityX = m_fMaxSpeed;
         m_Direction = Direction::RIGHT;
     }
     else
     {
-        // 没有移动输入时应用摩擦力，使马里奥减速停止
+        // 没有输入时减速
         if (m_fVelocityX > 0)
         {
-            m_fVelocityX -= m_fAcceleration * 2; // 增加摩擦力
+            m_fVelocityX -= m_fAcceleration * 1.5f;
             if (m_fVelocityX < 0) m_fVelocityX = 0;
         }
         else if (m_fVelocityX < 0)
         {
-            m_fVelocityX += m_fAcceleration * 2;
+            m_fVelocityX += m_fAcceleration * 1.5f;
             if (m_fVelocityX > 0) m_fVelocityX = 0;
         }
     }
 
-    // 处理跳跃
-    if (jump && m_bCanJump && m_bIsOnGround)
+    // 处理跳跃（原版马里奥逻辑）
+    if (jump)
     {
-        m_fVelocityY = m_fJumpForce;
-        m_bIsJumping = TRUE;
-        m_bIsOnGround = FALSE;
-        m_bCanJump = FALSE; // 防止在空中连续跳跃
-        m_fJumpTime = 0.0f;
-    }
+        // 跳跃键被按下
+        if (!m_bJumpWasPressed && m_bCanJump && m_bIsOnGround)
+        {
+            // 开始跳跃
+            StartJump();
+        }
 
-    // 跳跃键释放时重置跳跃能力
-    if (!jump)
-    {
-        m_bCanJump = TRUE;
+        // 跳跃过程中持续按住跳跃键
+        if (m_bIsJumping && m_fJumpHoldTime < m_fMaxJumpHoldTime)
+        {
+            m_fJumpHoldTime += 1.0f / 60.0f; // 假设60fps
+        }
     }
-
-    // 跳跃持续时间控制（实现长按跳得更高）
-    if (m_bIsJumping && jump && m_fJumpTime < m_fMaxJumpTime)
+    else
     {
-        m_fVelocityY = m_fJumpForce * (1.0f - m_fJumpTime / m_fMaxJumpTime);
-        m_fJumpTime += 1.0f / 60.0f; // 假设60fps
+        // 跳跃键被释放
+        if (m_bIsJumping)
+        {
+            // 释放跳跃键时，立即开始快速下落
+            m_fJumpHoldTime = m_fMaxJumpHoldTime;
+        }
     }
 }
+// 新增：开始跳跃方法
+void CMario::StartJump()
+{
+    m_bIsJumping = TRUE;
+    m_bIsOnGround = FALSE;
+    m_bCanJump = FALSE;
+    m_fJumpHoldTime = 0.0f;
+    m_bReachedJumpPeak = FALSE;
+    m_fPeakHoldTime = 0.0f;
 
+    // 给予跳跃初始速度（比原版小，因为后续会持续加速）
+    m_fVelocityY = m_fJumpForce * 0.7f;
+
+    TRACE(_T("开始跳跃！初始速度: %.2f\n"), m_fVelocityY);
+}
 // 应用物理效果
+// 修改ApplyPhysics方法
 void CMario::ApplyPhysics(float deltaTime)
 {
-    // 应用重力（如果不在地面上）
-    if (!m_bIsOnGround)
+    // 保存上一帧的速度用于峰值检测
+    m_fPreviousVelocityY = m_fVelocityY;
+
+    // 跳跃逻辑
+    if (m_bIsJumping)
     {
-        m_fVelocityY += m_fGravity;
+        // 跳跃上升阶段
+        if (!m_bReachedJumpPeak)
+        {
+            // 使用较小的跳跃重力
+            m_fVelocityY += m_fJumpGravity;
+
+            // 检测是否到达跳跃峰值（速度从负变正）
+            if (m_fPreviousVelocityY < 0 && m_fVelocityY >= 0)
+            {
+                m_bReachedJumpPeak = TRUE;
+                m_fPeakHoldTime = 0.0f;
+                TRACE(_T("到达跳跃峰值！\n"));
+            }
+
+            // 跳跃键持续按住时的额外上升力
+            if (m_fJumpHoldTime < m_fMaxJumpHoldTime)
+            {
+                // 持续给予上升力，模拟原版马里奥的长按跳得高
+                float holdFactor = 1.0f - (m_fJumpHoldTime / m_fMaxJumpHoldTime);
+                m_fVelocityY += m_fJumpForce * 0.05f * holdFactor;
+            }
+        }
+        else
+        {
+            // 峰值悬停阶段
+            if (m_fPeakHoldTime < m_fMaxPeakHoldTime)
+            {
+                m_fPeakHoldTime += deltaTime;
+                // 在峰值处给予轻微的速度调整，模拟悬停效果
+                m_fVelocityY = m_fVelocityY * 0.8f;
+            }
+            else
+            {
+                // 悬停结束后正常下落
+                m_fVelocityY += m_fFallGravity;
+            }
+        }
+
+        // 跳跃时间过长或速度过大时强制结束跳跃
+        if (m_fJumpHoldTime >= m_fMaxJumpHoldTime && m_fVelocityY > 0)
+        {
+            // 切换到下落状态
+            m_bIsJumping = FALSE;
+        }
+    }
+    else if (!m_bIsOnGround)
+    {
+        // 正常下落（非跳跃状态）
+        m_fVelocityY += m_fFallGravity;
     }
 
     // 限制最大下落速度
-    if (m_fVelocityY > 20.0f)
+    if (m_fVelocityY > CGameConfig::MARIO_MAX_FALL_SPEED)
     {
-        m_fVelocityY = 20.0f;
+        m_fVelocityY = CGameConfig::MARIO_MAX_FALL_SPEED;
+    }
+
+    // 限制最大上升速度
+    if (m_fVelocityY < m_fJumpForce * 1.2f)
+    {
+        m_fVelocityY = m_fJumpForce * 1.2f;
     }
 
     // 更新位置
@@ -429,81 +525,97 @@ void CMario::CheckCollisions(const std::vector<CRect>& solidRects)
     if (m_bIsDying || m_State == MarioState::DEAD)
         return;
 
-    // 步骤 1: 在每帧开始时，先假设马里奥不在地面上。
+    // 重置地面状态
+    BOOL wasOnGround = m_bIsOnGround;
     m_bIsOnGround = FALSE;
 
-    // 步骤 2: 遍历所有实体矩形，进行碰撞检测和位置修正。
+    // 先检测垂直碰撞（处理落地）
+    CRect marioRect = GetRect();
+
     for (const auto& rect : solidRects)
     {
         CRect intersection;
-        CRect marioRect = GetRect();
-
         if (intersection.IntersectRect(&marioRect, &rect))
         {
-            // 计算重叠区域的宽度和高度
-            int overlapLeft = marioRect.right - rect.left;
-            int overlapRight = rect.right - marioRect.left;
+            // 计算重叠
             int overlapTop = marioRect.bottom - rect.top;
             int overlapBottom = rect.bottom - marioRect.top;
+            int overlapLeft = marioRect.right - rect.left;
+            int overlapRight = rect.right - marioRect.left;
 
-            // 找到最小的重叠量，以确定碰撞方向
+            // 找到最小重叠方向
             int dx = min(overlapLeft, overlapRight);
             int dy = min(overlapTop, overlapBottom);
 
-            if (dy <= dx) // 垂直方向碰撞
+            if (dy <= dx) // 垂直碰撞
             {
-                if (dy == overlapTop && m_fVelocityY >= 0) // 从上方碰撞（落地）
+                if (dy == overlapTop && m_fVelocityY >= 0) // 落地
                 {
-                    m_nY = rect.top - m_nHeight; // 修正位置到平台上方
-                    m_fVelocityY = 0; // 垂直速度清零
-                    m_bIsOnGround = TRUE; // 标记在地面上
-                    m_bIsJumping = FALSE; // 结束跳跃状态
+                    // 更精确的落地检测
+                    int feetHeight = 4; // 脚部检测区域高度
+                    CRect feetCheck(marioRect.left + 4, marioRect.bottom - feetHeight,
+                        marioRect.right - 4, marioRect.bottom);
+
+                    CRect feetIntersection;
+                    if (feetIntersection.IntersectRect(&feetCheck, &rect))
+                    {
+                        // 落地成功
+                        m_nY = rect.top - m_nHeight;
+                        m_fVelocityY = 0;
+                        m_bIsOnGround = TRUE;
+                        m_bIsJumping = FALSE;
+                        m_bCanJump = TRUE; // 重置跳跃能力
+
+                        // 重置跳跃状态
+                        m_fJumpHoldTime = 0.0f;
+                        m_bReachedJumpPeak = FALSE;
+                        m_fPeakHoldTime = 0.0f;
+                    }
                 }
-                else if (dy == overlapBottom && m_fVelocityY < 0) // 从下方碰撞（撞头）
+                else if (dy == overlapBottom && m_fVelocityY < 0) // 撞头
                 {
-                    m_nY = rect.bottom; // 修正位置到平台下方
-                    m_fVelocityY = 0; // 垂直速度清零
-                    m_bIsJumping = FALSE; // 结束跳跃状态
+                    m_nY = rect.bottom;
+                    m_fVelocityY = 0;
+
+                    // 撞头时立即停止跳跃
+                    if (m_bIsJumping)
+                    {
+                        m_bIsJumping = FALSE;
+                        m_bReachedJumpPeak = TRUE; // 强制进入下落
+                    }
                 }
             }
-            else // 水平方向碰撞
+            else // 水平碰撞
             {
-                if (dx == overlapLeft && m_fVelocityX > 0) // 从左侧碰撞
+                if (dx == overlapLeft && m_fVelocityX > 0) // 右侧碰撞
                 {
-                    m_nX = rect.left - m_nWidth; // 修正位置到平台左侧
-                    m_fVelocityX = 0; // 水平速度清零
+                    m_nX = rect.left - m_nWidth;
+                    m_fVelocityX = 0;
                 }
-                else if (dx == overlapRight && m_fVelocityX < 0) // 从右侧碰撞
+                else if (dx == overlapRight && m_fVelocityX < 0) // 左侧碰撞
                 {
-                    m_nX = rect.right; // 修正位置到平台右侧
-                    m_fVelocityX = 0; // 水平速度清零
+                    m_nX = rect.right;
+                    m_fVelocityX = 0;
                 }
             }
         }
     }
 
-    // 步骤 3: 地面状态的滞后处理，防止在平台边缘抖动。
-    // 如果经过上面的精确碰撞修正后，马里奥仍被判定为“空中”，我们再做一次宽松的检查。
-    if (!m_bIsOnGround)
+    // 边缘情况：如果上一帧在地面，这一帧不在，但速度很小，强制认为在地面
+    if (wasOnGround && !m_bIsOnGround && abs(m_fVelocityY) < 0.5f)
     {
-        CRect feetProbe = GetFeetRect();
-        // 将探测框向下延伸几个像素，形成一个“缓冲区”。
-        feetProbe.OffsetRect(0, 2);
+        // 向下探测几个像素
+        CRect probeRect = marioRect;
+        probeRect.OffsetRect(0, 3);
 
         for (const auto& rect : solidRects)
         {
             CRect tmp;
-            if (tmp.IntersectRect(&feetProbe, &rect))
+            if (tmp.IntersectRect(&probeRect, &rect))
             {
-                // 如果探测框接触到了地面，我们就强制认为马里奥在地面上。
-                // 注意：这里我们不修正位置，只更新状态标志，以增加稳定性。
                 m_bIsOnGround = TRUE;
-                m_bIsJumping = FALSE;
-                // 如果此时有微小的垂直速度，也将其清零。
-                if (m_fVelocityY > 0) {
-                    m_fVelocityY = 0;
-                }
-                // 找到一个接触点就足够了，跳出循环。
+                m_fVelocityY = 0;
+                m_nY = rect.top - m_nHeight;
                 break;
             }
         }
@@ -592,37 +704,6 @@ CRect CMario::GetBodyRect() const
     // 身体区域：排除脚部和头部的中间部分，用于检测与墙壁等的碰撞
     return CRect(m_nX + 3, m_nY + 10,
         m_nX + m_nWidth - 3, m_nY + m_nHeight - 8);
-}
-
-// 头部碰撞响应
-void CMario::OnHeadCollision()
-{
-    m_fVelocityY = 0; // 停止上升
-    m_bIsJumping = FALSE;
-}
-
-// 脚部碰撞响应
-void CMario::OnFeetCollision(int surfaceY)
-{
-    m_nY = surfaceY - m_nHeight; // 将马里奥放在平台上
-    m_fVelocityY = 0; // 垂直速度清零
-    m_bIsOnGround = TRUE; // 标记在地面上
-    m_bIsJumping = FALSE; // 结束跳跃
-    m_fJumpTime = 0.0f; // 重置跳跃计时器
-}
-
-// 左侧碰撞响应
-void CMario::OnLeftCollision(int surfaceX)
-{
-    m_nX = surfaceX; // 将马里奥停在障碍物右侧
-    m_fVelocityX = 0; // 水平速度清零
-}
-
-// 右侧碰撞响应
-void CMario::OnRightCollision(int surfaceX)
-{
-    m_nX = surfaceX - m_nWidth; // 将马里奥停在障碍物左侧
-    m_fVelocityX = 0; // 水平速度清零
 }
 
 // 添加死亡触发方法

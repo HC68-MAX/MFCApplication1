@@ -82,7 +82,7 @@ public:
     BOOL IsJumping() const { return m_bIsJumping; } // 是否在跳跃中
     BOOL IsMoving() const; // 是否在移动中
     BOOL IsMovingUp() const { return m_fVelocityY < 0; } // 判断是否正在向上移动（用于头部碰撞）
-
+    void StartJump();
     // 碰撞响应处理
     void OnHeadCollision(); // 头部碰撞响应
     void OnFeetCollision(int surfaceY); // 脚部碰撞响应
@@ -126,20 +126,6 @@ private:
     float m_fDeathJumpVelocity;    // 死亡时向上的弹跳速度
     float m_fDeathAnimationTime;   // 死亡动画总时间
 
-    // 物理与速度
-    float m_fVelocityX, m_fVelocityY; // X和Y方向速度
-    float m_fAcceleration;            // 加速度
-    float m_fMaxSpeed;                // 最大速度
-    float m_fGravity;                 // 重力
-
-    // 跳跃相关
-    float m_fJumpForce;               // 跳跃力
-    float m_fJumpTime;                // 跳跃计时器
-    float m_fMaxJumpTime;             // 最大跳跃持续时间
-    BOOL  m_bIsJumping;               // 是否正在跳跃
-    BOOL  m_bIsOnGround;              // 是否在地面上
-    BOOL  m_bCanJump;                 // 是否可以跳跃
-
     // 状态与方向
     MarioState m_State;               // 当前状态（小、大、火焰）
     MarioSkin  m_Skin;                // 当前皮肤
@@ -163,4 +149,28 @@ private:
     static const int MIKU_WALK_FRAMES = 32; // Miku行走动画的总帧数
     static const int MIKU_FRAME_WIDTH = 48; // Miku每帧的宽度
     static const int MIKU_FRAME_HEIGHT = 48; // Miku每帧的高度
+
+    // 物理与速度
+    float m_fVelocityX, m_fVelocityY; // X和Y方向速度
+    float m_fAcceleration;            // 加速度
+    float m_fMaxSpeed;                // 最大速度
+    float m_fGravity;                 // 重力
+
+    // 跳跃相关（完全重写）
+    float m_fJumpForce;               // 跳跃初始力
+    float m_fJumpHoldTime;            // 跳跃键按住的时间
+    float m_fMaxJumpHoldTime;         // 最大跳跃按住时间
+    float m_fJumpGravity;             // 跳跃时的重力（较小）
+    float m_fFallGravity;             // 下落时的重力（较大）
+    BOOL  m_bIsJumping;               // 是否正在跳跃
+    BOOL  m_bIsOnGround;              // 是否在地面上
+    BOOL  m_bJumpPressed;             // 当前帧跳跃键是否被按下
+    BOOL  m_bJumpWasPressed;          // 上一帧跳跃键是否被按下
+    BOOL  m_bCanJump;                 // 是否可以跳跃
+
+    // 新增：跳跃峰值检测
+    float m_fPreviousVelocityY;       // 上一帧的Y速度
+    BOOL  m_bReachedJumpPeak;         // 是否到达跳跃峰值
+    float m_fPeakHoldTime;            // 峰值悬停时间
+    float m_fMaxPeakHoldTime;         // 最大峰值悬停时间
 };

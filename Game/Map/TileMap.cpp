@@ -643,7 +643,7 @@ void CTileMap::CheckMonsterCollisions(CMario* pMario)
             if (marioVelocityY > 0 && marioRect.bottom < monster.GetY() + monster.GetHeight() / 2 + 10)
             {
                 monster.OnCollisionWithMario(true);
-                pMario->SetVelocity(pMario->GetVelocityX(), -15.0f); // µ¯Æð
+                pMario->SetVelocity(pMario->GetVelocityX(), -5.0f); // µ¯Æð
                 CGameState::GetInstance().AddScore(100);
             }
             else
