@@ -72,77 +72,36 @@ CMario::~CMario()
     // 目前没有需要手动释放的资源
 }
 // 新增：使用精灵渲染器绘制马里奥
+// 新增：使用精灵渲染器绘制马里奥
 void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
 {
     if (!m_bVisible) return; // 如果不可见，则不绘制
-    if (m_bIsDying || m_State == MarioState::DEAD)
+
+    CResourceManager& resMgr = CResourceManager::GetInstance();
+    CBitmap* pBitmap = nullptr;
+    SSpriteCoord spriteCoord;
+
+    // 根据皮肤选择图集
+    if (m_Skin == MarioSkin::MIKU)
     {
-        // 死亡时使用半透明效果
-        CDC memDC;
-        memDC.CreateCompatibleDC(pDC);
-        CBitmap tempBitmap;
-        tempBitmap.CreateCompatibleBitmap(pDC, m_nWidth, m_nHeight);
-        CBitmap* pOldMemBitmap = memDC.SelectObject(&tempBitmap);
-
-        // 清空临时DC
-        memDC.FillSolidRect(0, 0, m_nWidth, m_nHeight, RGB(0, 0, 0));
-
-        // 正常绘制到临时DC
-        CResourceManager& resMgr = CResourceManager::GetInstance();
-        CBitmap* pBitmap = nullptr;
-        SSpriteCoord spriteCoord;
-
-        if (m_Skin == MarioSkin::MIKU)
-        {
-            pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMiku());
-            spriteCoord = GetMikuSpriteCoord();
-        }
-        else
-        {
-            pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
-            // 死亡时使用特定的精灵，比如向下掉落的样子
-            spriteCoord = CSpriteConfig::MARIO_SMALL_DEAD; // 需要在SpriteConfig中添加这个坐标
-        }
-
-        BOOL flipHorizontal = (m_Direction == Direction::RIGHT);
-
-        CSpriteRenderer::DrawSprite(&memDC, pBitmap, 0, 0,
-            m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,
-            spriteCoord.width, spriteCoord.height, flipHorizontal);
-
-        // 使用半透明方式绘制到屏幕
-        BLENDFUNCTION blend = { 0 };
-        blend.BlendOp = AC_SRC_OVER;
-        blend.BlendFlags = 0;
-        blend.SourceConstantAlpha = 128; // 50% 透明度
-        blend.AlphaFormat = 0;
-
-        pDC->AlphaBlend(screenX, screenY, m_nWidth, m_nHeight,
-            &memDC, 0, 0, m_nWidth, m_nHeight, blend);
-
-        memDC.SelectObject(pOldMemBitmap);
-        memDC.DeleteDC();
-        tempBitmap.DeleteObject();
+        pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMiku());
+        // 使用新的动画系统获取Miku精灵坐标
+        spriteCoord = GetMikuSpriteCoord();
     }
     else
     {
-        // 正常的绘制逻辑（你原有的代码）
-        CResourceManager& resMgr = CResourceManager::GetInstance();
-        CBitmap* pBitmap = nullptr;
-        SSpriteCoord spriteCoord;
-        // 根据皮肤选择图集和精灵坐标
-        if (m_Skin == MarioSkin::MIKU)
-        {
-            // 使用Miku图集
-            pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMiku());
+        pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
 
-            // 使用新的动画系统获取Miku精灵坐标
-            spriteCoord = GetMikuSpriteCoord();
+        // 死亡状态使用特定精灵
+        if (m_bIsDying || m_State == MarioState::DEAD)
+        {
+            // 死亡时使用跳跃或站立的精灵（根据需要选择）
+            // 这里使用小马里奥跳跃精灵作为死亡状态
+            spriteCoord = CSpriteConfig::MARIO_SMALL_DEAD;
         }
         else
         {
-            // 原始马里奥皮肤（保持原有逻辑）
-            pBitmap = resMgr.GetBitmap(CSpriteConfig::GetSpritesheetForMario());
+            // 正常的绘制逻辑
             // 根据状态和动作选择精灵（全部使用向右的贴图）
             switch (m_State)
             {
@@ -152,7 +111,7 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
                 else if (IsMoving())
                 {
                     // 三个行走动作循环
-                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED;
                     if (animTime < 250)
                         spriteCoord = CSpriteConfig::MARIO_SMALL_WALK1_RIGHT;
                     else if (animTime < 500)
@@ -169,8 +128,7 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
                     spriteCoord = CSpriteConfig::MARIO_BIG_JUMP_RIGHT;
                 else if (IsMoving())
                 {
-                    // 三个行走动作循环
-                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED;
                     if (animTime < 250)
                         spriteCoord = CSpriteConfig::MARIO_BIG_WALK1_RIGHT;
                     else if (animTime < 500)
@@ -187,8 +145,7 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
                     spriteCoord = CSpriteConfig::MARIO_FIRE_JUMP_RIGHT;
                 else if (IsMoving())
                 {
-                    // 三个行走动作循环
-                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED; // 一个完整循环
+                    DWORD animTime = GetTickCount64() % CGameConfig::MARIO_WALK_SPEED;
                     if (animTime < 250)
                         spriteCoord = CSpriteConfig::MARIO_FIRE_WALK1_RIGHT;
                     else if (animTime < 500)
@@ -201,14 +158,15 @@ void CMario::DrawWithSprite(CDC* pDC, int screenX, int screenY)
                 break;
             }
         }
-        // 判断是否需要水平翻转
-        BOOL flipHorizontal = (m_Direction == Direction::LEFT);
-
-        // 使用精灵渲染器绘制，添加翻转参数
-        CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
-            m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,
-            spriteCoord.width, spriteCoord.height, flipHorizontal);
     }
+
+    // 判断是否需要水平翻转
+    BOOL flipHorizontal = (m_Direction == Direction::LEFT);
+
+    // 使用精灵渲染器绘制，添加翻转参数
+    CSpriteRenderer::DrawSprite(pDC, pBitmap, screenX, screenY,
+        m_nWidth, m_nHeight, spriteCoord.x, spriteCoord.y,
+        spriteCoord.width, spriteCoord.height, flipHorizontal);
 }
 // 修改现有的DrawAt方法，使用新的精灵绘制方法
 void CMario::DrawAt(CDC* pDC, int screenX, int screenY)
