@@ -384,7 +384,7 @@ void CMario::HandleInput(BOOL left, BOOL right, BOOL jump)
         }
     }
 }
-// 新增：开始跳跃方法
+// 开始跳跃方法
 void CMario::StartJump()
 {
     m_bIsJumping = TRUE;
@@ -629,6 +629,7 @@ void CMario::UpdateSize()
         m_nHeight = CGameConfig::MARIO_BIG_HEIGHT;
         break;
     }
+    
 }
 
 // 获取脚部碰撞区域
@@ -713,14 +714,13 @@ void CMario::Respawn()
 
     // 更新大小
     UpdateSize();
-
-    // 设置重生位置（可以在外部设置）
-    // m_nX = respawnX;
-    // m_nY = respawnY;
+	//更新皮肤资源
+    UpdateSkinResources();
+ 
 }
 
 
-// 新增：从高处掉落死亡方法
+// 从高处掉落死亡方法
 void CMario::DieFromFall()
 {
     if (m_bIsDying || m_State == MarioState::DEAD)

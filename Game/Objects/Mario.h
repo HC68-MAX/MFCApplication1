@@ -84,10 +84,6 @@ public:
     BOOL IsMovingUp() const { return m_fVelocityY < 0; } // 判断是否正在向上移动（用于头部碰撞）
     void StartJump();
     // 碰撞响应处理
-    void OnHeadCollision(); // 头部碰撞响应
-    void OnFeetCollision(int surfaceY); // 脚部碰撞响应
-    void OnLeftCollision(int surfaceX); // 左侧碰撞响应
-    void OnRightCollision(int surfaceX); // 右侧碰撞响应
 
     void DrawWithSprite(CDC* pDC, int screenX, int screenY); // 使用精灵图绘制
     // =================================================================
