@@ -31,7 +31,7 @@ BOOL CFlagpole::CheckTouch(const CRect& rect) const
     return intersect.IntersectRect(&flagpoleRect, &rect);
 }
 // 绘制旗子：核心逻辑，在这里处理下落的Y偏移
-void CFlagpole::DrawFlag(CDC* pDC, int screenX, int screenY)
+void CFlagpole::DrawAt(CDC* pDC, int screenX, int screenY)
 {
     // 如果旗子不可见，直接返回
     if (!m_bVisible)

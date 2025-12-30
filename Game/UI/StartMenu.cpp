@@ -300,39 +300,6 @@ void CStartMenu::Update(float deltaTime)
     // 更新悬停状态（这里需要外部提供鼠标位置，暂时不实现）
     // 在实际使用中，可以在视图类中处理鼠标移动事件来更新悬停状态
 }
-void CStartMenu::DrawInstructions(CDC* pDC)
-{
-    pDC->SetTextColor(RGB(200, 200, 255));
-    pDC->SetBkMode(TRANSPARENT);
-
-    CFont font;
-    font.CreatePointFont(100, _T("Arial"));
-    CFont* pOldFont = pDC->SelectObject(&font);
-
-    CString instructions = _T("点击关卡选择，点击开始游戏");
-    CSize textSize = pDC->GetTextExtent(instructions);
-    pDC->TextOut(CGameConfig::SCREEN_WIDTH / 2 - textSize.cx / 2,
-        CGameConfig::SCREEN_HEIGHT - 60, instructions);
-
-    pDC->SelectObject(pOldFont);
-}
-
-void CStartMenu::DrawCopyright(CDC* pDC)
-{
-    pDC->SetTextColor(RGB(150, 150, 200));
-    pDC->SetBkMode(TRANSPARENT);
-
-    CFont font;
-    font.CreatePointFont(80, _T("Arial"));
-    CFont* pOldFont = pDC->SelectObject(&font);
-
-    CString copyright = _T("© 2024 超级马里奥 MFC版");
-    CSize textSize = pDC->GetTextExtent(copyright);
-    pDC->TextOut(CGameConfig::SCREEN_WIDTH / 2 - textSize.cx / 2,
-        CGameConfig::SCREEN_HEIGHT - 30, copyright);
-
-    pDC->SelectObject(pOldFont);
-}
 
 // 新增：绘制圆角矩形
 void CStartMenu::DrawRoundRect(CDC* pDC, CRect rect, COLORREF fillColor, COLORREF borderColor)

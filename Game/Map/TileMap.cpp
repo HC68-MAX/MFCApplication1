@@ -407,7 +407,7 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
             continue;
         }
         // 绘制动态旗子（仅绘制旗子部分，杆体已在静态瓦片绘制）
-        flagpole.DrawFlag(pDC, screenX, screenY);
+        flagpole.DrawAt(pDC, screenX, screenY);
     }
     // 绘制金币 
     for (auto& coin : m_Coins)
@@ -445,15 +445,7 @@ void CTileMap::Draw(CDC* pDC, int offsetX, int offsetY)
         }
     }
 
-    // 5. 绘制 Mario
-    // Draw Flagpoles
-    for (auto& flagpole : m_Flagpoles)
-    {
-        int screenX = flagpole.GetX() - offsetX;
-        int screenY = flagpole.GetY() - offsetY;
-        flagpole.DrawFlag(pDC, screenX, screenY);
-    }
-
+    // 绘制 Mario
     if (m_pMario && m_pMario->IsVisible())
     {
         int marioScreenX = m_pMario->GetX() - offsetX;

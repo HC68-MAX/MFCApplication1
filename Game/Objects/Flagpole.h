@@ -15,7 +15,7 @@ public:
     void DrawWithSprite(CDC* pDC, int screenX, int screenY);
     // 触发旗子下落（碰撞后调用）
     // 绘制旗子（核心：在这里处理下落的Y偏移）
-    void DrawFlag(CDC* pDC, int screenX, int screenY);
+    void DrawAt(CDC* pDC, int screenX, int screenY);
     // 检查是否触碰到旗杆
     BOOL CheckTouch(const CRect& rect) const;
     void TriggerFlagDown(){ m_bFlagDown = true; }

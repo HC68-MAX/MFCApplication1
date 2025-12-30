@@ -38,8 +38,7 @@ private:
     void DrawStartButton(CDC* pDC);
     void DrawRoundRect(CDC* pDC, CRect rect, COLORREF fillColor, COLORREF borderColor);
     void DrawLevelIcon(CDC* pDC, CRect rect, int level, BOOL selected);
-    void DrawInstructions(CDC* pDC);
-    void DrawCopyright(CDC* pDC);
+
 private:
     int m_nSelectedLevel;    // 选中的关卡 (1-3)
     BOOL m_bStartGame;       // 是否开始游戏
